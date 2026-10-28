@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes lsFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes lsSheet { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+  @keyframes lsPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  .ls-scroll::-webkit-scrollbar { width: 0; }
+  .ls-scroll { scrollbar-width: none; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E1226"/><rect x="24" y="42" width="7" height="16" rx="3.5" fill="#4A7FE5"/><rect x="38" y="30" width="7" height="40" rx="3.5" fill="#4A7FE5"/><rect x="52" y="36" width="7" height="28" rx="3.5" fill="#F9BD48"/><rect x="66" y="46" width="7" height="8" rx="3.5" fill="#F9BD48"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<x-import component-from-global-scope="mock-session" from="./mock-session.js" hint-size="0,0"></x-import>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">M7 · Listening Test Engine</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="MockTestDetail.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Test detail</a>
+  </div>
+
+  <div data-screen-label="Listening test engine" style="{{ frameStyle }}">
+
+    <!-- ══ SCROLL BODY ══ -->
+    <div class="ls-scroll" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+      <!-- ── CONSIGNES (the screen the real exam opens with) ── -->
+      <sc-if value="{{ isConsignes }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;gap:22px;overflow:hidden;animation:lsFade .35s ease both">
+          <div style="position:absolute;left:-90px;top:-110px;width:340px;height:340px;border-radius:9999px;background:#4A7FE5;opacity:.3;filter:blur(80px)"></div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">TEF Canada · épreuve 1 sur 4</span>
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-wrap:pretty">Compréhension orale</span>
+            <span style="font-size:14px;font-weight:500;line-height:21px;color:rgba(255,255,255,.6);text-wrap:pretty">40 questions · 40 minutes · sept groupes de documents</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#8FB2F0">CONSIGNES</span>
+            <sc-for list="{{ consigneRules }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="width:22px;height:22px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.1);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ r.n }}</span>
+                <span style="flex:1;font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.86);text-wrap:pretty">{{ r.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="position:relative;display:flex;gap:9px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:rgba(249,189,72,.1);box-shadow:inset 0 0 0 1px rgba(249,189,72,.3)">
+            <div style="width:16px;height:16px;flex-shrink:0;margin-top:1px;color:#F9BD48;display:flex;align-items:center;justify-content:center">
+              <fig-icon name="IconDuotoneInfo" size="15"></fig-icon>
+            </div>
+            <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#F9BD48;text-wrap:pretty">Aucune pause n'est autorisée une fois la session lancée : à l'examen, les épreuves sur ordinateur s'enchaînent.</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── QUESTION (text MCQ + image MCQ) ── -->
+      <sc-if value="{{ isQuestion }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:176px 20px 158px;display:flex;flex-direction:column;gap:16px;animation:lsFade .3s ease both">
+
+          <!-- the document: consigne, number of listens, live audio state.
+               One shared file per document — its questions sit under it. -->
+          <!-- Deliberately almost wordless: while the audio runs the screen must
+               not compete with it for attention. One kicker, one listen chip, the
+               waveform, and a hairline showing how long this question has left. -->
+          <div style="position:relative;display:flex;flex-direction:column;gap:10px;padding:13px 16px 15px;border-radius:20px;overflow:hidden;background:#F7F9FE;box-shadow:inset 0 0 0 1px #DCE6F8">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="flex:1;font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#5B84D6;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ docKickerShort }}</span>
+              <span style="{{ listenChipStyle }}">{{ listenChip }}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <sc-if value="{{ hasReplay }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ replayTap }}" style="{{ replayBtnStyle }}">
+                  <fig-icon name="{{ replayIcon }}" size="15"></fig-icon>
+                </div>
+              </sc-if>
+              <div style="flex:1;display:flex;align-items:flex-end;gap:2px;height:26px;min-width:0">
+                <sc-for list="{{ waves }}" as="w" hint-placeholder-count="34">
+                  <div style="{{ w.style }}"></div>
+                </sc-for>
+              </div>
+              <span style="font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:#2952A3;flex-shrink:0">{{ audioAt }} / {{ audioLen }}</span>
+            </div>
+            <sc-if value="{{ hasReplay }}" hint-placeholder-val="{{ false }}">
+              <span style="{{ replayNoteStyle }}">{{ replayLabel }}</span>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:5px;padding-top:2px">
+              <div style="display:flex;gap:4px">
+                <sc-for list="{{ qDots }}" as="d" hint-placeholder-count="3">
+                  <div style="{{ d.style }}"></div>
+                </sc-for>
+              </div>
+              <span style="font-size:10.5px;font-weight:600;letter-spacing:.3px;color:#2952A3">{{ qDotsNote }}</span>
+            </div>
+            <div style="{{ qPaceStyle }}"></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:flex;align-items:center;flex:0 0 auto;align-self:flex-start;min-height:24px;padding:3px 10px;border-radius:100px;background:#EEF3FD;color:#2952A3;font-size:10.5px;font-weight:700;letter-spacing:.4px">{{ qKicker }}</span>
+              <sc-if value="{{ isImageQ }}" hint-placeholder-val="{{ false }}">
+                <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#FFFBEB;color:#966010;font-size:10.5px;font-weight:700;letter-spacing:.4px;box-shadow:inset 0 0 0 1px #EDD99A">TEF uniquement</span>
+              </sc-if>
+            </div>
+            <sc-if value="{{ showQText }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:20px;font-weight:700;line-height:28px;letter-spacing:-.3px;color:#111827;text-wrap:pretty">{{ qText }}</span>
+            </sc-if>
+            <sc-if value="{{ isSpoken }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ spokenStyle }}">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <fig-icon name="{{ spokenIcon }}" size="16"></fig-icon>
+                  <span style="flex:1;font-size:15px;font-weight:700;line-height:21px;letter-spacing:-.2px;color:inherit;text-wrap:pretty">{{ spokenTitle }}</span>
+                </div>
+                <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">{{ spokenSub }}</span>
+              </div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ isTextQ }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ options }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.tap }}" style="{{ o.cardStyle }}">
+                  <div style="{{ o.badgeStyle }}">{{ o.letter }}</div>
+                  <span style="{{ o.textStyle }}">{{ o.text }}</span>
+                  <sc-if value="{{ o.hasMark }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ o.markStyle }}">
+                      <fig-icon name="{{ o.markIcon }}" size="14"></fig-icon>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isImageQ }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <sc-for list="{{ options }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.tap }}" style="{{ o.tileStyle }}">
+                  <sc-if value="{{ o.imgA }}"><img src="assets/q-train-station.jpeg" alt="" style="{{ o.imgTileStyle }}" /></sc-if><sc-if value="{{ o.imgB }}"><img src="assets/q-airport-checkin.jpg" alt="" style="{{ o.imgTileStyle }}" /></sc-if><sc-if value="{{ o.imgC }}"><img src="assets/q-ferry-terminal.webp" alt="" style="{{ o.imgTileStyle }}" /></sc-if><sc-if value="{{ o.imgD }}"><img src="assets/q-bus-stop.png" alt="" style="{{ o.imgTileStyle }}" /></sc-if><sc-if value="{{ o.noImg }}"><div style="{{ o.imgTileStyle }}"></div></sc-if>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="{{ o.badgeStyle }}">{{ o.letter }}</div>
+                    <span style="{{ o.textStyle }}">{{ o.text }}</span>
+                    <sc-if value="{{ o.hasMark }}" hint-placeholder-val="{{ false }}">
+                      <div style="{{ o.markStyle }}">
+                        <fig-icon name="{{ o.markIcon }}" size="13"></fig-icon>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showFeedback }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ feedbackStyle }}">
+              <div style="display:flex;align-items:center;gap:8px">
+                <fig-icon name="{{ feedbackIcon }}" size="17"></fig-icon>
+                <span style="font-size:13.5px;font-weight:700;line-height:18px;color:inherit">{{ feedbackTitle }}</span>
+              </div>
+              <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#374151;text-wrap:pretty">{{ feedbackBody }}</span>
+              <div style="display:flex;gap:8px;align-items:flex-start;padding-top:10px;border-top:1px solid rgba(0,0,0,.07)">
+                <span style="font-size:10px;font-weight:700;letter-spacing:.5px;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.06);color:#5E4E69;flex-shrink:0">TRANSCRIPTION</span>
+                <span style="flex:1;font-size:12px;font-weight:400;line-height:18px;color:#5E4E69;font-style:italic;text-wrap:pretty">« Finalement, je préfère partir le 14, c'est moins cher que le week-end. »</span>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </sc-if>
+
+      <!-- ── DIALOGUE BREAK ── -->
+      <sc-if value="{{ isBreak }}" hint-placeholder-val="{{ false }}">
+        <div style="min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:26px;animation:lsFade .35s ease both">
+          <div style="width:96px;height:96px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:#EEF3FD;box-shadow:inset 0 0 0 2px #C9DAF8;color:#2952A3">
+            <fig-icon name="IconCheck" size="38"></fig-icon>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+            <span style="font-size:24px;font-weight:700;line-height:30px;letter-spacing:-.5px;color:#111827;text-align:center">Interviews terminées</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:#5E4E69;text-align:center;text-wrap:pretty;max-width:280px">Vient ensuite une série d'illustrations. L'audio démarre dès que vous continuez.</span>
+          </div>
+          <div style="display:flex;width:100%;padding:16px 4px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+            <sc-for list="{{ breakStats }}" as="b" hint-placeholder-count="3">
+              <div style="{{ b.cellStyle }}">
+                <span style="font-size:20px;font-weight:700;line-height:24px;letter-spacing:-.4px;color:#111827">{{ b.value }}</span>
+                <span style="font-size:9.5px;font-weight:700;letter-spacing:.7px;color:#857789">{{ b.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── TEST COMPLETE ── -->
+      <sc-if value="{{ isComplete }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 190px;display:flex;flex-direction:column;align-items:center;gap:26px;overflow:hidden;animation:lsFade .35s ease both">
+          <div style="position:absolute;left:-70px;top:-90px;width:320px;height:320px;border-radius:9999px;background:#4A7FE5;opacity:.28;filter:blur(80px)"></div>
+          <div style="position:absolute;right:-110px;bottom:120px;width:280px;height:280px;border-radius:9999px;background:#F9BD48;opacity:.18;filter:blur(90px)"></div>
+
+          <div style="position:relative;width:186px;height:186px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:{{ ringBg }};box-shadow:0 0 0 1px rgba(255,255,255,.08)">
+            <div style="width:150px;height:150px;border-radius:9999px;background:#1E1226;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px">
+              <span style="{{ scorePctStyle }}">{{ scorePct }}</span>
+              <span style="font-size:10px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ scoreCaption }}</span>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px;align-items:center">
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-align:center">{{ doneTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.55);text-align:center;text-wrap:pretty;max-width:290px">{{ doneBody }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;width:100%;padding:18px 4px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <sc-for list="{{ doneStats }}" as="d" hint-placeholder-count="3">
+              <div style="{{ d.cellStyle }}">
+                <span style="font-size:20px;font-weight:700;line-height:24px;letter-spacing:-.4px;color:#fff">{{ d.value }}</span>
+                <span style="font-size:9.5px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">{{ d.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <!-- ══ FIXED CHROME ══ -->
+    <div style="{{ chromeStyle }}">
+      <div style="height:62px;display:flex;align-items:center;padding:21px 16px 19px;color:{{ barInk }}">
+        <div style="flex:1;display:flex;justify-content:center">
+          <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:inherit">9:41</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+          <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="currentColor"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+          <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="currentColor"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+          <div style="position:relative;width:27.328px;height:13px">
+            <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px currentColor"></div>
+            <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:currentColor"></div>
+            <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:currentColor"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:52px;display:flex;align-items:center;gap:8px;padding:0 12px 0 8px">
+        <sc-if value="{{ hasClose }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ closeTap }}" style="{{ closeStyle }}">
+            <fig-icon name="IconX" size="20"></fig-icon>
+          </div>
+        </sc-if>
+        <span style="{{ chromeTitleStyle }}">{{ chromeTitle }}</span>
+        <sc-if value="{{ hasFlag }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ flagTap }}" style="{{ flagStyle }}">
+            <fig-icon name="IconDuotoneFlag" size="15"></fig-icon>
+            <span style="font-size:12px;font-weight:700;line-height:1;color:inherit">{{ flagLabel }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasTimer }}" hint-placeholder-val="{{ true }}">
+          <div style="{{ timerStyle }}">
+            <span style="font-size:12.5px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:inherit">{{ clock }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hasProgress }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:2px 20px 0;display:flex;flex-direction:column;gap:6px">
+          <div style="height:5px;border-radius:100px;background:{{ trackBg }};overflow:hidden">
+            <div style="{{ progressFillStyle }}"></div>
+          </div>
+          <div style="display:flex;align-items:center">
+            <span onClick="{{ openNav }}" style="{{ progressLeftStyle }}">{{ progressLeft }}</span>
+            <span style="font-size:10.5px;font-weight:600;letter-spacing:.3px;color:{{ progressInk }}">{{ progressRight }}</span>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ══ FOOTER CTA ══ -->
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:46px 20px 24px;display:flex;flex-direction:column;gap:10px;z-index:8;pointer-events:none">
+      <div style="{{ fadeStyle }}"></div>
+
+      <sc-if value="{{ hasAutoStrip }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ autoStripStyle }}">{{ autoStripText }}</div>
+      </sc-if>
+
+      <sc-if value="{{ hasCta }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ ctaTap }}" style="{{ ctaStyle }}">
+          <sc-if value="{{ ctaHasIcon }}" hint-placeholder-val="{{ true }}">
+            <fig-icon name="{{ ctaIcon }}" size="17"></fig-icon>
+          </sc-if>
+          <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ ctaLabel }}</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasCta }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;height:22px">
+          <span onClick="{{ noteTap }}" style="{{ ctaNoteStyle }}">{{ ctaNote }}</span>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ══ QUESTION NAVIGATOR — practice only ══ -->
+    <sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:19;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ closeNav }}" style="position:absolute;inset:0;background:rgba(30,18,38,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="position:relative;display:flex;flex-direction:column;gap:16px;padding:14px 20px 26px;border-radius:28px 28px 0 0;background:#FFFDFB;animation:lsSheet .28s ease both;box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)">
+          <div style="width:38px;height:4px;border-radius:100px;margin:0 auto;background:#E8DFE6"></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:19px;font-weight:700;line-height:25px;letter-spacing:-.4px;color:#111827">Les 40 questions</span>
+            <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">Mode entraînement — sans chronomètre ni limite de réécoute : vous pouvez revenir sur n'importe quel document et l'écouter à nouveau.</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px">
+            <sc-for list="{{ navCells }}" as="n" hint-placeholder-count="40">
+              <div onClick="{{ n.tap }}" style="{{ n.style }}">{{ n.num }}</div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;gap:14px;flex-wrap:wrap;padding-top:2px">
+            <sc-for list="{{ navLegend }}" as="l" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="{{ l.dotStyle }}"></div>
+                <span style="font-size:11px;font-weight:500;color:#6E5F78">{{ l.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+            <div onClick="{{ navJump }}" style="display:flex;justify-content:center;align-items:center;height:52px;border-radius:100px;cursor:pointer;user-select:none;font-size:15px;font-weight:600;background:#6A2A5F;color:#fff">Aller à la première sans réponse · 9</div>
+            <div onClick="{{ closeNav }}" style="display:flex;justify-content:center;align-items:center;height:44px;border-radius:100px;cursor:pointer;user-select:none;font-size:14px;font-weight:600;color:#5E4E69" style-hover="background:#F6F0F5">Retour à l'épreuve</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ EXIT SHEET ══ -->
+    <sc-if value="{{ showExit }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ dismissExit }}" style="position:absolute;inset:0;background:rgba(30,18,38,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="{{ sheetStyle }}">
+          <div style="{{ sheetGrabStyle }}"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:20px;font-weight:700;line-height:26px;letter-spacing:-.4px;color:{{ sheetTitleInk }};text-wrap:pretty">{{ sheetTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:{{ sheetBodyInk }};text-wrap:pretty">{{ sheetBody }}</span>
+          </div>
+
+          <sc-if value="{{ sheetHasProgress }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;padding:4px 14px;border-radius:18px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+              <sc-for list="{{ sheetRows }}" as="sr" hint-placeholder-count="3">
+                <div style="{{ sr.rowStyle }}">
+                  <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:#5E4E69">{{ sr.label }}</span>
+                  <span style="font-size:13px;font-weight:700;line-height:18px;color:#111827">{{ sr.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+            <div onClick="{{ dismissExit }}" style="{{ sheetPrimaryStyle }}">{{ sheetPrimary }}</div>
+            <a href="MockTestDetail.dc.html" style="{{ sheetSecondaryStyle }}">{{ sheetSecondary }}</a>
+          </div>
+          <span style="font-size:11.5px;font-weight:400;line-height:16px;text-align:center;color:{{ sheetBodyInk }};text-wrap:pretty">{{ sheetNote }}</span>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ══ REVIEW CHROME ══ -->
+  <div style="display:flex;gap:6px;width:393px;flex-wrap:wrap">
+    <sc-for list="{{ steps }}" as="st" hint-placeholder-count="8">
+      <div onClick="{{ st.go }}" style="{{ st.chipStyle }}">{{ st.label }}</div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ showBeats }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:8px;width:393px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px #D9CCD6">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Audio beats (mock)</span>
+        <span style="font-size:12px;font-weight:400;line-height:17px;color:#6E5F78;text-wrap:pretty">One question is a seven-beat audio sequence. Mock runs it on its own clock; tap a beat to hold the screen there.</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ beats }}" as="bt" hint-placeholder-count="5">
+          <div onClick="{{ bt.go }}" style="{{ bt.style }}">{{ bt.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="display:flex;align-items:center;gap:10px;width:393px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px #D9CCD6">
+    <span style="flex:1;font-size:12.5px;font-weight:700;color:#2E1A3B">Session mode</span>
+    <sc-for list="{{ modes }}" as="md" hint-placeholder-count="2">
+      <div onClick="{{ md.go }}" style="{{ md.style }}">{{ md.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Scenario flags</span>
+      <span style="font-size:12px;font-weight:400;line-height:17px;color:#6E5F78;text-wrap:pretty">Each flag switches one branch of this flow. Toggle it on the left; tap the pill to jump to the step it changes.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ flags }}" as="f" hint-placeholder-count="3">
+        <div style="{{ f.rowStyle }}">
+          <div onClick="{{ f.toggle }}" style="{{ f.trackStyle }}">
+            <div style="{{ f.knobStyle }}"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span onClick="{{ f.toggle }}" style="font-size:13px;font-weight:700;line-height:17px;color:#2E1A3B;cursor:pointer;user-select:none">{{ f.label }}</span>
+              <span onClick="{{ f.goScreen }}" style="font-size:10px;font-weight:600;letter-spacing:.3px;padding:3px 8px;border-radius:100px;background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6;cursor:pointer;user-select:none;white-space:nowrap" style-hover="background:#6A2A5F;color:#fff">{{ f.screenLabel }} ↗</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.onTagStyle }}">ON</span>
+              <span style="{{ f.onTextStyle }}">{{ f.onText }}</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.offTagStyle }}">OFF</span>
+              <span style="{{ f.offTextStyle }}">{{ f.offText }}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mock&quot;,&quot;practice&quot;],&quot;default&quot;:&quot;mock&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;startStep&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;consignes&quot;,&quot;question&quot;,&quot;feedback&quot;,&quot;imageQ&quot;,&quot;break&quot;,&quot;exitQ&quot;,&quot;complete&quot;],&quot;default&quot;:&quot;consignes&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;audioDone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;playsOnce&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;replayUsed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const BLUE = "#4A7FE5", DEEP = "#2952A3", TINT = "#EEF3FD";
+
+const STEPS = [
+  { key: "consignes", label: "Consignes" },
+  { key: "question", label: "Question · MCQ" },
+  { key: "feedback", label: "Answered" },
+  { key: "imageQ", label: "Image MCQ" },
+  { key: "break", label: "Document break" },
+  { key: "exitQ", label: "Exit · question" },
+  { key: "complete", label: "Test complete" }
+];
+
+const LABELS = {
+  consignes: "Consignes — the on-screen instructions the real exam opens with",
+  question: "One question · the document, its audio state and the options on one screen",
+  feedback: "Answer picked — practice shows the verdict, mock does not",
+  imageQ: "Image MCQ 2×2 — TEF only",
+  break: "Between two item groups",
+  exitQ: "Exit sheet over a question",
+  complete: "Test complete — score ring, stats, "
+};
+
+/* The current TEF format (since 11 Dec 2023) is 40 questions in SEVEN item
+   groups — not 12 dialogues across sections A–D, which was the pre-2023 model.
+   `plays` is per document: the consigne announces one or two listens. */
+const GROUPS = [
+  { name: "Illustrations", q: 4, tefOnly: true },
+  { name: "Annonces publiques", q: 4 },
+  { name: "Micro-trottoirs", q: 6 },
+  { name: "Chroniques radio", q: 2 },
+  { name: "Interviews", q: 6 },
+  { name: "Reportage", q: 1 },
+  { name: "Documents divers", q: 10 }
+];
+
+/* One entry per document on screen. The illustration items are their own
+   document: four short messages, announced once. */
+const DOCS = {
+  question: { group: "Interviews", index: 5, of: 14, questions: 3, plays: 2, len: 108 },
+  imageQ: { group: "Illustrations", index: 1, of: 14, questions: 4, plays: 1, len: 42 }
+};
+const DOC = DOCS.question;
+
+/* One document, three questions — the Interviews item group. The document is
+   heard once (twice if the consigne says so) and then each question is read
+   aloud in turn over the SAME recording: beats 1·5·6·7 repeat, beats 2–4 do
+   not. This is the part the engine used to miss. */
+const QSET = [
+  { text: "Pourquoi la cliente appelle-t-elle l'agence ?",
+    correct: 2,
+    opts: [
+      { letter: "A", text: "Pour annuler une réservation." },
+      { letter: "B", text: "Pour réclamer un remboursement." },
+      { letter: "C", text: "Pour modifier la date de son départ." },
+      { letter: "D", text: "Pour réserver un hôtel." }
+    ],
+    fbRight: "Elle le dit dès la deuxième réplique : « je voudrais décaler mon départ ».",
+    fbWrong: "Le remboursement et l'annulation sont évoqués par l'agent, mais la demande de la cliente est le report de la date." },
+  { text: "Quand la cliente décide-t-elle de partir ?",
+    correct: 1,
+    opts: [
+      { letter: "A", text: "Elle part le week-end du 16." },
+      { letter: "B", text: "Elle part le 14, en semaine." },
+      { letter: "C", text: "Elle annule son voyage." },
+      { letter: "D", text: "Elle attend une promotion." }
+    ],
+    fbRight: "Elle annonce le 14 et donne la raison : en semaine, c'est moins cher que le week-end.",
+    fbWrong: "La cliente ne mentionne le 16 que pour l'écarter. La date qu'elle retient est le 14, parce qu'elle coûte moins cher que le week-end." },
+  { text: "Que doit faire la cliente avant vendredi ?",
+    correct: 3,
+    opts: [
+      { letter: "A", text: "Rappeler l'agence." },
+      { letter: "B", text: "Se présenter au guichet." },
+      { letter: "C", text: "Envoyer une lettre." },
+      { letter: "D", text: "Confirmer par courriel." }
+    ],
+    fbRight: "L'agent termine par « vous me confirmez par mail avant vendredi ».",
+    fbWrong: "L'agent propose d'abord un rappel, puis change : la confirmation se fait par courriel, avant vendredi." }
+];
+
+const OPTS_IMG = [
+  { letter: "A", text: "La gare", slot: "train station platform", img: "assets/q-train-station.jpeg" },
+  { letter: "B", text: "L'aéroport", slot: "airport check-in desk", img: "assets/q-airport-checkin.jpg" },
+  { letter: "C", text: "Le port", slot: "ferry terminal", img: "assets/q-ferry-terminal.webp" },
+  { letter: "D", text: "L'arrêt de bus", slot: "city bus stop", img: "assets/q-bus-stop.png" }
+];
+
+const CORRECT = 1;
+const IMG_Q = { text: "Où se trouve la personne qui parle ?", correct: CORRECT };
+
+const FLAGS = [
+  { key: "audioDone", label: "Audio already finished", def: false, screen: "question",
+    on: "The document has already played out — the panel reads Écoute terminée.",
+    off: "The audio plays while the question is on screen." },
+  { key: "playsOnce", label: "Document plays once only", def: false, screen: "question",
+    on: "The consigne announces a single listen — the strict case.",
+    off: "This document is announced twice: the second listen starts on its own." },
+  { key: "replayUsed", label: "Practice replay capped", def: false, screen: "question",
+    on: "The bar reads « Limite de réécoute atteinte » and is inert — for sets that cap re-listening.",
+    off: "Practice replays are unlimited: the bar reads « sans limite » and never greys out." }
+];
+
+/* The render tick is 260 ms, so a slot in seconds has to be converted before
+   it can be counted down — 14 ticks was 3.6 s, not 14 s.
+   Q_SLOT_SEC is the pause the audio file leaves for reading the question and
+   its four options and answering. */
+const TICK_MS = 260;
+const slotSecs = ticks => Math.max(0, Math.ceil(ticks * TICK_MS / 1000));
+
+/* The real mechanic, verified Sep 2026: one question is a seven-beat audio
+   sequence, and the ONLY text on screen while it runs is the four options.
+   1 signal sonore · 2 consigne read aloud · 3 candidate pre-reads the options
+   · 4 the document plays · 5 the question is read aloud, same file, no text
+   · 6 short pause to answer · 7 automatic move to the next question.
+   So mock mode never prints the question; practice does, labelled as ours. */
+const PHASES = { signal: 2, consigne: 6, ask: 7, answer: 10 };
+const PH_TICKS = k => Math.round(PHASES[k] * 1000 / TICK_MS);
+/* First question of a document walks all seven beats. A follow-up question on
+   the SAME document skips the consigne and the document itself — the
+   recording goes straight on to the next spoken question. */
+const nextPhase = (ph, firstOfDoc) =>
+  ph === "signal" ? (firstOfDoc ? "consigne" : "ask") : ph === "consigne" ? "doc" : ph === "doc" ? "ask" : "answer";
+
+const WAVE = [12,26,44,31,18,52,38,22,47,60,35,19,28,51,42,23,15,33,58,46,27,20,39,55,30,17,44,36,25,49,62,34,21,29,41,24,16,37,53,26];
+
+class Component extends DCLogic {
+  state = { screen: null, flags: {}, mode: null, picked: null, audio: 0, secs: 2418, replay: null, phase: null, phLeft: null };
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      const s = this.cur();
+      const practice = this.mode() === "practice";
+      const cap = (this.flag("playsOnce") ? 1 : (s === "imageQ" ? DOCS.imageQ : DOCS.question).plays) * 100;
+      const onQ = s === "question" || s === "imageQ" || s === "feedback";
+      const ph = this.state.phase || "signal";
+      /* In mock the document only plays during beat 4 — before it there is the
+         signal and the consigne, after it the spoken question and the pause. */
+      if (onQ && !this.state.hold && !this.flag("audioDone") && this.state.audio < cap && (practice || ph === "doc")) {
+        this.setState(st => ({ audio: Math.min(cap, st.audio + 4) }));
+      }
+      /* Mock runs the seven beats itself and never waits on the candidate:
+         when the answer pause runs out the test moves on, answered or not. */
+      if (onQ && !practice && !this.state.hold) {
+        if (ph === "doc") {
+          if (this.state.audio >= cap) this.setPhase("ask");
+        } else {
+          const left = this.state.phLeft === null || this.state.phLeft === undefined ? PH_TICKS(ph) : this.state.phLeft;
+          if (left > 1) this.setState({ phLeft: left - 1 });
+          else if (ph === "answer") this.advance(s);
+          else this.setPhase(nextPhase(ph, (this.state.qIdx || 0) === 0));
+        }
+      }
+      if (this.state.replayProg !== null && this.state.replayProg !== undefined) {
+        this.setState(st => {
+          const p = (st.replayProg ?? 0) + 5;
+          return { replayProg: p >= 100 ? null : p };
+        });
+      }
+      if (s === "question" || s === "feedback" || s === "imageQ" || s === "intro") {
+        this.setState(st => ({ secs: Math.max(0, st.secs - 1) }));
+      }
+    }, 260);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  cur() { return this.state.screen || this.props.startStep || "consignes"; }
+  /* the next item in the mock chain */
+  next(from) { this.goto(from === "imageQ" ? "break" : "imageQ"); }
+  /* Within a document, move to its next spoken question; only when the
+     document is exhausted does the test move on to the next document. */
+  advance(from) {
+    const doc = from === "imageQ" ? DOCS.imageQ : DOCS.question;
+    const i = (this.state.qIdx || 0) + 1;
+    if (from !== "imageQ" && i < Math.min(doc.questions, QSET.length)) {
+      this.setState({ qIdx: i, picked: null, phase: "signal", phLeft: null });
+    } else this.next(from);
+  }
+  /* PracticeConfig (§9) is the only door into an engine and it knows the mode,
+     so it carries it as ?mode=practice|mock. Without this every route ran mock. */
+  qMode() {
+    if (this._qm === undefined) {
+      const v = new URLSearchParams(location.search).get("mode");
+      this._qm = v === "practice" || v === "mock" ? v : null;
+    }
+    return this._qm;
+  }
+  mode() { return this.state.mode || this.qMode() || this.props.mode || "mock"; }
+  flag(k) {
+    const f = this.state.flags[k];
+    if (f !== undefined) return f;
+    if (this.props[k] !== undefined && this.props[k] !== null) return this.props[k];
+    return FLAGS.filter(x => x.key === k)[0].def;
+  }
+  setPhase(k) { this.setState(k === "doc" ? { phase: k, phLeft: null, audio: 0 } : { phase: k, phLeft: null }); }
+  goto(k) {
+    const next = { screen: k };
+    if (k === "intro") { next.picked = null; next.audio = 0; }
+    if (k === "question" || k === "imageQ") next.picked = null;
+    if (k === "feedback") next.picked = 3;
+    if (k === "exitQ") next.picked = null;
+    /* every question restarts the seven-beat sequence at the signal sonore */
+    next.phase = "signal"; next.phLeft = null; next.hold = false;
+    if (k === "question" || k === "imageQ" || k === "intro") next.qIdx = 0;
+    if (k === "question" || k === "imageQ" || k === "break") next.audio = 0;
+    this.setState(next);
+  }
+  fmt(n) {
+    const m = Math.floor(n / 60), s = n % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  renderVals() {
+    const raw = this.cur();
+    const exit = raw === "exitQ";
+    const screen = raw === "feedback" ? "question" : raw === "exitQ" ? "question" : raw;
+    const practice = this.mode() === "practice";
+
+    const imageQ = screen === "imageQ";
+    const isQ = screen === "question" || imageQ;
+    const dark = screen === "complete" || screen === "consignes";
+    const doc = imageQ ? DOCS.imageQ : DOCS.question;
+    const plays = this.flag("playsOnce") ? 1 : doc.plays;
+    /* qIdx = which question of THIS document is being asked (0-based). */
+    const qIdx = imageQ ? 1 : Math.min(this.state.qIdx || 0, QSET.length - 1);
+    const qOfDoc = imageQ ? DOCS.imageQ.questions : Math.min(DOCS.question.questions, QSET.length);
+    const item = imageQ ? IMG_Q : QSET[qIdx];
+    const firstOfDoc = qIdx === 0;
+    /* One denominator, one number: chrome, progress row and break all read it. */
+    const qNum = imageQ ? 2 : 9 + qIdx;
+
+    /* state.audio runs 0→100 per listen; with two listens it runs 0→200 */
+    const total = plays * 100;
+    const rawAudio = this.flag("audioDone") ? total : this.state.audio;
+    const audio = rawAudio % 100 === 0 && rawAudio > 0 ? 100 : rawAudio % 100;
+    const listen = Math.min(total / 100, Math.floor(rawAudio / 100) + (rawAudio % 100 === 0 && rawAudio > 0 ? 0 : 1)) || 1;
+    const audioReady = rawAudio >= total;
+    const picked = this.state.picked;
+    const answered = picked !== null;
+    /* seven-beat sequence — mock only; practice moves at the reader's pace */
+    const mockQ = isQ && !practice;
+    const phase = mockQ ? (this.state.phase || "signal") : "free";
+    const phLeft = this.state.phLeft === null || this.state.phLeft === undefined
+      ? (PHASES[phase] ? PH_TICKS(phase) : 0) : this.state.phLeft;
+    const phSecs = slotSecs(phLeft);
+    /* beats 5 and 6: the question has been read aloud, so answering is open */
+    const canAnswer = !mockQ || phase === "ask" || phase === "answer";
+    const locked = mockQ && !canAnswer;
+    const urgent = mockQ && phase === "answer" && slotSecs(phLeft) <= 5;
+    const showFeedback = practice && answered && !imageQ;
+    const answer = item.correct;
+    const correct = picked === answer;
+
+    // ── options ──
+    const src = imageQ ? OPTS_IMG : item.opts;
+    const options = src.map((o, i) => {
+      const sel = picked === i;
+      const verdict = practice && answered
+        ? (i === answer ? "right" : sel ? "wrong" : "idle")
+        : sel ? "sel" : "idle";
+      /* Locked (beats 1–4): readable but visibly not yet live — recessed
+         ground, dashed hairline, muted ink. It must not look like the
+         selectable state, or the candidate taps into nothing. */
+      const ring = locked ? "#DFD6DD"
+        : verdict === "right" ? "#8FD3CD" : verdict === "wrong" ? "#FBD5D5" : verdict === "sel" ? "#2E1A3B" : "#EFE3EC";
+      const ground = locked ? "#F8F4F7"
+        : verdict === "right" ? "#F0FDF4" : verdict === "wrong" ? "#FEF2F2" : verdict === "sel" ? "#FBF7FA" : "#FFFFFF";
+      const ringW = !locked && (verdict === "sel" || verdict === "right" || verdict === "wrong") ? 2 : 1;
+      const badgeInk = locked ? "#857789"
+        : verdict === "right" ? "#15803D" : verdict === "wrong" ? "#B91C1C" : verdict === "sel" ? "#FFFFFF" : "#5E4E69";
+      const badgeBg = locked ? "#ECE5EB"
+        : verdict === "right" ? "#DCFCE7" : verdict === "wrong" ? "#FEE2E2" : verdict === "sel" ? "#2E1A3B" : "#F3EDF2";
+      return {
+        letter: o.letter, text: o.text, slot: o.slot || "",
+        imgA: !!o.img && o.letter === "A", imgB: !!o.img && o.letter === "B", imgC: !!o.img && o.letter === "C", imgD: !!o.img && o.letter === "D", noImg: !o.img,
+        imgTileStyle: "display:block;width:100%;object-fit:cover;height:104px;border-radius:13px;box-shadow:inset 0 0 0 1px #E9E0E7;background:#EFE8EE",
+        tap: () => {
+          if (practice && answered) return;
+          if (practice) { this.setState({ picked: i, screen: "feedback" }); return; }
+          /* mock: the options are readable from beat 1 but only selectable once
+             the question has been read aloud. The answer pause keeps running
+             and moves on when it ends. */
+          if (!canAnswer) return;
+          this.setState({ picked: i });
+        },
+        cardStyle: "display:flex;align-items:center;gap:12px;padding:15px 15px;border-radius:18px;transition:box-shadow .16s ease,background .16s ease,opacity .16s ease;cursor:" +
+          (canAnswer ? "pointer" : "default") + ";background:" + ground +
+          (locked ? ";border:1px dashed " + ring + ";box-shadow:none;opacity:.72"
+                  : ";box-shadow:inset 0 0 0 " + ringW + "px " + ring + ",0 1px 2px rgba(0,0,0,.04);border:1px solid transparent"),
+        tileStyle: "display:flex;flex-direction:column;gap:10px;padding:10px;border-radius:18px;cursor:pointer;transition:box-shadow .16s ease;background:" +
+          ground + ";box-shadow:inset 0 0 0 " + ringW + "px " + ring + ",0 1px 2px rgba(0,0,0,.04)",
+        badgeStyle: "width:28px;height:28px;border-radius:9px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:12.5px;font-weight:700;background:" +
+          badgeBg + ";color:" + badgeInk,
+        textStyle: "flex:1;font-size:" + (imageQ ? "12.5" : "14.5") + "px;font-weight:500;line-height:" + (imageQ ? "17" : "20") + "px;color:" +
+          (locked ? "#473D45" : "#111827") + ";text-wrap:pretty",
+        hasMark: practice && answered && (i === answer || (sel && !correct)),
+        markIcon: i === answer ? "IconCheck" : "IconX",
+        markStyle: "width:22px;height:22px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#fff;background:" +
+          (i === answer ? "#15803D" : "#DC2626")
+      };
+    });
+
+    // ── waveform ──
+    const replaySpent = this.flag("replayUsed");
+    const replayProg = this.state.replayProg;
+    const replayPlaying = replayProg !== null && replayProg !== undefined;
+    /* Practice replays run through the SAME waveform as the first listen —
+       one audio object on screen, not a second bar in the footer. */
+    const inPanel = isQ && practice;
+    const headPct = inPanel && replayPlaying ? replayProg : audio;
+    const waves = WAVE.map((h, i) => {
+      const on = (i / WAVE.length) * 100 <= headPct;
+      const off = isQ ? (replaySpent ? "#D4C9D2" : "rgba(74,127,229,.28)") : "rgba(255,255,255,.16)";
+      return { style: "flex:1;min-width:2px;border-radius:100px;height:" + Math.max(6, h) + "%;background:" +
+        (on ? (replaySpent && isQ ? "#A2939F" : BLUE) : off) + ";transition:background .2s ease" };
+    });
+
+    // ── chrome ──
+    /* Locked Sep 2026 — one denominator for the whole test. No "section B of D"
+       (pre-2023 model) and no dialogue counter: the exam only ever states the
+       question number out of 40. */
+    const chromeTitle = screen === "complete" ? ""
+      : screen === "consignes" ? "Compréhension orale"
+      : "Question " + qNum + " sur 40";
+
+    /* Mock Listening is linear and self-advancing, so it carries no Next
+       button — the exam has none. Practice keeps one, because practice is
+       study and moves at the reader's pace. */
+    const qSecs = phSecs;
+    const cta = {};
+    if (screen === "consignes") {
+      cta.label = "Commencer l'épreuve"; cta.icon = "IconArrowRight";
+      cta.note = "Le chronomètre démarre à l'ouverture du premier document.";
+      /* Mock skips the intro listen screen — the exam opens straight on the question. */
+      cta.go = () => this.goto(this.mode() === "mock" ? "question" : "intro");
+    } else if (screen === "intro") {
+      cta.label = audioReady ? "Répondre aux questions" : "Écoute en cours…";
+      cta.icon = audioReady ? "IconArrowRight" : "IconOutlineRoundedLoading";
+      cta.disabled = !audioReady;
+      cta.note = audioReady
+        ? DOC.questions + " questions · vous ne pouvez pas revenir sur une question déjà validée"
+        : plays === 2 && listen === 1
+          ? "Écoute 1 sur 2 — la seconde écoute démarre toute seule."
+          : "Les questions s'ouvrent à la fin de l'audio.";
+      cta.go = () => { if (audioReady) this.goto("question"); };
+    } else if (isQ) {
+      cta.label = practice
+        ? (imageQ || qIdx + 1 >= qOfDoc ? "Document suivant" : "Question suivante · même document")
+        : "Valider la réponse";
+      cta.icon = "IconArrowRight";
+      cta.disabled = !answered;
+      cta.note = !practice
+        ? (phase === "answer"
+            ? "Réponse enregistrée · la question passe toute seule dans " + qSecs + " s"
+            : "Réponse enregistrée · la question passe à la fin de la pause")
+        : answered
+          ? "Question " + (qIdx + 1) + " sur " + qOfDoc + " sur ce document · l'entraînement avance à votre rythme"
+          : "Choisissez une réponse pour continuer.";
+      cta.go = () => {
+        if (!answered) return;
+        if (!imageQ && qIdx + 1 < qOfDoc) { this.setState({ qIdx: qIdx + 1, picked: null, screen: "question" }); return; }
+        this.goto(imageQ ? "break" : "imageQ");
+      };
+    } else if (screen === "break") {
+      cta.label = "Passer au document suivant"; cta.icon = "IconPlay";
+      cta.note = "9 questions sur 40 répondues · 24 min restantes";
+      cta.go = () => this.goto("complete");
+    } else {
+      /* In a mock session the four skills run back to back, so this screen
+         hands off to the next épreuve instead of ending the attempt. */
+      const nx = window.MockSession && MockSession.active() ? MockSession.nextOf("listening") : null;
+      cta.label = nx ? "Continuer : " + nx.fr : "Voir les résultats";
+      cta.icon = nx ? "IconArrowRight" : "IconSolidRoundedFileCheck";
+      cta.note = nx ? "Aucune pause entre les épreuves." : "Retour au test blanc";
+      cta.go = () => {
+        if (nx) MockSession.handoff("listening");
+        else __go("TestReview.dc.html");
+      };
+      cta.noteHref = "MockTestDetail.dc.html";
+    }
+
+    const ctaBg = cta.disabled ? (dark ? "rgba(255,255,255,.12)" : "#E5E7EB") : (dark ? "#FFFFFF" : "#2E1A3B");
+    const ctaInk = cta.disabled ? (dark ? "rgba(255,255,255,.42)" : "#9CA3AF") : (dark ? "#1E1226" : "#FFFFFF");
+
+    const sheetDark = false;
+    const answeredCount = raw === "exitQ" ? 8 : 8;
+
+    return {
+      stateLabel: LABELS[raw] || "",
+      frameStyle: "position:relative;width:393px;height:852px;overflow:hidden;flex-shrink:0;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);background:" +
+        (dark ? "linear-gradient(170deg,#221A13 0%,#1E1226 60%,#100D0A 100%)" : "linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 60%)"),
+
+      isConsignes: screen === "consignes",
+      /* footer: a pill in practice, a state strip in mock */
+      hasCta: !(isQ && !practice && !answered),
+      hasAutoStrip: isQ && !practice && !answered,
+      autoStripText: phase === "signal" ? (firstOfDoc ? "Signal sonore — nouvelle question." : "Même document — question " + (qIdx + 1) + " sur " + qOfDoc + ".")
+        : phase === "consigne" ? "Lisez les quatre propositions maintenant."
+        : phase === "doc" ? "Document en cours — la question arrive à la fin."
+        : phase === "ask" ? "La question est posée à l'oral."
+        : urgent ? "Question suivante dans " + qSecs + " s"
+        : "Répondez maintenant — la question passe toute seule.",
+      autoStripStyle: "position:relative;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:100px;background:" +
+        (urgent ? "#FEF2F2" : "rgba(255,255,255,.78)") +
+        ";box-shadow:inset 0 0 0 1px " + (urgent ? "#FBD5D5" : "#E8DFE6") +
+        ";font-size:12.5px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;color:" + (urgent ? "#B91C1C" : "#5E4E69"),
+
+      /* Beats 1–5 print no question text at all — only the four options. */
+      showBeats: !practice,
+      beats: [
+        { k: "signal", label: "1 · Signal" },
+        { k: "consigne", label: "2–3 · Consigne + lecture des options" },
+        { k: "doc", label: "4 · Document" },
+        { k: "ask", label: "5 · Question à l'oral" },
+        { k: "answer", label: "6–7 · Pause et passage" },
+        { k: "q2", label: "Question 2 · même document" }
+      ].map(b => ({
+        label: b.label,
+        go: () => {
+          if (!isQ) this.setState({ screen: "question" });
+          const follow = b.k === "q2";
+          this.setState({
+            phase: follow ? "signal" : b.k, phLeft: null, hold: true, picked: null,
+            qIdx: follow ? 1 : 0,
+            audio: !follow && (b.k === "signal" || b.k === "consigne") ? 0 : b.k === "doc" ? Math.round(total * 0.45) : total
+          });
+        },
+        style: "display:flex;align-items:center;height:30px;padding:0 12px;border-radius:100px;cursor:pointer;user-select:none;font-size:11.5px;font-weight:600;white-space:nowrap;background:" +
+          (mockQ && (b.k === "q2" ? qIdx > 0 : phase === b.k && qIdx === 0) ? "#2E1A3B" : "rgba(255,255,255,.7)") + ";color:" +
+          (mockQ && (b.k === "q2" ? qIdx > 0 : phase === b.k && qIdx === 0) ? "#fff" : "#5E4E69") + ";box-shadow:inset 0 0 0 1px " +
+          (mockQ && (b.k === "q2" ? qIdx > 0 : phase === b.k && qIdx === 0) ? "#2E1A3B" : "#D9CCD6")
+      })),
+      showQText: practice,
+      isSpoken: mockQ,
+      spokenIcon: phase === "answer" ? "IconDuotoneAlertCircle" : "IconBulkHeadphone",
+      spokenTitle: phase === "signal" ? (firstOfDoc ? "Signal sonore" : "Signal sonore — question suivante")
+        : phase === "consigne" ? "« Écoutez le document sonore et la question »"
+        : phase === "doc" ? "Document en cours d'écoute"
+        : phase === "ask" ? "La question est posée à l'oral"
+        : "Choisissez votre réponse",
+      spokenSub: phase === "signal" ? (firstOfDoc
+          ? "Une nouvelle question commence. Les quatre propositions sont déjà à l'écran."
+          : "Toujours le même document : il ne sera pas rejoué. La question " + (qIdx + 1) + " est lue dans la foulée.")
+        : phase === "consigne" ? "Profitez de la consigne pour lire les propositions : c'est le seul texte affiché."
+        : phase === "doc" ? "La question n'est pas écrite : elle sera lue à la fin du document, dans le même enregistrement."
+        : phase === "ask" ? "Écoutez — rien ne s'affiche. Les propositions deviennent sélectionnables."
+        : "Courte pause de " + PHASES.answer + " s, puis la question suivante démarre toute seule.",
+      spokenStyle: "display:flex;flex-direction:column;gap:7px;padding:15px 16px;border-radius:20px;background:" +
+        (phase === "answer" ? "#FFFBEB" : "#F7F9FE") + ";box-shadow:inset 0 0 0 1px " +
+        (phase === "answer" ? "#EDD99A" : "#DCE6F8") + ";color:" + (phase === "answer" ? "#966010" : DEEP),
+      /* The only pacing signal on the screen: a hairline, nothing to read.
+         The transition stays under the 260 ms tick so the width never
+         overshoots and reads as a bar bouncing backwards. */
+      qPaceStyle: "position:absolute;left:0;bottom:0;height:3px;border-radius:100px;transition:width .2s linear;background:" +
+        (urgent ? "#DC2626" : BLUE) + ";width:" + (!mockQ ? 0
+          : phase === "doc" ? Math.round(100 - audio)
+          : Math.round(phLeft / Math.max(1, PH_TICKS(phase)) * 100)) + "%",
+      isQuestion: isQ,
+      isTextQ: screen === "question",
+      isImageQ: imageQ,
+      isBreak: screen === "break",
+      isComplete: screen === "complete",
+
+      // intro audio
+      waves: waves,
+      audioAt: this.fmt(Math.round(doc.len * Math.min(100, inPanel && replayPlaying ? replayProg : audio) / 100)),
+      audioLen: this.fmt(doc.len),
+      togglePlay: () => this.setState({ audio: audioReady ? 0 : total }),
+      docKicker: doc.group + " · document " + doc.index + " sur " + doc.of,
+      docKickerShort: doc.group.toUpperCase() + " · DOCUMENT " + doc.index + " / " + doc.of,
+      docMeta: DOC.questions + " questions · " + this.fmt(DOC.len) + " d'audio",
+      /* The consigne announces the number of listens — CCI Paris IDF:
+         "some documents are played once, others twice: the consigne always tells you." */
+      playsLine: plays === 2
+        ? "Vous entendrez ce document deux fois."
+        : "Vous entendrez ce document une seule fois.",
+      listenChip: plays === 2 ? "Écoute " + listen + " / 2" : "Une seule écoute",
+      listenChipStyle: "display:flex;align-items:center;height:24px;padding:0 11px;border-radius:100px;font-size:10.5px;font-weight:700;letter-spacing:.4px;color:" +
+        (plays === 2 && listen === 2 ? "#F9BD48" : "#8FB2F0") + ";background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)",
+      consigneRules: [
+        { n: "1", text: "40 questions, 40 minutes. Le chronomètre s'affiche en haut à droite et ne s'arrête jamais." },
+        { n: "2", text: "Chaque question suit le même enchaînement : signal sonore, consigne, document, puis la question lue à voix haute — le tout dans un seul enregistrement. L'audio démarre tout seul : ni lecture, ni pause, ni retour." },
+        { n: "3", text: "La question n'est jamais écrite : seules les quatre propositions sont affichées. Lisez-les pendant la consigne, puis répondez dans la courte pause qui suit la question." },
+        { n: "4", text: "Vos réponses sont enregistrées automatiquement, y compris à la fin du temps imparti." }
+      ],
+      playIcon: audioReady ? "IconPlay" : "IconPause",
+      playBtnStyle: "width:64px;height:64px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;cursor:pointer;color:#fff;background:linear-gradient(145deg," +
+        BLUE + " 0%," + DEEP + " 100%);box-shadow:0 12px 26px -12px rgba(74,127,229,.9)" + (audioReady ? "" : ";animation:lsPulse 2.2s ease-in-out infinite"),
+      audioNote: practice
+        ? "Mode entraînement — réécoutez le document autant de fois que vous voulez, sur cet écran ou pendant les questions."
+        : plays === 2
+          ? "Test blanc — deux écoutes, annoncées par la consigne. Après la seconde, l'audio est terminé."
+          : "Test blanc — une seule écoute. Aucune réécoute n'est possible.",
+      audioNoteInk: practice ? "#8FB2F0" : "rgba(255,255,255,.5)",
+
+      // question
+      qKicker: doc.group + " · question " + (qIdx + 1) + " sur " + qOfDoc + " de ce document" +
+        (practice ? " · entraînement" : ""),
+      qText: item.text,
+      /* One document, several questions: the dots make the shared audio legible. */
+      qDots: Array.from({ length: qOfDoc }, (_, i) => ({
+        style: "height:4px;flex:1;border-radius:100px;transition:background .2s ease;background:" +
+          (i < qIdx ? "#8FB2F0" : i === qIdx ? BLUE : "rgba(74,127,229,.22)")
+      })),
+      qDotsNote: "Ce document sert " + qOfDoc + " questions · question " + (qIdx + 1),
+      options: options,
+      showFeedback: showFeedback,
+      feedbackStyle: "display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;animation:lsFade .25s ease both;background:" +
+        (correct ? "#F0FDF4" : "#FEF2F2") + ";box-shadow:inset 0 0 0 1px " + (correct ? "#BBF7D0" : "#FBD5D5") + ";color:" + (correct ? "#15803D" : "#B91C1C"),
+      feedbackIcon: correct ? "IconCheck" : "IconDuotoneAlertCircle",
+      feedbackTitle: (correct ? "Correct — " : "Presque — la bonne réponse est ") + src[answer].letter,
+      feedbackBody: correct ? item.fbRight : item.fbWrong,
+
+      hasReplay: practice && isQ,
+      replayTap: () => { if (!replaySpent) this.setState({ replayProg: replayPlaying ? null : 0 }); },
+      replayIcon: replayPlaying ? "IconPause" : "IconPlay",
+      replaySpent: replaySpent,
+      replayLabel: replaySpent
+        ? "Limite de réécoute atteinte"
+        : replayPlaying
+          ? "Réécoute en cours"
+          : "Réécouter le document · sans limite",
+      replayBtnStyle: "flex-shrink:0;width:32px;height:32px;border-radius:9999px;display:flex;justify-content:center;align-items:center;cursor:" +
+        (replaySpent ? "default" : "pointer") + ";background:" + (replaySpent ? "#E6DFE5" : TINT) +
+        ";box-shadow:inset 0 0 0 1px " + (replaySpent ? "#D4C9D2" : "#C9DAF8") + ";color:" + (replaySpent ? "#857789" : DEEP),
+      replayNoteStyle: "font-size:11px;font-weight:600;line-height:15px;color:" + (replaySpent ? "#857789" : DEEP),
+
+      // break + complete
+      breakStats: [
+        { value: "3 / 3", label: "CE GROUPE" },
+        { value: "9 / 40", label: "TOTAL ÉPREUVE" },
+        { value: "24:18", label: "TEMPS RESTANT" }
+      ].map((b, i) => Object.assign({}, b, {
+        cellStyle: "flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" + (i > 0 ? ";border-left:1px solid #F5EEF3" : "")
+      })),
+      doneStats: ((window.MockSession && MockSession.active() && MockSession.nextOf("listening"))
+        ? [{ value: "38 / 40", label: "RÉPONSES" }, { value: "36:04", label: "TEMPS UTILISÉ" }, { value: "—", label: "SCORE EN ATTENTE" }]
+        : [{ value: "38 / 40", label: "RÉPONSES" }, { value: "36:04", label: "TEMPS UTILISÉ" }, { value: "B2", label: "NIVEAU CECR" }]
+      ).map((d, i, a) => ({
+        value: d.value, label: d.label,
+        cellStyle: "flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" + (i > 0 ? ";border-left:1px solid rgba(255,255,255,.12)" : "")
+      })),
+      /* A mock sitting releases nothing until all four épreuves are in. */
+      doneBody: (window.MockSession && MockSession.active() && MockSession.nextOf("listening"))
+        ? "Vos réponses sont enregistrées. Aucun score n'est affiché avant la fin des quatre épreuves de la session."
+        : "Vos réponses sont enregistrées. Le détail par document se trouve dans la correction.",
+      holdScore: !!(window.MockSession && MockSession.active() && MockSession.nextOf("listening")),
+      doneTitle: (window.MockSession && MockSession.active() && MockSession.nextOf("listening"))
+        ? "Compréhension orale enregistrée"
+        : "Compréhension orale terminée",
+      scorePct: (window.MockSession && MockSession.active() && MockSession.nextOf("listening")) ? "✓" : "8",
+      scorePctStyle: (window.MockSession && MockSession.active() && MockSession.nextOf("listening"))
+        ? "font-size:52px;font-weight:700;line-height:52px;color:#4ADE80"
+        : "font-size:44px;font-weight:700;line-height:48px;letter-spacing:-1.5px;color:#fff",
+      scoreCaption: (window.MockSession && MockSession.active() && MockSession.nextOf("listening")) ? "ENREGISTRÉ" : "NCLC · ESTIMATION",
+      ringBg: (window.MockSession && MockSession.active() && MockSession.nextOf("listening"))
+        ? "conic-gradient(from -90deg,#4ADE80 0deg 360deg)"
+        : "conic-gradient(from -90deg," + BLUE + " 0deg 281deg,rgba(255,255,255,.12) 281deg 360deg)",
+
+      // chrome
+      chromeStyle: "position:absolute;left:0;right:0;top:0;z-index:9;padding-bottom:" + (isQ ? "12px" : "0") + ";background:" +
+        (dark ? "linear-gradient(180deg,rgba(30,18,38,.92) 0%,rgba(30,18,38,0) 100%)" : "linear-gradient(180deg,rgba(248,243,247,.96) 0%,rgba(248,243,247,.86) 70%,rgba(248,243,247,0) 100%)") +
+        ";backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)",
+      barInk: dark ? "#FFFFFF" : "#111827",
+      chromeTitle: chromeTitle,
+      chromeTitleStyle: "flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:" +
+        (dark ? "rgba(255,255,255,.85)" : "#111827"),
+      hasClose: screen !== "complete",
+      closeTap: () => this.goto("exitQ"),
+      closeStyle: "width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;flex-shrink:0;cursor:pointer;color:" +
+        (dark ? "#fff" : "#111827"),
+      hasTimer: screen === "intro" || isQ || screen === "break",
+      clock: this.fmt(this.state.secs),
+      timerStyle: "display:flex;align-items:center;height:32px;padding:0 12px;border-radius:100px;flex-shrink:0;background:" +
+        (dark ? "rgba(255,255,255,.1)" : this.state.secs < 300 ? "#FEF2F2" : "#F5EEF3") + ";box-shadow:inset 0 0 0 1px " +
+        (dark ? "rgba(255,255,255,.16)" : this.state.secs < 300 ? "#FBD5D5" : "#E8DFE6") + ";color:" +
+        (dark ? "#fff" : this.state.secs < 300 ? "#B91C1C" : "#374151"),
+
+      hasFlag: practice && isQ,
+      flagTap: () => this.setState(s => ({ flagOn: !(s.flagOn || false) })),
+      flagLabel: this.state.flagOn ? "2 marquées" : "Marquer",
+      flagStyle: "display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:100px;flex-shrink:0;cursor:pointer;transition:background .16s ease;background:" +
+        (this.state.flagOn ? "#FFFBEB" : "#FFFFFF") + ";box-shadow:inset 0 0 0 1px " + (this.state.flagOn ? "#EDD99A" : "#E8DFE6") +
+        ";color:" + (this.state.flagOn ? "#966010" : "#857789"),
+
+      hasProgress: isQ,
+      progressLeftStyle: "flex:1;font-size:10.5px;font-weight:600;letter-spacing:.3px;color:#857789" +
+        (practice ? ";cursor:pointer;text-decoration:underline;text-underline-offset:3px" : ""),
+      openNav: () => { if (practice) this.setState({ navOpen: true }); },
+      closeNav: () => this.setState({ navOpen: false }),
+      showNav: practice && !!this.state.navOpen,
+      navCells: Array.from({ length: 40 }, (_, i) => {
+        const num = i + 1;
+        const cur = num === (imageQ ? 11 : 9);
+        const done = num <= 8;
+        const isFlag = !!this.state.flagOn && (num === 5 || num === 7);
+        const bg = cur ? BLUE : isFlag ? "#FFFBEB" : done ? "#F5EEF3" : "#FFFFFF";
+        const ink = cur ? "#fff" : isFlag ? "#966010" : done ? "#5E4E69" : "#9C8F9A";
+        const ring = cur ? BLUE : isFlag ? "#EDD99A" : done ? "#EFE3EC" : "#E8DFE6";
+        return {
+          num: num,
+          tap: () => this.setState({ navOpen: false, screen: num >= 11 ? "imageQ" : "question", picked: null }),
+          style: "height:30px;border-radius:9px;display:flex;justify-content:center;align-items:center;cursor:pointer;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:" +
+            bg + ";color:" + ink + ";box-shadow:inset 0 0 0 1px " + ring
+        };
+      }),
+      navLegend: [
+        { label: "En cours", c: BLUE, ring: BLUE },
+        { label: "Marquée", c: "#FFFBEB", ring: "#EDD99A" },
+        { label: "Répondue", c: "#F5EEF3", ring: "#EFE3EC" },
+        { label: "Sans réponse", c: "#FFFFFF", ring: "#E8DFE6" }
+      ].map(l => ({ label: l.label, dotStyle: "width:14px;height:14px;border-radius:5px;background:" + l.c + ";box-shadow:inset 0 0 0 1px " + l.ring })),
+      navJump: () => this.setState({ navOpen: false, screen: "question", picked: null }),
+      trackBg: "#EFE3EC",
+      progressFillStyle: "height:100%;width:" + (imageQ ? 27 : 22) + "%;border-radius:100px;background:linear-gradient(90deg," + BLUE + "," + DEEP + ")",
+      progressInk: "#857789",
+      progressLeft: "Question " + qNum + " sur 40",
+      progressRight: doc.group,
+
+      // footer
+      fadeStyle: "position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg," +
+        (dark
+          ? "rgba(17,24,39,0) 0%,rgba(30,18,38,.72) 42%,rgba(30,18,38,.96) 78%,#100D0A 100%"
+          : "rgba(255,255,255,0) 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,.96) 78%,#fff 100%") +
+        ");backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%)",
+      ctaLabel: cta.label,
+      ctaIcon: cta.icon,
+      ctaHasIcon: true,
+      ctaTap: cta.go,
+      ctaStyle: "position:relative;pointer-events:" + (cta.disabled ? "none" : "auto") +
+        ";display:flex;justify-content:center;align-items:center;gap:9px;height:52px;padding:0 18px;border-radius:100px;cursor:pointer;user-select:none;transition:background .2s ease;background:" +
+        ctaBg + ";color:" + ctaInk + (cta.disabled ? "" : ";box-shadow:0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1)"),
+      ctaNote: cta.note,
+      noteTap: () => { if (cta.noteHref) __go(cta.noteHref); },
+      ctaNoteStyle: "font-size:12.5px;font-weight:500;line-height:17px;text-align:center;text-wrap:pretty;" +
+        (cta.noteHref ? "cursor:pointer;text-decoration:underline;text-underline-offset:3px;" : "") + "color:" +
+        (cta.warn ? "#B91C1C" : dark ? "rgba(255,255,255,.55)" : "#6E5F78"),
+
+      // exit sheet
+      showExit: exit,
+      dismissExit: () => this.goto(sheetDark && this.mode() !== "mock" ? "intro" : "question"),
+      sheetStyle: "position:relative;display:flex;flex-direction:column;gap:18px;padding:14px 20px 26px;border-radius:28px 28px 0 0;animation:lsSheet .28s ease both;background:" +
+        (sheetDark ? "#1B1510" : "#FFFFFF") + ";box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)",
+      sheetGrabStyle: "width:38px;height:4px;border-radius:100px;margin:0 auto 4px;background:" + (sheetDark ? "rgba(255,255,255,.22)" : "#E8DFE6"),
+      sheetTitleInk: sheetDark ? "#FFFFFF" : "#111827",
+      sheetBodyInk: sheetDark ? "rgba(255,255,255,.55)" : "#5E4E69",
+      sheetTitle: sheetDark ? "Quitter avant de répondre ?" : "Quitter l'épreuve ?",
+      sheetBody: sheetDark
+        ? "Vous avez entendu ce document mais n'avez répondu à aucune de ses trois questions. Il ne sera pas rejoué à votre retour."
+        : "Votre progression est enregistrée comme tentative inachevée. Le chronomètre continue pendant votre absence.",
+      sheetHasProgress: !sheetDark,
+      sheetRows: [
+        { label: "Réponses", value: answeredCount + " sur 40" },
+        { label: "Document", value: doc.index + " sur " + doc.of },
+        { label: "Temps restant", value: this.fmt(this.state.secs) }
+      ].map((r, i, a) => Object.assign({}, r, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:11px 0" + (i < a.length - 1 ? ";border-bottom:1px solid #F5EEF3" : "")
+      })),
+      sheetPrimary: sheetDark ? "Poursuivre l'écoute" : "Continuer l'épreuve",
+      sheetPrimaryStyle: "display:flex;justify-content:center;align-items:center;height:52px;border-radius:100px;cursor:pointer;user-select:none;font-size:15px;font-weight:600;background:" +
+        (sheetDark ? "#FFFFFF" : "#2E1A3B") + ";color:" + (sheetDark ? "#1E1226" : "#FFFFFF"),
+      sheetSecondary: sheetDark ? "Quitter l'épreuve" : "Enregistrer et quitter",
+      sheetSecondaryStyle: "display:flex;justify-content:center;align-items:center;height:44px;border-radius:100px;font-size:14px;font-weight:600;color:" +
+        (sheetDark ? "rgba(255,255,255,.7)" : "#B4451F"),
+      sheetNote: "La reprise est gratuite.",
+
+      // review chrome
+      steps: STEPS.map(s => ({
+        label: s.label,
+        go: () => this.goto(s.key),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (s.key === raw ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      })),
+      modes: [
+        { key: "mock", label: "Mock test" },
+        { key: "practice", label: "Practice" }
+      ].map(m => ({
+        label: m.label,
+        go: () => this.setState({ mode: m.key, picked: null, replay: null }),
+        style: "font-size:12px;font-weight:600;border-radius:100px;padding:6px 13px;cursor:pointer;user-select:none;" +
+          (this.mode() === m.key ? "background:#6A2A5F;color:#fff" : "background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6")
+      })),
+      flags: FLAGS.map(f => {
+        const on = this.flag(f.key);
+        const toggle = () => this.setState(s => ({ flags: Object.assign({}, s.flags, { [f.key]: !on }) }));
+        return {
+          label: f.label, screenLabel: STEPS.filter(s => s.key === f.screen)[0].label,
+          onText: f.on, offText: f.off, toggle: toggle,
+          goScreen: () => this.goto(f.screen),
+          rowStyle: "display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:" +
+            (on ? "rgba(255,255,255,.78)" : "rgba(255,255,255,.42)") + ";box-shadow:inset 0 0 0 1px " + (on ? "#D9CCD6" : "#D8CBD5"),
+          trackStyle: "width:38px;height:22px;border-radius:100px;flex-shrink:0;padding:2px;cursor:pointer;display:flex;justify-content:" +
+            (on ? "flex-end" : "flex-start") + ";background:" + (on ? "#2E1A3B" : "#D9CCD6"),
+          knobStyle: "width:18px;height:18px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#2E1A3B" : "#EFE3EC") + ";color:" + (on ? "#fff" : "#857789"),
+          offTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#EFE3EC" : "#2E1A3B") + ";color:" + (on ? "#857789" : "#fff"),
+          onTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#2E1A3B" : "#857789"),
+          offTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#857789" : "#2E1A3B")
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

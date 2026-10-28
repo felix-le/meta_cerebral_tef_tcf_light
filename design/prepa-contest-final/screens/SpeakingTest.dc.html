@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes spFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes spSheet { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+  @keyframes spPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  @keyframes spHalo { 0% { transform: scale(1); opacity: .5; } 100% { transform: scale(1.5); opacity: 0; } }
+  @keyframes spSpin { to { transform: rotate(360deg); } }
+  @keyframes spRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes spPop { 0% { opacity: 0; transform: scale(.84); } 62% { opacity: 1; transform: scale(1.035); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes spLand { 0% { transform: scale(1); } 42% { transform: scale(1.09); } 100% { transform: scale(1); } }
+  .sp-scroll::-webkit-scrollbar { width: 0; }
+  .sp-scroll { scrollbar-width: none; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E1226"/><rect x="44" y="24" width="12" height="30" rx="6" fill="#8B62E0"/><rect x="34" y="60" width="32" height="6" rx="3" fill="#F9BD48"/><rect x="48" y="66" width="4" height="12" rx="2" fill="#8B62E0"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<x-import component-from-global-scope="mock-session" from="./mock-session.js" hint-size="0,0"></x-import>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">M9 · Speaking Test Engine</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="Home.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Config</a>
+  </div>
+
+  <div data-screen-label="Speaking test engine" style="{{ frameStyle }}">
+
+    <!-- ══ SCROLL BODY ══ -->
+    <div class="sp-scroll" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+      <!-- ── CONSIGNES (the screen the real exam opens with) ── -->
+      <sc-if value="{{ isConsignes }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;gap:22px;overflow:hidden;animation:spFade .35s ease both">
+          <div style="position:absolute;left:-90px;top:-110px;width:340px;height:340px;border-radius:9999px;background:#8B62E0;opacity:.32;filter:blur(80px)"></div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">{{ examHead }}</span>
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-wrap:pretty">Expression orale</span>
+            <span style="font-size:14px;font-weight:500;line-height:21px;color:rgba(255,255,255,.6);text-wrap:pretty">{{ examSub }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#C0A6F5">CONSIGNES</span>
+            <sc-for list="{{ consigneRules }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="width:22px;height:22px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.1);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ r.n }}</span>
+                <span style="flex:1;font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.86);text-wrap:pretty">{{ r.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="position:relative;display:flex;gap:9px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:rgba(249,189,72,.1);box-shadow:inset 0 0 0 1px rgba(249,189,72,.3)">
+            <div style="width:16px;height:16px;flex-shrink:0;margin-top:1px;color:#F9BD48;display:flex;align-items:center;justify-content:center">
+              <fig-icon name="IconDuotoneInfo" size="15"></fig-icon>
+            </div>
+            <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#F9BD48;text-wrap:pretty">Le retour de l'IA ne concerne que l'entraînement. Le jour de l'examen, deux examinateurs notent l'enregistrement séparément.</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── TASK INTRO ── -->
+      <sc-if value="{{ isIntro }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;gap:22px;overflow:hidden;animation:spFade .35s ease both">
+          <div style="position:absolute;left:-90px;top:-110px;width:340px;height:340px;border-radius:9999px;background:#8B62E0;opacity:.32;filter:blur(80px)"></div>
+          <sc-if value="{{ hasPills }}" hint-placeholder-val="{{ false }}"><div style="height:12px"></div></sc-if>
+
+          <div style="position:absolute;right:-120px;bottom:60px;width:300px;height:300px;border-radius:9999px;background:#F9BD48;opacity:.14;filter:blur(90px)"></div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">{{ tKicker }}</span>
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-wrap:pretty">{{ tTitle }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#C0A6F5">CONSIGNE</span>
+            <span style="font-size:15px;font-weight:500;line-height:23px;color:#fff;text-wrap:pretty">{{ tConsigne }}</span>
+          </div>
+
+          <sc-if value="{{ hasDoc }}" hint-placeholder-val="{{ true }}">
+            <div style="position:relative;display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)">
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ tDocLabel }}</span>
+              <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.82);text-wrap:pretty">{{ tDoc }}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hasInterview }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:22px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="{{ ivAvatarStyle }}">{{ ivInitials }}</div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="font-size:14.5px;font-weight:700;line-height:19px;color:#fff">{{ ivName }}</span>
+                  <span style="font-size:11.5px;font-weight:500;line-height:16px;color:rgba(255,255,255,.5)">{{ ivRole }}</span>
+                </div>
+              </div>
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">CE QU'IL VA VOUS DEMANDER</span>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ ivQuestions }}" as="q" hint-placeholder-count="5">
+                  <div style="display:flex;gap:10px;align-items:flex-start">
+                    <span style="{{ q.nStyle }}">{{ q.n }}</span>
+                    <span style="flex:1;font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.86);text-wrap:pretty">{{ q.text }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="position:relative;display:flex;flex-direction:column;padding:4px 18px;border-radius:20px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)">
+            <sc-for list="{{ introMeta }}" as="m" hint-placeholder-count="3">
+              <div style="{{ m.rowStyle }}">
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:rgba(255,255,255,.6)">{{ m.label }}</span>
+                <span style="font-size:13px;font-weight:700;line-height:18px;color:#fff">{{ m.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── PREPARATION ── -->
+      <sc-if value="{{ isPrep }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:176px 20px 190px;display:flex;flex-direction:column;gap:20px;animation:spFade .3s ease both">
+
+          <div style="display:flex;align-items:center;gap:16px;padding:16px;border-radius:22px;background:#F3EEFC;box-shadow:inset 0 0 0 1px #DCCCF7">
+            <div style="{{ prepRingStyle }}">
+              <div style="width:60px;height:60px;border-radius:9999px;background:#F3EEFC;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px">
+                <span style="font-size:18px;font-weight:700;line-height:20px;letter-spacing:-.4px;font-variant-numeric:tabular-nums;color:#5535A8">{{ prepClock }}</span>
+                <span style="font-size:8px;font-weight:700;letter-spacing:.7px;color:#8B62E0">RESTANT</span>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+              <span style="font-size:15px;font-weight:700;line-height:20px;color:#3D1F73">Préparation</span>
+              <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">{{ prepNote }}</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:20px;font-weight:700;line-height:28px;letter-spacing:-.3px;color:#111827;text-wrap:pretty">{{ tTitle }}</span>
+            <span style="font-size:15px;font-weight:500;line-height:23px;color:#374151;text-wrap:pretty">{{ tConsigne }}</span>
+          </div>
+
+          <sc-if value="{{ hasDoc }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:20px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#857789">{{ tDocLabel }}</span>
+              <span style="font-size:14px;font-weight:400;line-height:21px;color:#2E1A3B;text-wrap:pretty">{{ tDoc }}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showHints }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:20px;background:#F3EEFC;box-shadow:inset 0 0 0 1px #DCCCF7;animation:spFade .25s ease both">
+              <div style="display:flex;align-items:center;gap:8px;color:#5535A8">
+                <fig-icon name="IconDuotoneBulb" size="16"></fig-icon>
+                <span style="font-size:12.5px;font-weight:700;line-height:17px;color:inherit">Aide à l'entraînement — expressions utiles</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ hints }}" as="h" hint-placeholder-count="5">
+                  <span style="font-size:12px;font-weight:500;line-height:1;padding:8px 11px;border-radius:100px;background:#fff;color:#3D1F73;box-shadow:inset 0 0 0 1px #DCCCF7">{{ h.text }}</span>
+                </sc-for>
+              </div>
+              <span style="font-size:11.5px;font-weight:400;line-height:16px;color:#5E4E69;text-wrap:pretty">Ces aides n'existent qu'en entraînement. En test blanc, vous n'avez que la consigne, comme à l'examen.</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ── RECORDING ── -->
+      <sc-if value="{{ isRecord }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 200px;display:flex;flex-direction:column;gap:20px;overflow:hidden;animation:spFade .3s ease both">
+          <div style="position:absolute;left:-80px;top:-120px;width:320px;height:320px;border-radius:9999px;background:#8B62E0;opacity:.3;filter:blur(80px)"></div>
+          <sc-if value="{{ hasPills }}" hint-placeholder-val="{{ false }}"><div style="height:12px"></div></sc-if>
+
+
+          <sc-if value="{{ micDenied }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative;display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:18px;background:rgba(220,38,38,.14);box-shadow:inset 0 0 0 1px rgba(251,213,213,.5)">
+              <div style="color:#FCA5A5;display:flex;flex-shrink:0">
+                <fig-icon name="IconDuotoneAlertCircle" size="17"></fig-icon>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <span style="font-size:13px;font-weight:700;line-height:18px;color:#FECACA">Le microphone est désactivé</span>
+                <span style="font-size:12px;font-weight:400;line-height:17px;color:rgba(255,255,255,.6);text-wrap:pretty">Rien n'est enregistré. Autorisez le microphone dans les réglages, puis revenez : le chronomètre est en pause.</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">{{ tKicker }}</span>
+            <span style="font-size:14.5px;font-weight:500;line-height:21px;color:rgba(255,255,255,.8);text-wrap:pretty">{{ tConsigneShort }}</span>
+          </div>
+
+          <sc-if value="{{ hasQDots }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ accentStyle }}">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="flex:1;font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#fff">{{ qDotsLabel }}</span>
+                <span style="font-size:10.5px;font-weight:600;line-height:14px;text-align:right;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.5)">{{ qNext }}</span>
+              </div>
+              <div style="display:flex;gap:5px;padding:3px 0 1px">
+                <sc-for list="{{ qDots }}" as="d" hint-placeholder-count="5">
+                  <div style="{{ d.style }}"></div>
+                </sc-for>
+              </div>
+              <span style="font-size:14.5px;font-weight:500;line-height:21px;color:#fff;text-wrap:pretty">{{ qCurrent }}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hasMonologue }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ accentStyle }}">
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#fff">MONOLOGUE SUIVI</span>
+              <span style="font-size:14.5px;font-weight:500;line-height:21px;color:#fff;text-wrap:pretty">Vous parlez seul jusqu'à la fin. L'examinateur écoute et n'intervient pas : personne ne vous relancera.</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hasInterlocutor }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ turnStyle }}">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:22px;height:22px;border-radius:9999px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.12);color:#fff">
+                  <fig-icon name="IconOutlineRoundedUser" size="13"></fig-icon>
+                </div>
+                <span style="flex:1;font-size:9.5px;font-weight:700;letter-spacing:.9px;color:{{ turnKickerInk }}">{{ turnKicker }}</span>
+                <span style="font-size:10.5px;font-weight:600;line-height:14px;text-align:right;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.35)">{{ turnNext }}</span>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:3px;height:21px">
+                <sc-for list="{{ turnMeter }}" as="m" hint-placeholder-count="12">
+                  <div style="{{ m.style }}"></div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ showTurnText }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:14.5px;font-weight:500;line-height:21px;color:#fff;text-wrap:pretty">{{ turnText }}</span>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:20px;padding:26px 18px 22px;border-radius:26px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)">
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+              <span style="{{ recClockStyle }}">{{ recClock }}</span>
+              <span style="font-size:11px;font-weight:600;letter-spacing:.5px;color:{{ recStateInk }}">{{ recStateLabel }}</span>
+            </div>
+
+            <div style="display:flex;align-items:flex-end;gap:3px;height:74px">
+              <sc-for list="{{ bars }}" as="b" hint-placeholder-count="40">
+                <div style="{{ b.style }}"></div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="height:5px;border-radius:100px;background:rgba(255,255,255,.14);overflow:hidden">
+                <div style="{{ recFillStyle }}"></div>
+              </div>
+              <div style="display:flex;align-items:center">
+                <span style="flex:1;font-size:10.5px;font-weight:600;letter-spacing:.3px;color:rgba(255,255,255,.45)">{{ recLeftLabel }}</span>
+                <span style="font-size:10.5px;font-weight:600;letter-spacing:.3px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.45)">max {{ tMaxLabel }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:6px">
+            <div style="position:relative;width:104px;height:104px;display:flex;justify-content:center;align-items:center">
+              <sc-if value="{{ recHalo }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;width:104px;height:104px;border-radius:9999px;background:rgba(139,98,224,.5);animation:spHalo 2s ease-out infinite"></div>
+              </sc-if>
+              <div onClick="{{ recTap }}" style="{{ recBtnStyle }}">
+                <div style="{{ recBtnInnerStyle }}"></div>
+              </div>
+            </div>
+            <span style="font-size:12.5px;font-weight:500;line-height:18px;text-align:center;color:rgba(255,255,255,.55);text-wrap:pretty;max-width:270px">{{ recHint }}</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── RECORDING REVIEW ── -->
+      <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:176px 20px 200px;display:flex;flex-direction:column;gap:20px;animation:spFade .3s ease both">
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#F3EEFC;color:#5535A8;font-size:10.5px;font-weight:700;letter-spacing:.4px">{{ tKicker }}</span>
+              <div style="display:flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:100px;background:#F0FDF4;color:#15803D;box-shadow:inset 0 0 0 1px #BBF7D0">
+                <fig-icon name="IconCheck" size="12"></fig-icon>
+                <span style="font-size:10.5px;font-weight:700;letter-spacing:.4px;color:inherit">Enregistré</span>
+              </div>
+            </div>
+            <span style="font-size:20px;font-weight:700;line-height:28px;letter-spacing:-.3px;color:#111827;text-wrap:pretty">{{ reviewTitle }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;padding:18px;border-radius:22px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 3px rgba(60,30,55,.06)">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div onClick="{{ playTap }}" style="{{ playBtnStyle }}">
+                <fig-icon name="{{ playIcon }}" size="22"></fig-icon>
+              </div>
+              <div style="flex:1;display:flex;align-items:flex-end;gap:3px;height:44px;min-width:0">
+                <sc-for list="{{ playBars }}" as="p" hint-placeholder-count="34">
+                  <div style="{{ p.style }}"></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <span style="flex:1;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:#5535A8">{{ playAt }}</span>
+              <span style="font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;color:#857789">{{ tGotLabel }}</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:9px;align-items:flex-start;padding:14px 16px;border-radius:18px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+            <div style="color:#857789;display:flex;flex-shrink:0">
+              <fig-icon name="IconDuotoneInfo" size="16"></fig-icon>
+            </div>
+            <span style="flex:1;font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">{{ finalNote }}</span>
+          </div>
+
+          <sc-if value="{{ canRerecord }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ rerecordTap }}" style="display:flex;justify-content:center;align-items:center;gap:9px;height:46px;border-radius:100px;cursor:pointer;user-select:none;background:#F3EEFC;color:#5535A8;box-shadow:inset 0 0 0 1px #DCCCF7">
+              <fig-icon name="IconBulkMic" size="16"></fig-icon>
+              <span style="font-size:13.5px;font-weight:600;line-height:1;color:inherit">Réenregistrer cette tâche</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ── SUBMIT CONFIRM ── -->
+      <sc-if value="{{ isSubmit }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:176px 20px 200px;display:flex;flex-direction:column;gap:20px;animation:spFade .3s ease both">
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:22px;font-weight:700;line-height:29px;letter-spacing:-.4px;color:#111827;text-wrap:pretty">{{ submitTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:#5E4E69;text-wrap:pretty">Une fois envoyés, les enregistrements ne peuvent plus être modifiés. L'IA les évalue sur quatre critères et vous transmet le résultat.</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ submitRows }}" as="s" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(60,30,55,.04)">
+                <div style="width:34px;height:34px;border-radius:11px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:#F3EEFC;color:#5535A8">
+                  <fig-icon name="IconBulkMic" size="16"></fig-icon>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="font-size:13.5px;font-weight:700;line-height:18px;color:#111827">{{ s.name }}</span>
+                  <span style="font-size:11.5px;font-weight:400;line-height:16px;color:#6E5F78">{{ s.meta }}</span>
+                </div>
+                <span style="font-size:13px;font-weight:700;line-height:18px;font-variant-numeric:tabular-nums;color:#5535A8">{{ s.dur }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:20px;background:#FEFAF1;box-shadow:inset 0 0 0 1px #F3E6C8">
+            <div style="display:flex;align-items:center;gap:8px;color:#8A5B10">
+              <fig-icon name="IconSparkles" size="16"></fig-icon>
+              <span style="font-size:12.5px;font-weight:700;line-height:17px;color:inherit">La correction par l'IA prend 1 à 5 minutes</span>
+            </div>
+            <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">Vous pouvez fermer l'application. La tentative apparaît dans l'historique avec le statut « correction IA » et une notification vous prévient dès que le score arrive.</span>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:2px">
+              <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="4">
+                <span style="font-size:11px;font-weight:600;line-height:1;padding:7px 10px;border-radius:100px;background:#fff;color:#8A5B10;box-shadow:inset 0 0 0 1px #F3E6C8">{{ c.text }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── PENDING (WITH THE AI) ── -->
+      <sc-if value="{{ isPending }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 190px;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;animation:spFade .35s ease both">
+          <div style="position:absolute;left:-70px;top:-90px;width:320px;height:320px;border-radius:9999px;background:#8B62E0;opacity:.3;filter:blur(80px)"></div>
+          <div style="position:absolute;right:-110px;bottom:120px;width:280px;height:280px;border-radius:9999px;background:#F9BD48;opacity:.16;filter:blur(90px)"></div>
+
+          <div style="{{ aiRingStyle }}">
+            <div style="{{ aiSpinStyle }}"></div>
+            <div style="position:relative;width:120px;height:120px;border-radius:9999px;background:#1E1226;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;color:#C0A6F5">
+              <fig-icon name="{{ aiGlyph }}" size="30"></fig-icon>
+              <span style="font-size:10px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ aiLabel }}</span>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px;align-items:center">
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-align:center;text-wrap:pretty">{{ aiTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.55);text-align:center;text-wrap:pretty;max-width:290px">{{ aiSub }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;width:100%;padding:4px 18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <sc-for list="{{ pendingRows }}" as="p" hint-placeholder-count="3">
+              <div style="{{ p.rowStyle }}">
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:rgba(255,255,255,.6)">{{ p.label }}</span>
+                <span style="font-size:13px;font-weight:700;line-height:18px;color:#fff">{{ p.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── SCORE READY ── -->
+      <sc-if value="{{ isScored }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 190px;display:flex;flex-direction:column;align-items:center;gap:22px;overflow:hidden;animation:spFade .35s ease both">
+          <div style="position:absolute;left:-70px;top:-90px;width:320px;height:320px;border-radius:9999px;background:#8B62E0;opacity:.3;filter:blur(80px)"></div>
+          <div style="position:absolute;right:-110px;bottom:120px;width:280px;height:280px;border-radius:9999px;background:#4ADE80;opacity:.12;filter:blur(90px)"></div>
+
+          <div style="position:relative;display:flex;align-items:center;gap:8px;height:30px;padding:0 13px 0 10px;border-radius:100px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);color:#C0A6F5;animation:spRise .45s cubic-bezier(.2,.7,.3,1) .04s both">
+            <fig-icon name="IconSparkles" size="14"></fig-icon>
+            <span style="font-size:11.5px;font-weight:700;letter-spacing:.3px;color:inherit">Corrigé par l'IA · 4 min 12 s</span>
+          </div>
+
+          <div style="position:relative;width:186px;height:186px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:{{ scoreRingBg }};box-shadow:0 0 0 1px rgba(255,255,255,.08);animation:spPop .55s cubic-bezier(.2,.8,.25,1) .1s both">
+            <div style="width:150px;height:150px;border-radius:9999px;background:#1E1226;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px">
+              <span style="font-size:40px;font-weight:700;line-height:44px;letter-spacing:-1.4px;font-variant-numeric:tabular-nums;color:#fff">{{ scoreValue }}</span>
+              <span style="font-size:10px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ scoreUnit }}</span>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px;align-items:center;animation:spRise .5s cubic-bezier(.2,.7,.3,1) .26s both">
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-align:center">{{ scoreTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.55);text-align:center;text-wrap:pretty;max-width:290px">{{ scoreSub }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:13px;width:100%;padding:18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);animation:spRise .5s cubic-bezier(.2,.7,.3,1) .38s both">
+            <sc-for list="{{ scoreCriteria }}" as="sc" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <div style="display:flex;align-items:center">
+                  <span style="flex:1;font-size:12.5px;font-weight:600;line-height:17px;color:rgba(255,255,255,.8)">{{ sc.label }}</span>
+                  <span style="font-size:12.5px;font-weight:700;line-height:17px;font-variant-numeric:tabular-nums;color:#fff">{{ sc.value }}</span>
+                </div>
+                <div style="height:5px;border-radius:100px;background:rgba(255,255,255,.14);overflow:hidden">
+                  <div style="{{ sc.fillStyle }}"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <!-- ══ FIXED CHROME ══ -->
+    <div style="{{ chromeStyle }}">
+      <div style="height:62px;display:flex;align-items:center;padding:21px 16px 19px;color:{{ barInk }}">
+        <div style="flex:1;display:flex;justify-content:center">
+          <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:inherit">9:41</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+          <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="currentColor"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+          <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="currentColor"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+          <div style="position:relative;width:27.328px;height:13px">
+            <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px currentColor"></div>
+            <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:currentColor"></div>
+            <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:currentColor"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:52px;display:flex;align-items:center;gap:8px;padding:0 12px 0 8px">
+        <sc-if value="{{ hasClose }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ closeTap }}" style="{{ closeStyle }}">
+            <fig-icon name="IconX" size="20"></fig-icon>
+          </div>
+        </sc-if>
+        <span style="{{ chromeTitleStyle }}">{{ chromeTitle }}</span>
+        <sc-if value="{{ hasRecDot }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ recDotStyle }}">
+            <div style="{{ recDotInnerStyle }}"></div>
+            <span style="font-size:11.5px;font-weight:700;line-height:1;letter-spacing:.4px;color:inherit">{{ recDotLabel }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasTimer }}" hint-placeholder-val="{{ true }}">
+          <div style="{{ timerStyle }}">
+            <span style="font-size:12.5px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:inherit">{{ clock }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hasPills }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:2px 16px 8px;display:flex;gap:6px">
+          <sc-for list="{{ pills }}" as="pl" hint-placeholder-count="3">
+            <div style="{{ pl.style }}">{{ pl.label }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasProgress }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:2px 20px 0;display:flex;flex-direction:column;gap:6px">
+          <div style="height:5px;border-radius:100px;background:{{ trackBg }};overflow:hidden">
+            <div style="{{ progressFillStyle }}"></div>
+          </div>
+          <div style="display:flex;align-items:center">
+            <span style="flex:1;font-size:10.5px;font-weight:600;letter-spacing:.3px;color:{{ progressInk }}">{{ progressLeft }}</span>
+            <span style="font-size:10.5px;font-weight:600;letter-spacing:.3px;color:{{ progressInk }}">{{ progressRight }}</span>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ══ FOOTER CTA ══ -->
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:46px 20px 24px;display:flex;flex-direction:column;gap:10px;z-index:8;pointer-events:none">
+      <div style="{{ fadeStyle }}"></div>
+
+      <div onClick="{{ ctaTap }}" style="{{ ctaStyle }}">
+        <sc-if value="{{ ctaHasIcon }}" hint-placeholder-val="{{ true }}">
+          <fig-icon name="{{ ctaIcon }}" size="17"></fig-icon>
+        </sc-if>
+        <span style="font-size:15px;font-weight:600;line-height:1;color:inherit;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ctaLabel }}</span>
+      </div>
+
+      <div style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;min-height:22px">
+        <span onClick="{{ noteTap }}" style="{{ ctaNoteStyle }}">{{ ctaNote }}</span>
+      </div>
+    </div>
+
+    <!-- ══ EXIT SHEET ══ -->
+    <sc-if value="{{ showExit }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ dismissExit }}" style="position:absolute;inset:0;background:rgba(30,18,38,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="{{ sheetStyle }}">
+          <div style="{{ sheetGrabStyle }}"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:20px;font-weight:700;line-height:26px;letter-spacing:-.4px;color:{{ sheetTitleInk }};text-wrap:pretty">{{ sheetTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:{{ sheetBodyInk }};text-wrap:pretty">{{ sheetBody }}</span>
+          </div>
+
+          <sc-if value="{{ sheetHasProgress }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;padding:4px 14px;border-radius:18px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+              <sc-for list="{{ sheetRows }}" as="sr" hint-placeholder-count="3">
+                <div style="{{ sr.rowStyle }}">
+                  <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:#5E4E69">{{ sr.label }}</span>
+                  <span style="font-size:13px;font-weight:700;line-height:18px;color:#111827">{{ sr.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+            <div onClick="{{ dismissExit }}" style="{{ sheetPrimaryStyle }}">{{ sheetPrimary }}</div>
+            <a href="Home.dc.html" style="{{ sheetSecondaryStyle }}">{{ sheetSecondary }}</a>
+          </div>
+          <span style="font-size:11.5px;font-weight:400;line-height:16px;text-align:center;color:{{ sheetBodyInk }};text-wrap:pretty">{{ sheetNote }}</span>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ══ REVIEW CHROME ══ -->
+  <div style="display:flex;gap:6px;width:393px;flex-wrap:wrap">
+    <sc-for list="{{ steps }}" as="st" hint-placeholder-count="9">
+      <div onClick="{{ st.go }}" style="{{ st.chipStyle }}">{{ st.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;width:393px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px #D9CCD6">
+    <span style="flex:1;font-size:12.5px;font-weight:700;color:#2E1A3B">Exam variant</span>
+    <sc-for list="{{ exams }}" as="xv" hint-placeholder-count="2">
+      <div onClick="{{ xv.go }}" style="{{ xv.style }}">{{ xv.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;width:393px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px #D9CCD6">
+    <span style="flex:1;font-size:12.5px;font-weight:700;color:#2E1A3B">Session mode</span>
+    <sc-for list="{{ modes }}" as="md" hint-placeholder-count="2">
+      <div onClick="{{ md.go }}" style="{{ md.style }}">{{ md.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Scenario flags</span>
+      <span style="font-size:12px;font-weight:400;line-height:17px;color:#6E5F78;text-wrap:pretty">Each flag switches one branch of this flow. Toggle it on the left; tap the pill to jump to the step it changes.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ flags }}" as="f" hint-placeholder-count="3">
+        <div style="{{ f.rowStyle }}">
+          <div onClick="{{ f.toggle }}" style="{{ f.trackStyle }}">
+            <div style="{{ f.knobStyle }}"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span onClick="{{ f.toggle }}" style="font-size:13px;font-weight:700;line-height:17px;color:#2E1A3B;cursor:pointer;user-select:none">{{ f.label }}</span>
+              <span onClick="{{ f.goScreen }}" style="font-size:10px;font-weight:600;letter-spacing:.3px;padding:3px 8px;border-radius:100px;background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6;cursor:pointer;user-select:none;white-space:nowrap" style-hover="background:#6A2A5F;color:#fff">{{ f.screenLabel }} ↗</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.onTagStyle }}">ON</span>
+              <span style="{{ f.onTextStyle }}">{{ f.onText }}</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.offTagStyle }}">OFF</span>
+              <span style="{{ f.offTextStyle }}">{{ f.offText }}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;exam&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tef&quot;,&quot;tcf&quot;],&quot;default&quot;:&quot;tef&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mock&quot;,&quot;practice&quot;],&quot;default&quot;:&quot;mock&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;startStep&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;consignes&quot;,&quot;intro&quot;,&quot;prep&quot;,&quot;record&quot;,&quot;review&quot;,&quot;intro2&quot;,&quot;prep2&quot;,&quot;record2&quot;,&quot;review2&quot;,&quot;intro3&quot;,&quot;record3&quot;,&quot;review3&quot;,&quot;submit&quot;,&quot;pending&quot;,&quot;scored&quot;,&quot;exitPrep&quot;,&quot;exitRecord&quot;],&quot;default&quot;:&quot;consignes&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;micDenied&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;autoStop&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;hintsOn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const PURPLE = "#8B62E0", DEEP = "#5535A8", TINT = "#F3EEFC", RING = "#DCCCF7";
+
+/* ── Exam variants ───────────────────────────────────────────────────────
+   TEF Canada / TEFAQ  = 2 tâches, both two-way role-plays, scored /450.
+   TCF Canada / TCF Québec / TCF Tout Public = 3 tâches, scored /20:
+     T1 entretien dirigé  2:00 · no prep, no document, the examiner asks about you
+     T2 interaction       5:30 · 2:00 prep on a carte de situation
+     T3 point de vue      4:30 · no prep, monologue — the examiner stays silent
+   Source: PRD §Exam Format · Expression orale and PRD/Audit §E.          */
+
+const TEF_TASKS = [
+  {
+    kicker: "Tâche 1 · section A",
+    title: "Obtenir des informations",
+    consigne: "Vous avez vu cette annonce dans un journal local. Vous téléphonez à l'atelier pour obtenir plus d'informations. Posez une dizaine de questions à votre interlocuteur.",
+    short: "Vous téléphonez à l'atelier pour obtenir des informations. Posez une dizaine de questions.",
+    docLabel: "ANNONCE",
+    doc: "Atelier Le Panier — cours de cuisine française. Petits groupes de six personnes, quatre samedis de suite. Inscription avant le 30 mars.",
+    prep: 60, max: 300, maxLabel: "5:00", got: 222, gotLabel: "3:42",
+    /* Section A: formal role-play — the candidate asks, the examiner answers.
+       These are the examiner's turns, cued off the recording clock. */
+    interaction: true,
+    format: "Jeu de rôle formel avec l'examinateur",
+    turns: [
+      { at: 0, who: "you", text: "Bonjour, je vous appelle au sujet de votre atelier de cuisine." },
+      { at: 14, who: "ex", text: "Bonjour ! Oui, l'atelier Le Panier. Que voulez-vous savoir ?" },
+      { at: 42, who: "you", text: "Posez vos questions : dates, prix, niveau, matériel, nombre de places…" },
+      { at: 96, who: "ex", text: "Les quatre samedis, de 10 h à 13 h. Le matériel est fourni." },
+      { at: 150, who: "you", text: "Relancez : demandez une précision sur ce qu'il vient de dire." },
+      { at: 214, who: "ex", text: "Il reste deux places. Souhaitez-vous que je vous inscrive ?" }
+    ]
+  },
+  {
+    kicker: "Tâche 2 · section B",
+    title: "Présenter et convaincre",
+    consigne: "Votre entreprise envisage de passer à la semaine de quatre jours. Vous êtes favorable au projet. Présentez la situation à un collègue hésitant et convainquez-le de signer la proposition.",
+    short: "Présentez la situation à un collègue hésitant et convainquez-le de signer la proposition.",
+    docLabel: "DOCUMENT",
+    doc: "« La semaine de quatre jours : moins d'heures, autant de travail ? » — note interne, mars 2025.",
+    prep: 60, max: 600, maxLabel: "10:00", got: 485, gotLabel: "8:05",
+    /* Section B: informal role-play — you present the document, then argue with
+       the examiner, who plays the hesitant colleague. Both TEF parts are two-way. */
+    interaction: true,
+    format: "Jeu de rôle informel avec l'examinateur",
+    turns: [
+      { at: 0, who: "you", text: "Présentez le document à votre collègue : de quoi il s'agit, et ce que vous en pensez." },
+      { at: 40, who: "ex", text: "Quatre jours, d'accord, mais on va devoir tout finir en moins de temps, non ?" },
+      { at: 120, who: "you", text: "Répondez à son objection, puis donnez un argument concret." },
+      { at: 240, who: "ex", text: "Et les clients ? Ils appellent le vendredi, eux." },
+      { at: 360, who: "you", text: "Proposez une solution et invitez-le à signer la proposition." },
+      { at: 480, who: "ex", text: "Bon… si l'essai ne dure que trois mois, je veux bien y réfléchir." }
+    ]
+  }
+];
+
+const TCF_TASKS = [
+  {
+    kicker: "Tâche 1 · entretien dirigé",
+    title: "Entretien dirigé",
+    consigne: "Vous vous présentez à l'examinateur. Il vous pose des questions sur vous, votre vie et vos projets. Répondez naturellement : ni document, ni préparation.",
+    short: "Répondez aux questions de l'examinateur sur vous et vos projets.",
+    prep: 0, max: 120, maxLabel: "2:00", got: 118, gotLabel: "1:58",
+    hue: "#1A9E94", pill: "Entretien",
+    format: "Entretien avec l'examinateur · sans préparation",
+    /* No document and no role-play card: the examiner simply asks, in order.
+       The five questions are known up front, so they are shown on the intro
+       and tracked as dots while recording. */
+    interview: {
+      name: "Claire Moreau",
+      role: "Examinatrice · centre agréé FEI",
+      questions: [
+        { at: 0, text: "Bonjour, comment vous appelez-vous et d'où venez-vous ?" },
+        { at: 24, text: "Parlez-moi de la ville où vous habitez." },
+        { at: 48, text: "Que faites-vous comme travail ou comme études ?" },
+        { at: 72, text: "Pourquoi apprenez-vous le français ?" },
+        { at: 96, text: "Quels sont vos projets pour les deux prochaines années ?" }
+      ]
+    }
+  },
+  {
+    kicker: "Tâche 2 · interaction",
+    title: "Interaction",
+    consigne: "Vous tirez une carte de situation. Vous avez 2 minutes pour la préparer, puis vous jouez la situation avec l'examinateur : obtenez les informations et réagissez à ce qu'il dit.",
+    short: "Jouez la situation : obtenez les informations et réagissez.",
+    docLabel: "CARTE DE SITUATION",
+    doc: "Vous voulez inscrire votre fille de 8 ans à une activité sportive à la mairie. Vous téléphonez pour connaître les horaires, le tarif et le matériel nécessaire.",
+    prep: 120, max: 330, maxLabel: "5:30", got: 318, gotLabel: "5:18",
+    hue: "#4A7FE5", pill: "Interaction",
+    interaction: true,
+    format: "Jeu de rôle avec l'examinateur · 2:00 de préparation",
+    turns: [
+      { at: 0, who: "you", text: "Ouvrez l'échange : dites pourquoi vous appelez le service des sports." },
+      { at: 30, who: "ex", text: "Service des sports, bonjour. Pour quelle activité et quel âge ?" },
+      { at: 80, who: "you", text: "Posez vos questions : horaires, tarif, matériel à prévoir." },
+      { at: 150, who: "ex", text: "Le mercredi de 14 h à 16 h. Le tarif dépend du quotient familial." },
+      { at: 220, who: "you", text: "Réagissez à sa réponse et demandez une précision." },
+      { at: 280, who: "ex", text: "Il faut un certificat médical. Je vous réserve une place ?" }
+    ]
+  },
+  {
+    kicker: "Tâche 3 · point de vue",
+    title: "Exprimer un point de vue",
+    consigne: "Vous tirez un sujet. Sans préparation, vous exprimez votre point de vue de façon claire et argumentée pendant 4 minutes 30. Vous parlez seul : l'examinateur n'intervient pas.",
+    short: "Exprimez votre point de vue et justifiez-le. Vous parlez seul.",
+    docLabel: "SUJET TIRÉ",
+    doc: "« Les réseaux sociaux rapprochent-ils vraiment les gens ? » Donnez votre avis et justifiez-le par des exemples concrets.",
+    prep: 0, max: 270, maxLabel: "4:30", got: 254, gotLabel: "4:14",
+    hue: "#8B62E0", pill: "Point de vue",
+    monologue: true,
+    format: "Monologue suivi · sans préparation"
+  }
+];
+
+const EXAMS = {
+  tef: {
+    key: "tef", label: "TEF Canada", short: "TEF · 2 tâches", tasks: TEF_TASKS,
+    head: "TEF Canada · épreuve 4 sur 4",
+    sub: "2 parties · 15 minutes · face à un examinateur",
+    sessionLabel: "Expression orale · 15 min",
+    rules: [
+      { n: "1", text: "Deux sections, 15 minutes en tout. La section A dure 5 minutes, la section B 10 minutes." },
+      { n: "2", text: "Chaque section commence par une minute de découverte du sujet. La prise de notes n'est pas autorisée." },
+      { n: "3", text: "Un examinateur vous fait face et joue le rôle de votre interlocuteur. Vous l'entendez : rien n'est écrit, ni ici ni le jour de l'examen." },
+      { n: "4", text: "Tout est enregistré une seule fois. Il n'y a pas de seconde prise le jour de l'examen." }
+    ],
+    scoreUnit: "NCLC · ESTIMATION", scoreValue: "8", scorePct: 67,
+    scoreTitle: "NCLC 8 · B2 à l'expression orale",
+    scoreSub: "Estimation par l'IA à partir de la transcription, sur les critères officiels. L'argumentation porte la prestation ; l'interaction est à travailler. La prononciation n'est pas évaluée."
+  },
+  tcf: {
+    key: "tcf", label: "TCF Canada", short: "TCF · 3 tâches", tasks: TCF_TASKS,
+    head: "TCF Canada · épreuve 4 sur 4",
+    sub: "3 tâches · environ 12 minutes · face à un examinateur",
+    sessionLabel: "Expression orale · 12 min",
+    rules: [
+      { n: "1", text: "Trois tâches, environ 12 minutes en tout : entretien dirigé 2 minutes, interaction 5 minutes 30, point de vue 4 minutes 30." },
+      { n: "2", text: "Seule la tâche 2 donne une préparation : 2 minutes sur la carte de situation. Les tâches 1 et 3 commencent sans préparation." },
+      { n: "3", text: "La tâche 1 est un entretien : l'examinateur vous pose des questions sur vous. La tâche 3 est un monologue : il n'intervient pas." },
+      { n: "4", text: "Tout est enregistré une seule fois. Il n'y a pas de seconde prise le jour de l'examen." }
+    ],
+    scoreUnit: "NCLC · ESTIMATION", scoreValue: "8", scorePct: 67,
+    scoreTitle: "NCLC 8 · B2 à l'expression orale",
+    scoreSub: "Estimation par l'IA à partir de la transcription, sur les critères officiels. L'argumentation porte la prestation ; l'interaction est à travailler. La prononciation n'est pas évaluée."
+  }
+};
+
+/* Every tâche runs the same intro → (prep) → record → review chain, so the
+   state keys repeat with a task suffix: bare for tâche 1, "2" / "3" after.
+   Tâches without a préparation phase simply have no prep key. */
+function stepsFor(ex) {
+  const out = [{ key: "consignes", label: "Consignes" }];
+  ex.tasks.forEach((t, i) => {
+    const sfx = i === 0 ? "" : String(i + 1), n = "T" + (i + 1) + " · ";
+    out.push({ key: "intro" + sfx, label: n + "intro" });
+    if (t.prep) out.push({ key: "prep" + sfx, label: n + "prépa" });
+    out.push({ key: "record" + sfx, label: n + "rec" });
+    out.push({ key: "review" + sfx, label: n + "review" });
+  });
+  return out.concat([
+    { key: "submit", label: "Submit confirm" },
+    { key: "pending", label: "With the AI" },
+    { key: "scored", label: "Score ready" },
+    { key: "exitPrep", label: "Exit · avant l'enregistrement" },
+    { key: "exitRecord", label: "Exit · recording" }
+  ]);
+}
+
+const BASE_LABELS = {
+  intro: "intro — consigne et document, avant le chronomètre",
+  prep: "préparation — le compte à rebours avant l'enregistrement",
+  record: "recording — waveform live, compte-up, arrêt à la limite",
+  review: "enregistré — écoute seule, pas de seconde prise en test blanc"
+};
+const FLAT_LABELS = {
+  consignes: "Consignes — the on-screen instructions before the examiner call",
+  submit: "Submit confirm — every recording listed, async warning",
+  pending: "Submitted — AI scoring, notification when it lands",
+  scored: "Score ready — AI scoring finished, four criteria in",
+  exitPrep: "Exit sheet before the recording starts",
+  exitRecord: "Exit sheet during a recording"
+};
+
+const HINTS = [
+  "Je voudrais savoir si…", "Pourriez-vous me préciser…", "Est-ce qu'il reste des places ?",
+  "Combien de temps dure…", "En ce qui concerne le tarif…"
+];
+
+const FLAGS = [
+  { key: "micDenied", label: "Microphone blocked", def: false, screen: "record",
+    on: "Recording screen opens with the red permission banner, dead waveform and an Open settings CTA.",
+    off: "Mic granted — the waveform is live and the stop button is armed." },
+  { key: "autoStop", label: "Auto-stop at the limit", def: false, screen: "record",
+    on: "The clock has hit the maximum: recording stopped itself and the CTA saves the take.",
+    off: "The recording is still running; you stop it yourself." },
+  { key: "hintsOn", label: "Practice hints", def: false, screen: "prep",
+    on: "Préparation adds a card of expressions utiles — practice mode only.",
+    off: "Prompt only, same silence as the exam." }
+];
+
+const WAVE = [12,26,44,31,18,52,38,22,47,60,35,19,28,51,42,23,15,33,58,46,27,20,39,55,30,17,44,36,25,49,62,34,21,29,41,24,16,37,53,26];
+
+class Component extends DCLogic {
+  state = { screen: null, mode: null, flags: {}, task: 0, prepLeft: null, rec: 0, tick: 0, secs: null, playProg: null };
+  /* the épreuve clock: 15 min on the TEF, ~12 on the TCF */
+  sessionSecs() { return this.examKey() === "tcf" ? 712 : 872; }
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      const s = this.base(this.cur());
+      if (s === "pending") this.scheduleLand();
+      else if (this.landQueued) { this.landQueued = false; clearTimeout(this.landWait); clearTimeout(this.landTimer); }
+      this.setState(st => {
+        const next = { tick: st.tick + 1 };
+        if (s === "prep" && st.prepLeft > 0) next.prepLeft = st.prepLeft - 1;
+        if (s === "record" && !this.flag("micDenied") && !this.flag("autoStop")) {
+          next.rec = Math.min(this.tasks()[this.taskIdx()].max, st.rec + 1);
+        }
+        if (st.playProg !== null && st.playProg !== undefined) {
+          const p = st.playProg + 4;
+          next.playProg = p >= 100 ? null : p;
+        }
+        if (s !== "pending" && s !== "scored" && s !== "intro") next.secs = Math.max(0, (st.secs === null ? this.sessionSecs() : st.secs) - 1);
+        return next;
+      });
+    }, 260);
+  }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.landTimer); clearTimeout(this.landWait); }
+
+  land() {
+    if (this.state.landing) return;
+    this.setState({ landing: true });
+    this.landTimer = setTimeout(() => this.setState({ screen: "scored", landing: false }), 1100);
+  }
+
+  // pending resolves by itself — the wait is the state, not an affordance
+  scheduleLand() {
+    if (this.landQueued) return;
+    this.landQueued = true;
+    this.landWait = setTimeout(() => this.land(), 3200);
+  }
+
+  cur() { return this.state.screen || this.props.startStep || "intro"; }
+  qExam() {
+    if (this._qe === undefined) {
+      const v = new URLSearchParams(location.search).get("exam");
+      this._qe = v === "tcf" || v === "tef" ? v : null;
+    }
+    return this._qe;
+  }
+  examKey() { return this.state.exam || this.qExam() || this.props.exam || "tef"; }
+  ex() { return EXAMS[this.examKey()] || EXAMS.tef; }
+  tasks() { return this.ex().tasks; }
+  steps() { return stepsFor(this.ex()); }
+  /* Strip the task suffix to get the screen; the exit sheets sit over one. */
+  base(k) {
+    if (k === "exitPrep") return "prep";
+    if (k === "exitRecord") return "record";
+    const m = /^(intro|prep|record|review)([23])?$/.exec(k || "");
+    return m ? m[1] : k;
+  }
+  idxOf(k) {
+    const m = /^(intro|prep|record|review)([23])?$/.exec(k || "");
+    if (!m) return null;
+    return m[2] ? Number(m[2]) - 1 : 0;
+  }
+  sfx(i) { return i === 0 ? "" : String(i + 1); }
+  st(b, i) { return b + this.sfx(i === undefined ? this.taskIdx() : i); }
+  /* intro leads to prep only where the tâche has one — TCF T1 and T3 do not. */
+  afterIntro() { const i = this.taskIdx(); return this.st(this.tasks()[i].prep ? "prep" : "record", i); }
+  jumpKey(b) {
+    if (b !== "prep") return b;
+    const i = this.tasks().map((t, n) => t.prep ? n : -1).filter(n => n >= 0)[0] || 0;
+    return this.st("prep", i);
+  }
+  /* PracticeConfig (§9) is the only door into an engine and it knows the mode,
+     so it carries it as ?mode=practice|mock. Without this every route ran mock. */
+  qMode() {
+    if (this._qm === undefined) {
+      const v = new URLSearchParams(location.search).get("mode");
+      this._qm = v === "practice" || v === "mock" ? v : null;
+    }
+    return this._qm;
+  }
+  mode() { return this.state.mode || this.qMode() || this.props.mode || "mock"; }
+  taskIdx() { return Math.min(this.state.task || 0, this.tasks().length - 1); }
+  flag(k) {
+    const f = this.state.flags[k];
+    if (f !== undefined) return f;
+    if (this.props[k] !== undefined && this.props[k] !== null) return this.props[k];
+    return FLAGS.filter(x => x.key === k)[0].def;
+  }
+  goto(k) {
+    const i = this.idxOf(k);
+    const idx = i === null ? this.taskIdx() : i;
+    const bs = this.base(k);
+    const next = { screen: k, playProg: null, task: idx };
+    if (bs === "prep") next.prepLeft = this.tasks()[idx].prep;
+    if (bs === "record") next.rec = 0;
+    this.setState(next);
+  }
+  fmt(n) {
+    const m = Math.floor(n / 60), s = n % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  renderVals() {
+    const raw = this.cur();
+    const exit = raw === "exitPrep" || raw === "exitRecord";
+    const screen = this.base(raw);
+    const practice = this.mode() === "practice";
+    const ex = this.ex();
+    const TASKS = ex.tasks;
+    const total = TASKS.length;
+    const t = TASKS[this.taskIdx()];
+    const hue = t.hue || PURPLE;
+    const steps = this.steps();
+    const isLast = this.taskIdx() === total - 1;
+    const secsNow = this.state.secs === null ? this.sessionSecs() : this.state.secs;
+    const dark = screen === "consignes" || screen === "intro" || screen === "record" || screen === "pending" || screen === "scored";
+    const CRIT = [
+      { label: "Présentation des faits", v: "B2" },
+      { label: "Qualité de l'argumentation", v: "B2" },
+      { label: "Qualité de l'interaction", v: "B1" },
+      { label: "Lexique", v: "B2" }
+    ];
+
+    const landing = !!this.state.landing;
+    const micDenied = this.flag("micDenied");
+    const autoStop = this.flag("autoStop");
+    const rec = autoStop ? t.max : micDenied ? 0 : this.state.rec;
+    const prepLeft = this.state.prepLeft === null || this.state.prepLeft === undefined ? t.prep : this.state.prepLeft;
+    const prepPct = 100 - Math.round(100 * prepLeft / t.prep);
+    const recPct = Math.round(100 * rec / t.max);
+
+    // recording bars — live while running, flat when blocked
+    const live = screen === "record" && !micDenied && !autoStop;
+    const bars = WAVE.map((h, i) => {
+      const done = (i / WAVE.length) * 100 <= recPct;
+      const wobble = live && done ? 0.55 + 0.45 * Math.abs(Math.sin((this.state.tick + i * 1.7) / 2.6)) : 1;
+      const height = micDenied ? 6 : Math.max(6, (done ? h : h * 0.35) * wobble);
+      return { style: "flex:1;min-width:2px;border-radius:100px;transition:height .2s ease;height:" + height + "%;background:" + (micDenied ? "rgba(255,255,255,.12)" : done ? PURPLE : "rgba(255,255,255,.16)") };
+    });
+
+    const playProg = this.state.playProg;
+    const playing = playProg !== null && playProg !== undefined;
+    const playBars = WAVE.slice(0, 34).map((h, i) => {
+      const done = playing && (i / 34) * 100 <= playProg;
+      return { style: "flex:1;min-width:2px;border-radius:100px;transition:background .18s ease;height:" + Math.max(10, h) + "%;background:" + (done ? DEEP : RING) };
+    });
+
+    const cta = {};
+    if (screen === "consignes") {
+      cta.label = "Commencer l'épreuve"; cta.icon = "IconArrowRight";
+      cta.note = ex.key === "tcf"
+        ? "L'examinateur est prêt — la tâche 1 commence tout de suite, sans préparation."
+        : "L'examinateur est prêt — la section A commence par une minute de découverte du document.";
+      cta.go = () => this.goto("intro");
+    } else if (screen === "intro") {
+      cta.label = t.prep ? "Commencer la préparation" : "Commencer l'enregistrement";
+      cta.icon = t.prep ? "IconArrowRight" : "IconBulkMic";
+      cta.note = t.prep
+        ? "Le chronomètre démarre à l'écran suivant. " + this.fmt(t.prep) + " de préparation, puis l'enregistrement démarre tout seul."
+        : "Cette tâche n'a pas de préparation. Le microphone s'ouvre à l'écran suivant — " + t.maxLabel + " de parole.";
+      cta.go = () => this.goto(this.afterIntro());
+    } else if (screen === "prep") {
+      cta.label = "Je suis prêt · enregistrer";
+      cta.icon = "IconBulkMic";
+      cta.note = "L'enregistrement démarre tout seul à la fin de la préparation.";
+      cta.go = () => this.goto(this.st("record"));
+    } else if (screen === "record") {
+      if (micDenied) {
+        cta.label = "Ouvrir les réglages du microphone";
+        cta.icon = "IconDuotoneAlertCircle";
+        cta.note = "Rien n'est enregistré tant que le microphone n'est pas autorisé.";
+        cta.go = () => {};
+      } else if (autoStop) {
+        cta.label = "Enregistrer et continuer";
+        cta.icon = "IconCheck";
+        cta.note = "Temps écoulé — l'enregistrement s'est arrêté à " + t.maxLabel + ".";
+        cta.go = () => this.goto(this.st("review"));
+      } else {
+        cta.label = "Arrêter et enregistrer";
+        cta.icon = "IconPause";
+        cta.disabled = rec < 3;
+        cta.note = rec < 3 ? "Parlez quelques secondes avant de pouvoir arrêter." : "Une fois arrêté, cet enregistrement est définitif.";
+        cta.go = () => { if (rec >= 3) this.goto(this.st("review")); };
+      }
+    } else if (screen === "review") {
+      const nxt = isLast ? null : TASKS[this.taskIdx() + 1];
+      cta.label = isLast ? "Vérifier et envoyer" : "Passer à la tâche " + (this.taskIdx() + 2);
+      cta.icon = "IconArrowRight";
+      cta.note = isLast
+        ? "Rien n'a encore été envoyé à l'IA."
+        : "Tâche " + (this.taskIdx() + 2) + " · " + nxt.maxLabel + " — " + nxt.title.toLowerCase() + ".";
+      cta.go = () => this.goto(isLast ? "submit" : this.st("intro", this.taskIdx() + 1));
+    } else if (screen === "submit") {
+      cta.label = "Envoyer à la correction";
+      cta.icon = "IconSolidRoundedFileCheck";
+      cta.note = "Action irréversible — les enregistrements sont définitifs après envoi.";
+      cta.go = () => this.goto("pending");
+    } else if (screen === "pending") {
+      /* In a mock session the AI keeps scoring in the background while the
+         next épreuve starts — the wait is not a place to stop. */
+      /* Speaking is the last épreuve of the sitting: closing it closes the
+         session and releases every score at once. */
+      const inSession = !!(window.MockSession && MockSession.active());
+      cta.label = inSession ? "Voir le résultat de la session" : "Voir l'historique";
+      cta.icon = inSession ? "IconSolidRoundedFileCheck" : "IconOutlineRoundedTransactionHistory";
+      cta.note = inSession ? "Les quatre épreuves sont terminées — les scores sont publiés ensemble." : "Retour à l'accueil";
+      if (inSession) cta.go = () => MockSession.handoff("speaking");
+      if (!inSession) cta.go = () => { __go("TestHistory.dc.html"); };
+      cta.noteHref = "Home.dc.html";
+    } else {
+      cta.label = "Voir le résultat complet";
+      cta.icon = "IconSolidRoundedFileCheck";
+      cta.note = "Le retour par tâche et les notes de l'IA se trouvent dans la correction.";
+      cta.go = () => { __go("TestReview.dc.html"); };
+    }
+
+    const ctaBg = cta.disabled ? (dark ? "rgba(255,255,255,.12)" : "#E5E7EB") : (dark ? "#FFFFFF" : "#2E1A3B");
+    const ctaInk = cta.disabled ? (dark ? "rgba(255,255,255,.42)" : "#9CA3AF") : (dark ? "#1E1226" : "#FFFFFF");
+
+    /* Which examiner/candidate turn the clock is on, for the part-A role-play */
+    const turns = t.turns || [];
+    const curTurn = turns.filter(x => x.at <= this.state.rec).slice(-1)[0] || turns[0] || null;
+    const nextTurn = turns.filter(x => x.at > this.state.rec)[0] || null;
+
+    const sheetDark = raw === "exitRecord";
+    const taskNo = this.taskIdx() + 1;
+
+    return {
+      stateLabel: FLAT_LABELS[raw] || ("Tâche " + (this.idxOf(raw) + 1) + " " + (BASE_LABELS[screen] || "")),
+      frameStyle: "position:relative;width:393px;height:852px;overflow:hidden;flex-shrink:0;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);background:" +
+        (dark ? "linear-gradient(170deg,#221A2E 0%,#1E1226 60%,#100D0A 100%)" : "linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 60%)"),
+
+      isIntro: screen === "intro",
+      isPrep: screen === "prep",
+      isRecord: screen === "record",
+      isReview: screen === "review",
+      isSubmit: screen === "submit",
+      isPending: screen === "pending",
+      isScored: screen === "scored",
+
+      // score ready
+      scoreRingBg: "conic-gradient(from -90deg," + PURPLE + " 0deg " + Math.round((practice ? 67 : ex.scorePct) * 3.6) + "deg,rgba(255,255,255,.12) " + Math.round((practice ? 67 : ex.scorePct) * 3.6) + "deg 360deg)",
+      scoreValue: practice ? "B2" : ex.scoreValue,
+      scoreUnit: practice ? "NIVEAU · ESTIMATION" : ex.scoreUnit,
+      scoreTitle: practice ? "B2 à l'expression orale" : ex.scoreTitle,
+      scoreSub: practice
+        ? "Une seule tâche : un niveau CECR estimé, pas de NCLC. L'argumentation porte la prestation ; l'interaction est à travailler."
+        : ex.scoreSub,
+      scoreCriteria: CRIT.map(c => ({
+        label: c.label,
+        value: c.v,
+        fillStyle: "height:100%;width:" + Math.round((["A1","A2","B1","B2","C1","C2"].indexOf(c.v) + 1) / 6 * 100) + "%;border-radius:100px;background:linear-gradient(90deg," + PURPLE + "," + DEEP + ")"
+      })),
+
+      // task content
+      tKicker: t.kicker,
+      tTitle: t.title,
+      tConsigne: t.consigne,
+      tConsigneShort: t.short,
+      tDocLabel: t.docLabel,
+      tDoc: t.doc,
+      tMaxLabel: t.maxLabel,
+      tGotLabel: t.gotLabel,
+      hasDoc: !!t.doc,
+      hasInterview: !!t.interview,
+      ivName: t.interview ? t.interview.name : "",
+      ivRole: t.interview ? t.interview.role : "",
+      ivInitials: t.interview ? t.interview.name.split(" ").map(w => w[0]).join("") : "",
+      ivAvatarStyle: "width:44px;height:44px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:14px;font-weight:700;letter-spacing:.3px;color:#fff;background:" + hue,
+      ivQuestions: (t.interview ? t.interview.questions : []).map((q, i) => ({
+        n: String(i + 1), text: q.text,
+        nStyle: "width:20px;height:20px;flex-shrink:0;margin-top:1px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff;background:" + hue
+      })),
+      introMeta: [
+        t.prep
+          ? { label: "Préparation · découverte du sujet", value: this.fmt(t.prep) }
+          : { label: "Préparation", value: "Aucune — comme à l'examen" },
+        { label: "Temps de parole", value: t.maxLabel + " max" },
+        { label: "Format", value: t.format },
+        { label: "Réenregistrement", value: practice ? "Autorisé en entraînement" : "Non autorisé" }
+      ].map((m, i, a) => Object.assign({}, m, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:12px 0" + (i < a.length - 1 ? ";border-bottom:1px solid rgba(255,255,255,.08)" : "")
+      })),
+
+      // prep
+      prepClock: this.fmt(prepLeft),
+      prepRingStyle: "width:76px;height:76px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:conic-gradient(from -90deg," +
+        PURPLE + " 0deg " + (prepPct * 3.6) + "deg," + RING + " " + (prepPct * 3.6) + "deg 360deg)",
+      prepNote: prepLeft > 0
+        ? "Lisez la consigne et préparez vos questions. L'enregistrement démarre automatiquement à 0:00."
+        : "La préparation est terminée — le microphone s'ouvre maintenant.",
+      showHints: practice && this.flag("hintsOn"),
+      hints: HINTS.map(h => ({ text: h })),
+
+      // record
+      isConsignes: screen === "consignes",
+      examHead: ex.head,
+      examSub: ex.sub,
+      consigneRules: ex.rules,
+      /* both parts — the examiner's side of the role-play */
+      hasInterlocutor: !!t.interaction && !micDenied,
+      /* TCF T1 — the five questions are known, so the tracker shows which
+         ones the clock has already reached. */
+      hasQDots: !!t.interview && !micDenied,
+      qDotsLabel: t.interview
+        ? "Question " + Math.min(t.interview.questions.length, t.interview.questions.filter(q => q.at <= rec).length || 1) + " sur " + t.interview.questions.length
+        : "",
+      qDots: (t.interview ? t.interview.questions : []).map((q, i, arr) => {
+        const done = arr.filter(x => x.at <= rec).length - 1 > i;
+        const active = arr.filter(x => x.at <= rec).length - 1 === i;
+        return { style: "flex:1;height:6px;border-radius:100px;transition:background .25s ease;background:" +
+          (done ? hue : active ? "#fff" : "rgba(255,255,255,.18)") };
+      }),
+      qCurrent: t.interview
+        ? (t.interview.questions.filter(q => q.at <= rec).slice(-1)[0] || t.interview.questions[0]).text
+        : "",
+      qNext: t.interview
+        ? (t.interview.questions.filter(q => q.at > rec)[0]
+            ? "Question suivante à " + this.fmt(t.interview.questions.filter(q => q.at > rec)[0].at)
+            : "Dernière question — concluez")
+        : "",
+      hasMonologue: !!t.monologue && !micDenied,
+      accentStyle: "position:relative;display:flex;flex-direction:column;gap:6px;padding:15px 16px;border-radius:20px;background:" +
+        hue + "29;box-shadow:inset 0 0 0 1px " + hue + "66",
+      accentInk: hue,
+      showTurnText: practice,
+      turnAudioLabel: curTurn && curTurn.who === "ex" ? "L'examinateur parle" : "À vous de parler",
+      turnMeter: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => {
+        const live = curTurn && curTurn.who === "ex";
+        const h = live ? 4 + ((i * 7 + this.state.tick * 5) % 17) : 3;
+        return { style: "flex:1;border-radius:100px;background:" + (live ? "#CDB8F5" : "rgba(255,255,255,.2)") + ";height:" + h + "px" };
+      }),
+      turnKicker: curTurn && curTurn.who === "ex" ? "L'EXAMINATEUR" : "À VOUS",
+      turnKickerLine: practice ? "" : (curTurn && curTurn.who === "ex" ? "L'examinateur parle" : "À vous de parler"),
+      turnText: curTurn ? curTurn.text : "",
+      turnStyle: "position:relative;display:flex;flex-direction:column;gap:6px;padding:15px 16px;border-radius:20px;background:" +
+        (curTurn && curTurn.who === "ex" ? "rgba(139,98,224,.16)" : "rgba(255,255,255,.05)") +
+        ";box-shadow:inset 0 0 0 1px " + (curTurn && curTurn.who === "ex" ? "rgba(220,204,247,.4)" : "rgba(255,255,255,.1)"),
+      turnKickerInk: curTurn && curTurn.who === "ex" ? "#CDB8F5" : "rgba(255,255,255,.45)",
+      turnNext: nextTurn ? "Prochaine réplique à " + this.fmt(nextTurn.at) : "Dernière réplique — concluez l'échange",
+      micDenied: micDenied,
+      recClock: this.fmt(rec),
+      recClockStyle: "font-size:44px;font-weight:700;line-height:48px;letter-spacing:-1.6px;font-variant-numeric:tabular-nums;color:" +
+        (micDenied ? "rgba(255,255,255,.35)" : "#fff"),
+      recStateLabel: micDenied ? "AUCUN SIGNAL" : autoStop ? "ARRÊT À LA LIMITE" : "ENREGISTREMENT",
+      recStateInk: micDenied ? "#FCA5A5" : autoStop ? "#F9BD48" : "#C0A6F5",
+      bars: bars,
+      recFillStyle: "height:100%;width:" + (micDenied ? 0 : recPct) + "%;border-radius:100px;transition:width .25s linear;background:linear-gradient(90deg," + PURPLE + "," + DEEP + ")",
+      recLeftLabel: micDenied ? "0:00 enregistré" : autoStop ? "Durée maximale atteinte" : this.fmt(t.max - rec) + " restant",
+      recHalo: live,
+      recTap: () => { if (!micDenied && rec >= 3) this.goto(this.st("review")); },
+      recBtnStyle: "position:relative;width:84px;height:84px;border-radius:9999px;display:flex;justify-content:center;align-items:center;cursor:" +
+        (micDenied ? "default" : "pointer") + ";background:" + (micDenied ? "rgba(255,255,255,.08)" : "#fff") +
+        ";box-shadow:" + (micDenied ? "inset 0 0 0 1px rgba(255,255,255,.16)" : "0 14px 34px -14px rgba(139,98,224,.9)"),
+      recBtnInnerStyle: micDenied
+        ? "width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.24)"
+        : "width:28px;height:28px;border-radius:8px;background:#DC2626",
+      recHint: micDenied
+        ? "Le bouton d'arrêt est inactif tant que le microphone est bloqué."
+        : autoStop
+          ? "L'enregistrement a été sauvegardé automatiquement à la limite. Rien n'est perdu."
+          : "Touchez le carré pour arrêter. L'enregistrement est sauvegardé dès l'arrêt.",
+
+      // review
+      reviewTitle: "Tâche " + taskNo + " enregistrée · " + t.gotLabel,
+      playTap: () => this.setState({ playProg: playing ? null : 0 }),
+      playIcon: playing ? "IconPause" : "IconPlay",
+      playBtnStyle: "width:52px;height:52px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;cursor:pointer;color:#fff;background:linear-gradient(145deg," +
+        PURPLE + " 0%," + DEEP + " 100%);box-shadow:0 10px 22px -12px rgba(139,98,224,.9)",
+      playBars: playBars,
+      playAt: this.fmt(Math.round(t.got * (playing ? playProg : 0) / 100)),
+      finalNote: practice
+        ? "L'entraînement conserve la dernière prise. Un réenregistrement la remplace, et seule la prise finale est envoyée à l'IA."
+        : "Cet enregistrement est définitif. Un test blanc n'autorise qu'une prise par tâche, exactement comme à l'examen.",
+      canRerecord: practice,
+      rerecordTap: () => this.goto(this.st("record")),
+
+      // submit
+      submitTitle: "Envoyer " + (total === 2 ? "les deux" : "les trois") + " enregistrements à la correction",
+      submitRows: TASKS.map((tt, i) => ({
+        name: "Tâche " + (i + 1) + " · " + tt.title,
+        meta: tt.kicker.split(" · ")[1] + " · limite " + tt.maxLabel,
+        dur: tt.gotLabel
+      })),
+      criteria: ["Présentation des faits", "Argumentation", "Interaction", "Lexique"].map(c => ({ text: c })),
+
+      // pending
+      aiRingStyle: "position:relative;width:150px;height:150px;border-radius:9999px;display:flex;justify-content:center;align-items:center" +
+        (landing ? ";animation:spLand .6s cubic-bezier(.2,.8,.25,1) both" : ""),
+      aiSpinStyle: "position:absolute;inset:0;border-radius:9999px;will-change:transform;transition:background .3s ease;background:" +
+        (landing
+          ? "conic-gradient(#4ADE80 0deg 360deg)"
+          : "conic-gradient(" + PURPLE + " 0deg 90deg,rgba(255,255,255,.1) 90deg 360deg);animation:spSpin 1.6s linear infinite"),
+      aiGlyph: landing ? "IconCheck" : "IconSparkles",
+      aiLabel: landing ? "TERMINÉ" : "CORRECTION",
+      aiTitle: landing ? "Le score vient d'arriver" : "Les " + (total === 2 ? "deux" : "trois") + " tâches sont chez l'IA",
+      aiSub: landing
+        ? "Les " + (total === 2 ? "deux" : "trois") + " tâches sont revenues de l'IA. Ouverture du résultat…"
+        : "Environ 5 minutes. Vous n'êtes pas obligé de rester ici : nous vous prévenons dès que le score est prêt.",
+      pendingRows: [
+        { label: "Envoyé", value: total + " tâches · 11:47" },
+        { label: "Statut dans l'historique", value: "Correction IA" },
+        { label: "Attente estimée", value: "environ 5 min" }
+      ].map((p, i, a) => Object.assign({}, p, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:12px 0" + (i < a.length - 1 ? ";border-bottom:1px solid rgba(255,255,255,.08)" : "")
+      })),
+
+      // chrome
+      chromeStyle: "position:absolute;left:0;right:0;top:0;z-index:9;padding-bottom:" + (screen === "prep" || screen === "review" || screen === "submit" ? "12px" : "0") + ";background:" +
+        (dark ? "linear-gradient(180deg,rgba(30,18,38,.92) 0%,rgba(30,18,38,0) 100%)" : "linear-gradient(180deg,rgba(248,243,247,.96) 0%,rgba(248,243,247,.86) 70%,rgba(248,243,247,0) 100%)") +
+        ";backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)",
+      barInk: dark ? "#FFFFFF" : "#111827",
+      chromeTitle: screen === "pending" || screen === "scored" ? "" : screen === "submit" ? "Envoi · " + total + " tâches" : "Tâche " + taskNo + " sur " + total,
+      chromeTitleStyle: "flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:" +
+        (dark ? "rgba(255,255,255,.85)" : "#111827"),
+      hasClose: screen !== "pending" && screen !== "scored",
+      closeTap: () => this.goto(screen === "record" ? "exitRecord" : "exitPrep"),
+      closeStyle: "width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;flex-shrink:0;cursor:pointer;color:" +
+        (dark ? "#fff" : "#111827"),
+      hasRecDot: screen === "record",
+      recDotStyle: "display:flex;align-items:center;gap:7px;height:32px;padding:0 12px 0 10px;border-radius:100px;flex-shrink:0;background:" +
+        (micDenied ? "rgba(220,38,38,.16)" : "rgba(255,255,255,.1)") + ";box-shadow:inset 0 0 0 1px " +
+        (micDenied ? "rgba(252,165,165,.5)" : "rgba(255,255,255,.16)") + ";color:" + (micDenied ? "#FECACA" : "#fff"),
+      recDotInnerStyle: "width:8px;height:8px;border-radius:9999px;background:" + (micDenied ? "#FCA5A5" : "#DC2626") +
+        (live ? ";animation:spPulse 1.4s ease-in-out infinite" : ""),
+      recDotLabel: micDenied ? "OFF" : autoStop ? "FINI" : "REC",
+      hasTimer: screen !== "pending" && screen !== "scored",
+      clock: this.fmt(this.state.secs === null ? this.sessionSecs() : this.state.secs),
+      timerStyle: "display:flex;align-items:center;height:32px;padding:0 12px;border-radius:100px;flex-shrink:0;background:" +
+        (dark ? "rgba(255,255,255,.1)" : secsNow < 300 ? "#FEF2F2" : "#F5EEF3") + ";box-shadow:inset 0 0 0 1px " +
+        (dark ? "rgba(255,255,255,.16)" : secsNow < 300 ? "#FBD5D5" : "#E8DFE6") + ";color:" +
+        (dark ? "#fff" : secsNow < 300 ? "#B91C1C" : "#374151"),
+
+      /* TCF colour-codes its three tâches, so the chrome carries done /
+         active / future pills instead of one undifferentiated bar. */
+      hasPills: total > 2 && screen !== "pending" && screen !== "scored" && screen !== "consignes",
+      pills: TASKS.map((tt, i) => {
+        const done = i < this.taskIdx() || screen === "submit";
+        const active = i === this.taskIdx() && screen !== "submit";
+        return {
+          label: tt.pill || "Tâche " + (i + 1),
+          style: "flex:1;min-width:0;display:flex;align-items:center;justify-content:center;height:26px;padding:0 8px;border-radius:100px;font-size:10.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
+            (active ? "background:" + tt.hue + ";color:#fff"
+             : done ? "background:" + tt.hue + "33;color:" + tt.hue + ";box-shadow:inset 0 0 0 1px " + tt.hue + "55"
+             : dark ? "background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)" : "background:#F5EEF3;color:#857789")
+        };
+      }),
+      hasProgress: total === 2 && (screen === "prep" || screen === "review" || screen === "submit"),
+      trackBg: "#EFE3EC",
+      progressFillStyle: "height:100%;width:" + (screen === "submit" ? 100 : screen === "review" ? (taskNo === 1 ? 50 : 90) : (taskNo === 1 ? 20 : 62)) +
+        "%;border-radius:100px;background:linear-gradient(90deg," + PURPLE + "," + DEEP + ")",
+      progressInk: "#857789",
+      progressLeft: screen === "submit" ? "Deux tâches enregistrées" : "Tâche " + taskNo + " sur " + total,
+      progressRight: screen === "submit" ? "Prêt à envoyer" : screen === "review" ? "Enregistré" : ex.sessionLabel,
+
+      // footer
+      fadeStyle: "position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg," +
+        (dark
+          ? "rgba(17,24,39,0) 0%,rgba(30,18,38,.72) 42%,rgba(30,18,38,.96) 78%,#100D0A 100%"
+          : "rgba(255,255,255,0) 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,.96) 78%,#fff 100%") +
+        ");backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%)",
+      ctaLabel: cta.label,
+      ctaIcon: cta.icon,
+      ctaHasIcon: true,
+      ctaTap: cta.go,
+      ctaStyle: "position:relative;pointer-events:" + (cta.disabled ? "none" : "auto") +
+        ";display:flex;justify-content:center;align-items:center;gap:9px;height:52px;padding:0 18px;border-radius:100px;cursor:pointer;user-select:none;transition:background .2s ease;background:" +
+        ctaBg + ";color:" + ctaInk + (cta.disabled ? "" : ";box-shadow:0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1)"),
+      ctaNote: cta.note,
+      noteTap: () => { if (cta.noteTapOverride) cta.noteTapOverride(); else if (cta.noteHref) __go(cta.noteHref); },
+      ctaNoteStyle: "font-size:12.5px;font-weight:500;line-height:17px;text-align:center;text-wrap:pretty;" +
+        (cta.noteHref || cta.noteTapOverride ? "cursor:pointer;text-decoration:underline;text-underline-offset:3px;" : "") + "color:" +
+        (dark ? "rgba(255,255,255,.55)" : "#6E5F78"),
+
+      // exit sheet
+      showExit: exit,
+      dismissExit: () => this.goto(this.st(sheetDark ? "record" : (t.prep ? "prep" : "intro"))),
+      sheetStyle: "position:relative;display:flex;flex-direction:column;gap:18px;padding:14px 20px 26px;border-radius:28px 28px 0 0;animation:spSheet .28s ease both;background:" +
+        (sheetDark ? "#1B1520" : "#FFFFFF") + ";box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)",
+      sheetGrabStyle: "width:38px;height:4px;border-radius:100px;margin:0 auto 4px;background:" + (sheetDark ? "rgba(255,255,255,.22)" : "#E8DFE6"),
+      sheetTitleInk: sheetDark ? "#FFFFFF" : "#111827",
+      sheetBodyInk: sheetDark ? "rgba(255,255,255,.55)" : "#5E4E69",
+      sheetTitle: sheetDark ? "Arrêter et perdre cet enregistrement ?" : "Quitter avant d'enregistrer ?",
+      sheetBody: sheetDark
+        ? "Vous êtes à " + this.fmt(rec) + " de la tâche " + taskNo + ". Quitter maintenant supprime cet enregistrement : aucune prise partielle n'est conservée."
+        : "Rien n'a encore été enregistré pour la tâche " + taskNo + ". La tentative est enregistrée comme inachevée et la préparation recommence à votre retour.",
+      sheetHasProgress: !sheetDark,
+      sheetRows: [
+        { label: "Enregistré", value: (taskNo - 1) + (taskNo === 1 ? " tâche sur " : " tâches sur ") + total },
+        { label: "Tâche en cours", value: "Tâche " + taskNo + " · " + t.title },
+        { label: "Temps restant", value: this.fmt(secsNow) }
+      ].map((r, i, a) => Object.assign({}, r, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:11px 0" + (i < a.length - 1 ? ";border-bottom:1px solid #F5EEF3" : "")
+      })),
+      sheetPrimary: sheetDark ? "Poursuivre l'enregistrement" : "Rester et préparer",
+      sheetPrimaryStyle: "display:flex;justify-content:center;align-items:center;height:52px;border-radius:100px;cursor:pointer;user-select:none;font-size:15px;font-weight:600;background:" +
+        (sheetDark ? "#FFFFFF" : "#2E1A3B") + ";color:" + (sheetDark ? "#1E1226" : "#FFFFFF"),
+      sheetSecondary: sheetDark ? "Supprimer et quitter" : "Enregistrer et quitter",
+      sheetSecondaryStyle: "display:flex;justify-content:center;align-items:center;height:44px;border-radius:100px;font-size:14px;font-weight:600;color:" +
+        (sheetDark ? "#F0A0A0" : "#B4451F"),
+      sheetNote: "La reprise est gratuite.",
+
+      // review chrome
+      steps: steps.map(s => ({
+        label: s.label,
+        go: () => this.goto(s.key),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (s.key === raw ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      })),
+      exams: [EXAMS.tef, EXAMS.tcf].map(e => ({
+        label: e.short,
+        /* switching variant resets to the consignes: the step keys differ */
+        go: () => this.setState({ exam: e.key, screen: "consignes", task: 0, rec: 0, prepLeft: null, playProg: null, secs: e.key === "tcf" ? 712 : 872 }),
+        style: "font-size:12px;font-weight:600;border-radius:100px;padding:6px 13px;cursor:pointer;user-select:none;" +
+          (this.examKey() === e.key ? "background:#6A2A5F;color:#fff" : "background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6")
+      })),
+      modes: [
+        { key: "mock", label: "Mock test" },
+        { key: "practice", label: "Practice" }
+      ].map(m => ({
+        label: m.label,
+        go: () => this.setState({ mode: m.key, playProg: null }),
+        style: "font-size:12px;font-weight:600;border-radius:100px;padding:6px 13px;cursor:pointer;user-select:none;" +
+          (this.mode() === m.key ? "background:#6A2A5F;color:#fff" : "background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6")
+      })),
+      flags: FLAGS.map(f => {
+        const on = this.flag(f.key);
+        const toggle = () => this.setState(s => ({ flags: Object.assign({}, s.flags, { [f.key]: !on }) }));
+        return {
+          label: f.label, screenLabel: (steps.filter(s => s.key === this.jumpKey(f.screen))[0] || { label: f.screen }).label,
+          onText: f.on, offText: f.off, toggle: toggle,
+          goScreen: () => this.goto(this.jumpKey(f.screen)),
+          rowStyle: "display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:" +
+            (on ? "rgba(255,255,255,.78)" : "rgba(255,255,255,.42)") + ";box-shadow:inset 0 0 0 1px " + (on ? "#D9CCD6" : "#D8CBD5"),
+          trackStyle: "width:38px;height:22px;border-radius:100px;flex-shrink:0;padding:2px;cursor:pointer;display:flex;justify-content:" +
+            (on ? "flex-end" : "flex-start") + ";background:" + (on ? "#2E1A3B" : "#D9CCD6"),
+          knobStyle: "width:18px;height:18px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#2E1A3B" : "#EFE3EC") + ";color:" + (on ? "#fff" : "#857789"),
+          offTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#EFE3EC" : "#2E1A3B") + ";color:" + (on ? "#857789" : "#fff"),
+          onTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#2E1A3B" : "#857789"),
+          offTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#857789" : "#2E1A3B")
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes homeFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes homePop { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+  .home-scroll::-webkit-scrollbar { width: 0; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#ECE4EA"/><rect x="30" y="30" width="40" height="40" rx="10" fill="#6A2A5F"/><text x="50" y="58" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#ECE4EA" text-anchor="middle">H</text></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Contest · Home (guest, free)</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="Onboarding.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Start</a>
+    
+  </div>
+
+  <div data-screen-label="Home device" style="position:relative;width:393px;height:852px;overflow:hidden;background:#fff;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);flex-shrink:0">
+
+    <div style="position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 100%)">
+      <div style="position:absolute;left:-136px;top:-178px;width:392px;height:417.522px;opacity:.15;border-radius:9999px;background:#F9BD48;filter:blur(70px)"></div>
+      <div style="position:absolute;left:235.8px;top:511.19px;width:196.5px;height:426px;opacity:.15;border-radius:9999px;background:#6A2A5F;filter:blur(70px)"></div>
+    </div>
+
+    <!-- Status bar -->
+    <div style="position:absolute;left:0;top:0;width:393px;height:62px;display:flex;align-items:center;padding:21px 16px 19px;z-index:5">
+      <div style="flex:1;display:flex;justify-content:center">
+        <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:#000">9:41</span>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+        <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="#000"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+        <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="#000"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+        <div style="position:relative;width:27.328px;height:13px">
+          <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px #000"></div>
+          <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:#000"></div>
+          <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:#000"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="home-scroll" style="position:absolute;left:0;top:62px;right:0;bottom:0;overflow-y:auto">
+      <div style="display:flex;flex-direction:column;gap:20px;padding:8px 20px 110px;animation:homeFade .3s ease both">
+
+        <!-- Header: greeting + wallet -->
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="position:relative;width:48px;height:48px;flex-shrink:0">
+            <img src="assets/prepa-mark.svg" alt="Prépa" style="width:48px;height:48px;display:block" />
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+            <span style="font-size:13px;font-weight:500;line-height:18px;color:#6B7280">{{ greetingKicker }}</span>
+            <span style="font-size:20px;font-weight:700;line-height:26px;letter-spacing:-.3px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ greetingName }}</span>
+          </div>
+          
+        </div>
+
+        <!-- Continue rail -->
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-if value="{{ hasManyContinue }}">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <span style="font-size:16px;font-weight:700;line-height:22px;letter-spacing:-.2px;color:#111827">Up next</span>
+              <sc-if value="{{ hasInProgress }}" hint-placeholder-val="{{ true }}">
+                <a href="TestHistory.dc.html#open" style="display:flex;align-items:center;gap:2px;margin:-6px -6px -6px 0;padding:6px;border-radius:8px;color:#6A2A5F" style-hover="background:#EDF2F9">
+                  <span style="font-size:12px;font-weight:600;line-height:16px;color:inherit">{{ inProgressLabel }}</span>
+                  <fig-icon name="IconArrowRight" size="14"></fig-icon>
+                </a>
+              </sc-if>
+            </div>
+          </sc-if>
+          <div ref="{{ railRef }}" style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;margin:0 -20px;padding:0 20px;scrollbar-width:none;cursor:grab">
+            <sc-for list="{{ continueCards }}" as="c" hint-placeholder-count="1">
+              <div style="{{ c.cardStyle }}">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="{{ c.iconStyle }}">
+                    <fig-icon name="{{ c.icon }}" size="24"></fig-icon>
+                  </div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0">
+                    <span style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:{{ c.kickerInk }}">{{ c.kicker }}</span>
+                    <span style="font-size:17px;font-weight:700;line-height:22px;letter-spacing:-.2px;color:{{ c.titleInk }}">{{ c.title }}</span>
+                  </div>
+                </div>
+                <span style="font-size:13px;font-weight:400;line-height:19px;color:{{ c.bodyInk }};text-wrap:pretty">{{ c.body }}</span>
+                <sc-if value="{{ c.hasBar }}">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <div style="height:6px;border-radius:100px;background:{{ c.barTrack }};overflow:hidden">
+                      <div style="{{ c.barStyle }}"></div>
+                    </div>
+                    <span style="font-size:12px;font-weight:500;color:{{ c.barInk }}">{{ c.barLabel }}</span>
+                  </div>
+                </sc-if>
+                <a href="{{ c.href }}" style="{{ c.btnStyle }}">
+                  <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ c.cta }}</span>
+                  <fig-icon name="IconArrowRight" size="18"></fig-icon>
+                </a>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- Result summary -->
+        <sc-if value="{{ hasResult }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <span style="font-size:16px;font-weight:700;line-height:22px;letter-spacing:-.2px;color:#111827">Result summary</span>
+              <span style="font-size:12px;font-weight:600;color:#6A2A5F;cursor:pointer">View result</span>
+            </div>
+            <div style="display:flex;flex-direction:column;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04);overflow:hidden">
+              <div style="display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #F5EEF3">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:56px;height:56px;border-radius:16px;background:#F8F3F7;box-shadow:inset 0 0 0 1px #EFE3EC;flex-shrink:0">
+                  <span style="font-size:18px;font-weight:700;line-height:20px;letter-spacing:-.3px;color:#111827">{{ resultLevel }}</span>
+                  <span style="font-size:10px;font-weight:600;line-height:12px;color:#9CA3AF">{{ resultPct }}</span>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0">
+                  <span style="font-size:14px;font-weight:600;line-height:19px;color:#111827">{{ resultTitle }}</span>
+                  <span style="font-size:12px;font-weight:400;line-height:16px;color:#6B7280">{{ resultMeta }}</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;padding:12px 16px 6px;color:#9CA3AF">
+                <fig-icon name="IconSparkles" size="14"></fig-icon>
+                <span style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF">AI insights</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;padding:6px 16px 16px">
+                <sc-for list="{{ insights }}" as="ins" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:flex-start;gap:6px">
+                    <div style="width:14px;display:flex;justify-content:center;flex-shrink:0">
+                      <div style="width:7px;height:7px;border-radius:9999px;margin-top:6px;background:{{ ins.dot }}"></div>
+                    </div>
+                    <span style="flex:1;font-size:13px;font-weight:400;line-height:19px;color:#374151;text-wrap:pretty">{{ ins.text }}</span>
+                    <span style="{{ ins.tagStyle }}">{{ ins.tag }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <a href="TestHistory.dc.html" style="display:flex;align-items:center;gap:8px;padding:13px 16px;border-top:1px solid #F5EEF3;cursor:pointer;text-decoration:none;color:inherit" style-hover="background:#F8F3F7">
+                <span style="flex:1;font-size:13px;font-weight:600;line-height:18px;color:#111827">All test history</span>
+                <fig-icon name="IconChevronRight" size="18"></fig-icon>
+              </a>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- No result yet: History entry, so the empty state is visible from Home -->
+        <sc-if value="{{ noResult }}" hint-placeholder-val="{{ true }}">
+          <a href="TestHistory.dc.html" style="display:flex;align-items:center;gap:12px;padding:16px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04);cursor:pointer;text-decoration:none;color:inherit" style-hover="box-shadow:inset 0 0 0 1px #D9CCD6,0 1px 2px rgba(0,0,0,.04)">
+            <div style="width:40px;height:40px;border-radius:12px;background:#F8F3F7;box-shadow:inset 0 0 0 1px #EFE3EC;display:flex;justify-content:center;align-items:center;flex-shrink:0;color:#6A2A5F">
+              <fig-icon name="IconOutlineRoundedTransactionHistory" size="20"></fig-icon>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+              <span style="font-size:14px;font-weight:600;line-height:19px;color:#2E1A3B">No results yet</span>
+              <span style="font-size:12px;font-weight:400;line-height:16px;color:#5E4E69">Take your first test. Your results are kept in History on this device.</span>
+            </div>
+            <span style="color:#857789;display:flex"><fig-icon name="IconChevronRight" size="20"></fig-icon></span>
+          </a>
+        </sc-if>
+
+        <!-- Skills -->
+        <sc-if value="{{ showSkills }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <span style="font-size:16px;font-weight:700;line-height:22px;letter-spacing:-.2px;color:#111827">Your skills</span>
+            <sc-if value="{{ showSeeAll }}">
+              <a href="Home.dc.html" style="margin:-6px -6px -6px 0;padding:6px;border-radius:8px;font-size:12px;font-weight:600;color:#6A2A5F;text-decoration:none" style-hover="background:#EDF2F9">Statistics</a>
+            </sc-if>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ skills }}" as="sk" hint-placeholder-count="4">
+              <a href="{{ sk.href }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04);cursor:pointer;text-decoration:none" style-hover="box-shadow:inset 0 0 0 1px #D4D4D4,0 1px 2px rgba(0,0,0,.04)">
+                <div style="{{ sk.ringStyle }}">
+                  <div style="width:34px;height:34px;border-radius:9999px;background:#fff;display:flex;justify-content:center;align-items:center;color:{{ sk.color }}">
+                    <fig-icon name="{{ sk.icon }}" size="18"></fig-icon>
+                  </div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;align-items:flex-start">
+                  <span style="font-size:13px;font-weight:600;line-height:18px;color:#111827">{{ sk.name }}</span>
+                  <sc-if value="{{ sk.weak }}">
+                    <span style="font-size:11px;font-weight:600;line-height:14px;padding:2px 7px;border-radius:100px;background:#FEF2F2;box-shadow:inset 0 0 0 1px #FBD5D5;color:#DC2626">{{ sk.value }}</span>
+                  </sc-if>
+                  <sc-if value="{{ sk.normal }}" hint-placeholder-val="{{ true }}">
+                    <span style="font-size:12px;font-weight:500;line-height:16px;color:{{ sk.valueInk }}">{{ sk.value }}</span>
+                  </sc-if>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        
+      </div>
+    </div>
+
+    <!-- Bottom nav -->
+    <div style="position:absolute;left:0;right:0;bottom:0;height:104px;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.32) 100%);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.5) 38%,#000 72%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.5) 38%,#000 72%)"></div>
+    <div style="position:absolute;left:14px;right:14px;bottom:24px;height:62px;border-radius:100px;display:flex;align-items:center;padding:6px;gap:2px;z-index:4;background:rgba(248,243,247,.82);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.6),0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1)">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="3">
+        <a href="{{ n.link }}" onClick="{{ n.pick }}" style="{{ n.itemStyle }}">
+          <fig-icon name="{{ n.icon }}" size="24"></fig-icon>
+          <span style="font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1;color:inherit">{{ n.label }}</span>
+        </a>
+      </sc-for>
+    </div>
+
+    
+  </div>
+
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;userState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;fresh&quot;,&quot;solo&quot;,&quot;active&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;active&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;nextSkillHasSets&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;},&quot;showDailyBonus&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const STATES = {
+  fresh:  { label: "Guest · free · results stay on this device", tpc: "", name: "Bonjour !" },
+  solo:   { label: "Free · skipped placement", tpc: "11", name: "Bonjour !" },
+  active: { label: "Free · with history", tpc: "13", name: "Bonjour !" },
+  pro:    { label: "Regular learner", tpc: "", name: "Bonjour !" }
+};
+const ORDER = ["fresh", "solo", "active", "pro"];
+
+const INK = "#6A2A5F", ACCENT = "#F9BD48", BLUE = "#6A2A5F", MUTED = "#9CA3AF";
+
+// Skill colors — DESIGN.md v4, Section 2.2. Accent / icon / ring fill only, never CTA background.
+const SKILL_COLORS = {
+  Listening: { primary: "#4A7FE5", dark: "#2952A3" },
+  Reading:   { primary: "#1A9E94", dark: "#0F6B65" },
+  Speaking:  { primary: "#8B62E0", dark: "#5535A8" },
+  Writing:   { primary: "#D4860F", dark: "#966010" }
+};
+
+function ring(pct, color) {
+  return "width:44px;height:44px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;" +
+    "background:conic-gradient(" + color + " " + (pct * 3.6) + "deg,#EFE3EC 0deg)";
+}
+
+const SKILL_DEFS = [
+  { name: "Listening", icon: "IconBulkHeadphone" },
+  { name: "Reading", icon: "IconBulkBook" },
+  { name: "Speaking", icon: "IconBulkMic" },
+  { name: "Writing", icon: "IconBulkWrite" }
+].map(d => ({ ...d, ...SKILL_COLORS[d.name] }));
+const SKILL_DATA = {
+  fresh:  [{ pct: 0, value: "Not started" }, { pct: 0, value: "Not started" }, { pct: 0, value: "Not started" }, { pct: 0, value: "Not started" }],
+  solo:   [{ pct: 50, value: "NCLC 6 · B1" }, { pct: 0, value: "Not started" }, { pct: 0, value: "Not started" }, { pct: 0, value: "Not started" }],
+  active: [{ pct: 67, value: "NCLC 8 · B2" }, { pct: 58, value: "NCLC 7 · B2" }, { pct: 33, value: "NCLC 4 · A2", weak: true }, { pct: 50, value: "NCLC 6 · B1" }],
+  pro:    [{ pct: 83, value: "NCLC 10 · C1" }, { pct: 75, value: "NCLC 9 · C1" }, { pct: 58, value: "NCLC 7 · B2" }, { pct: 67, value: "NCLC 8 · B2" }]
+};
+
+const ENGINE = {
+  listening: "ListeningTest.dc.html",
+  reading: "ReadingTest.dc.html",
+  writing: "WritingTest.dc.html",
+  speaking: "SpeakingTest.dc.html"
+};
+
+const CONTINUE = {
+  fresh: [
+    { kicker: "Speaking · Section B", title: "Convince a friend", body: "Present the offer, then answer the AI examiner's objections. Feedback at the end.", cta: "Start Speaking", dark: true, skill: "Speaking", icon: "IconBulkMic" },
+    { kicker: "Writing · Section B", title: "Give your point of view", body: "At least 200 words on a short statement. AI feedback on every criterion.", cta: "Start Writing", dark: true, skill: "Writing", icon: "IconBulkWrite" }
+  ],
+  solo: [
+    { kicker: "Next up", title: "Try Reading next", body: "Your Listening estimate is NCLC 6 (B1). Reading shares the same comprehension pattern — 15 minutes.", cta: "Start Reading test", dark: true, skill: "Reading", icon: "IconBulkBook" },
+    { kicker: "Still open", title: "Take your placement test", body: "20 minutes across all 4 skills. Scores every skill at once instead of one at a time.", cta: "Start placement test", dark: true, icon: "IconSolidRoundedFileCheck" }
+  ],
+  active: [
+    { kicker: "Continue", title: "Listening · Section 2", body: "TEF Canada mock test #3 — you stopped at question 14 of 40.", cta: "Resume test", dark: true, bar: 35, barLabel: "14 of 40 questions", skill: "Listening", icon: "IconBulkHeadphone" },
+    { kicker: "Continue", title: "Writing · Tâche 1", body: "TEF Canada mock test #3 — draft saved, not submitted.", cta: "Resume writing", dark: true, bar: 20, barLabel: "Draft saved 2 days ago", skill: "Writing", icon: "IconBulkWrite" }
+  ],
+  pro: [
+    { kicker: "Recommended", title: "Speaking · Tâche 3 drill", body: "AI feedback on argumentation. Your weakest sub-skill this week.", cta: "Start drill", dark: true, skill: "Speaking", icon: "IconBulkMic" },
+    { kicker: "Continue", title: "Reading · Section 3", body: "TEF full mock test #8 — you stopped at question 24 of 39.", cta: "Resume test", dark: true, bar: 62, barLabel: "24 of 39 questions", skill: "Reading", icon: "IconBulkBook" },
+    { kicker: "Continue", title: "Writing · Tâche 2", body: "TEF full mock test #8 — draft saved, not submitted.", cta: "Resume writing", dark: true, bar: 35, barLabel: "Draft saved yesterday", skill: "Writing", icon: "IconBulkWrite" },
+    { kicker: "Continue", title: "Listening · Section 1", body: "TEF Canada mock test #6 — you stopped at question 8 of 40.", cta: "Resume test", dark: true, bar: 20, barLabel: "8 of 40 questions", skill: "Listening", icon: "IconBulkHeadphone" },
+    { kicker: "Continue", title: "Speaking · Tâche 2", body: "TEF full mock test #7 — recording started, not submitted.", cta: "Resume speaking", dark: true, bar: 50, barLabel: "Paused 4 days ago", skill: "Speaking", icon: "IconBulkMic" },
+    { kicker: "Continue", title: "Reading · Section 1", body: "TEF Canada mock test #5 — you stopped at question 4 of 40.", cta: "Resume test", dark: true, bar: 10, barLabel: "Paused 6 days ago", skill: "Reading", icon: "IconBulkBook" }
+  ]
+};
+
+const RAIL_LIMIT = 3;
+
+// Result summary (M2 State C) — latest completed test + AI bullet insights
+const TAGS = {
+  strong: { dot: "#16A34A", bg: "#F0FDF4", ring: "#BBF7D0", ink: "#15803D", label: "Strong" },
+  low:    { dot: "#DC2626", bg: "#FEF2F2", ring: "#FBD5D5", ink: "#DC2626", label: "Low" },
+  focus:  { dot: "#F9BD48", bg: "#FDF2EE", ring: "#F3CDBF", ink: "#B4451F", label: "Focus" }
+};
+
+const RESULTS = {
+  solo: {
+    level: "NCLC 6", pct: "Estimation",
+    title: "Listening practice test #1",
+    meta: "Completed 2 days ago · 1 of 4 skills scored",
+    insights: [
+      { kind: "strong", text: "Section 1 short dialogues: 10 of 14 correct, your strongest block." },
+      { kind: "focus", text: "3 skills still unscored, so there is no overall level yet." }
+    ]
+  },
+  active: {
+    level: "NCLC 4", pct: "Estimation",
+    title: "TEF Canada mock test #2",
+    meta: "Completed 3 days ago · 4 of 4 skills scored",
+    insights: [
+      { kind: "strong", text: "Listening estimate at NCLC 8 (B2), steady across both sections." },
+      { kind: "low", text: "Speaking at NCLC 4 sets your usable level: only 1 task submitted this month." },
+      { kind: "focus", text: "Reading administrative documents: 5 of your 8 missed questions." }
+    ]
+  },
+  pro: {
+    level: "NCLC 7", pct: "Estimation",
+    title: "TEF full mock test #7",
+    meta: "Completed yesterday · 4 of 4 skills scored",
+    insights: [
+      { kind: "strong", text: "Speaking argumentation now at B2, your best criterion so far." },
+      { kind: "low", text: "Writing tâche 2 came in under word count twice in a row." },
+      { kind: "focus", text: "Reading long-text questions are where your pace slips." }
+    ]
+  }
+};
+
+const MEDALS = {
+  "1": { bg: "#FBF0D4", ring: "#E8C86A", ink: "#8A6410" },
+  "2": { bg: "#F1F0F1", ring: "#D1CFD1", ink: "#6A6769" },
+  "3": { bg: "#F7E9DE", ring: "#DFB392", ink: "#8A5230" }
+};
+
+// No leaderboard in the contest build.
+const LEADERS = { active: [], pro: [], solo: [], fresh: [] };
+
+// href = a screen that exists as a prototype file. Tabs without one only switch
+// the active pill, so the nav never dead-ends on a screen that is not built.
+const NAV = [
+  { key: "home", label: "Home", icon: "IconOutlineRoundedHome", href: null },
+  { key: "test", label: "Mock Test", icon: "IconOutlineRoundedAiDocument", href: "MockTest.dc.html" },
+  { key: "history", label: "History", icon: "IconOutlineRoundedTransactionHistory", href: "TestHistory.dc.html" }
+];
+
+// Scenario flags — reachable in the standalone file via the panel under the device,
+// or a URL query: ?nextSkillHasSets=0&showDailyBonus=0
+const FLAGS = [
+  { key: "nextSkillHasSets", label: "Next skill has practice sets", def: true, screenLabel: "Free · skipped placement",
+    jump: c => c.setState({ user: "solo" }),
+    on: "The rail leads with the suggested next skill (Reading).",
+    off: "Suggestion is dropped — the placement card leads instead." },
+  { key: "showDailyBonus", label: "Daily modal (off in contest build)", def: true, screenLabel: "Any state",
+    jump: c => c.setState({ daily: null, claimed: false }),
+    reset: c => c.setState({ daily: null, claimed: false }),
+    on: "Not used in the contest build.",
+    off: "Home opens clean — the modal only shows from the chip." }
+];
+
+class Component extends DCLogic {
+  state = { user: null, tab: "home", daily: null, claimed: false, guideDone: false };
+  rail = React.createRef();
+
+
+  // Scenario flags — host prop, with the panel / URL override layered on top.
+  opt(key, def) {
+    const o = this._flags || {};
+    if (key in o) return o[key];
+    const p = this.props || {};
+    return (key in p && p[key] != null) ? p[key] : def;
+  }
+  flagOn(f) { return !!this.opt(f.key, f.def); }
+  toggleFlag(f) {
+    this._flags = Object.assign({}, this._flags);
+    this._flags[f.key] = !this.flagOn(f);
+    if (f.reset) f.reset(this); else this.forceUpdate();
+  }
+  readFlagQuery() {
+    const q = new URLSearchParams(location.search);
+    const over = {};
+    FLAGS.forEach(f => { if (q.has(f.key)) over[f.key] = q.get(f.key) !== "0" && q.get(f.key) !== "false"; });
+    if (Object.keys(over).length) this._flags = over;
+  }
+
+  componentDidMount() {
+    this.readFlagQuery();
+    /* Demo mode: the home tour runs first, the daily bonus lands after it. */
+    this.__onGuideEnd = e => {
+      if (e.detail && e.detail.tour !== "home") return;
+      setTimeout(() => this.setState({ guideDone: true, daily: null, claimed: false }), 380);
+    };
+    window.addEventListener("guide:end", this.__onGuideEnd);
+    this.__onGuidePending = e => {
+      if (e.detail && e.detail.tour !== "home") return;
+      this.setState({ daily: null, guideDone: false });
+    };
+    window.addEventListener("guide:pending", this.__onGuidePending);
+    this.__onDemo = e => {
+      if (!e.detail) return;
+      // Vào demo mode: đóng modal, chờ guide chạy lại; ra demo mode: trả về mặc định review.
+      this.setState({ daily: null, claimed: false, guideDone: !e.detail.on });
+    };
+    window.addEventListener("tefdemo:change", this.__onDemo);
+    const el = this.rail.current;
+    if (!el) return;
+    let down = false, startX = 0, startScroll = 0, moved = false;
+    const onDown = e => {
+      if (e.pointerType === "touch") return;   // native touch scroll handles it
+      down = true; moved = false;
+      startX = e.clientX; startScroll = el.scrollLeft;
+      el.style.cursor = "grabbing";
+      el.style.scrollSnapType = "none";
+    };
+    const onMove = e => {
+      if (!down) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 3) moved = true;
+      el.scrollLeft = startScroll - dx;
+    };
+    const onUp = () => {
+      if (!down) return;
+      down = false;
+      el.style.cursor = "grab";
+      el.style.scrollSnapType = "x mandatory";
+    };
+    el.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    el.addEventListener("click", e => { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
+    el.addEventListener("dragstart", e => e.preventDefault());
+    this._railCleanup = () => {
+      el.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }
+
+  componentWillUnmount() {
+    if (this._railCleanup) this._railCleanup();
+    if (this.__onGuideEnd) window.removeEventListener("guide:end", this.__onGuideEnd);
+    if (this.__onGuidePending) window.removeEventListener("guide:pending", this.__onGuidePending);
+    if (this.__onDemo) window.removeEventListener("tefdemo:change", this.__onDemo);
+  }
+
+  get demoMode() {
+    if (document.documentElement.hasAttribute("data-tef-demo")) return true;
+    try { return sessionStorage.getItem("tefDemo") === "1" || localStorage.getItem("tefDemo") === "1"; } catch (e) { return false; }
+  }
+
+  get user() { return "fresh"; }
+  get dailyOpen() { return false;
+    if (this.state.daily != null) return this.state.daily;
+    // Daily bonus chỉ mở sau khi tour `home` kết thúc — ở cả demo mode và review mode.
+    if (window.__guidePending === "home" && !this.state.guideDone) return false;
+    return this.opt("showDailyBonus", true) !== false;
+  }
+
+  renderVals() {
+    const u = this.user;
+    const meta = STATES[u];
+    // Catalogue guard (ScreenSpec §3.5): a card only names a skill when Collection holds
+    // at least 3 practice sets for it. Below that the suggestion is dropped and the
+    // placement card leads — placement never depends on the catalogue.
+    const hasSets = this.opt("nextSkillHasSets", true);
+    let allCards = CONTINUE[u] || [];
+    if (u === "solo" && !hasSets) {
+      allCards = allCards.filter(c => !c.skill)
+        .map(c => ({ ...c, kicker: "Start here" }));
+    }
+    const cards = allCards.slice(0, RAIL_LIMIT);        // Home rail never shows more than 3
+    const many = cards.length > 1;
+    const inProgress = allCards.filter(c => c.bar);
+    const unfinished = inProgress.length;
+    const isPro = u === "pro";
+    const streakDays = u === "active" ? 4 : isPro ? 26 : u === "solo" ? 2 : 1;
+
+    return {
+      stateLabel: meta.label,
+      isMember: true, isPro,
+      showSkills: true,
+      showSeeAll: u !== "fresh",
+      
+      tpc: meta.tpc,
+      greetingKicker: "Free practice · no account",
+      greetingName: meta.name,
+      streak: streakDays + (streakDays === 1 ? " day" : " days"),
+      target: u === "fresh" ? "—" : isPro ? "C1" : u === "solo" ? "B1" : "B2",   // current CEFR level
+      examName: "TEF CA",
+
+      railRef: this.rail,
+      hasManyContinue: many,
+      hasInProgress: unfinished > 0,
+      inProgressLabel: "In progress (" + unfinished + ")",
+      continueCards: cards.map(c => {
+        const skill = c.skill ? SKILL_COLORS[c.skill] : null;
+        /* The rail is Home's only way into a test, so every card routes:
+           a resume card (has a bar) reopens its engine, a suggestion goes
+           through PracticeConfig, and the placement card — not built as its
+           own flow — opens the mock session hub. */
+        const sk = (c.skill || (c.title || "").split(" ")[0] || "").toLowerCase();
+        const dest = ENGINE[sk]
+          ? ENGINE[sk]
+          : "MockTestDetail.dc.html";
+        return {
+          icon: c.icon, kicker: c.kicker, title: c.title, body: c.body, cta: c.cta,
+          href: dest,
+          cardStyle: "flex:0 0 " + (many ? "82%" : "100%") + ";scroll-snap-align:start;box-sizing:border-box;" +
+            "display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:20px;" +
+            (c.dark
+              ? "background:#111827"
+              : "background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC"),
+          iconStyle: "width:44px;height:44px;border-radius:14px;display:flex;justify-content:center;align-items:center;flex-shrink:0;" +
+            (c.dark ? "background:rgba(255,255,255,.1);" : "background:#F8F3F7;box-shadow:inset 0 0 0 1px #EFE3EC;") +
+            "color:" + (skill ? skill.primary : "#fff"),
+          kickerInk: c.dark ? "#9CA3AF" : "#6B7280",
+          titleInk: c.dark ? "#F9FAFB" : "#111827",
+          bodyInk: c.dark ? "#D1D5DB" : "#374151",
+          hasBar: !!c.bar,
+          barTrack: c.dark ? "rgba(255,255,255,.14)" : "#EFE3EC",
+          barInk: c.dark ? "#9CA3AF" : "#6B7280",
+          barStyle: "height:6px;border-radius:100px;background:" + (skill ? skill.primary : "#fff") + ";width:" + (c.bar || 0) + "%",
+          barLabel: c.barLabel || "",
+          btnStyle: "height:46px;border-radius:100px;display:flex;gap:8px;justify-content:center;align-items:center;cursor:pointer;" +
+            "text-decoration:none;" + (c.dark ? "background:#fff;color:#111827" : "background:" + INK + ";color:#fff")
+        };
+      }),
+
+      hasResult: !!RESULTS[u],
+      noResult: !RESULTS[u],
+      resultLevel: (RESULTS[u] || {}).level || "",
+      resultPct: (RESULTS[u] || {}).pct || "",
+      resultTitle: (RESULTS[u] || {}).title || "",
+      resultMeta: (RESULTS[u] || {}).meta || "",
+      insights: ((RESULTS[u] || {}).insights || []).map(ins => {
+        const t = TAGS[ins.kind];
+        return {
+          text: ins.text, dot: t.dot, tag: t.label,
+          tagStyle: "flex-shrink:0;font-size:10px;font-weight:700;line-height:14px;padding:2px 8px;border-radius:100px;" +
+            "background:" + t.bg + ";box-shadow:inset 0 0 0 1px " + t.ring + ";color:" + t.ink
+        };
+      }),
+
+      skills: SKILL_DEFS.map((d, i) => {
+        const s = SKILL_DATA[u][i];
+        const color = s.locked ? MUTED : d.primary;
+        return {
+          name: d.name, icon: d.icon, value: s.value, color,
+          href: ENGINE[d.name.toLowerCase()],
+          weak: !!s.weak, normal: !s.weak,
+          valueInk: s.pct ? d.dark : "#6B7280",
+          ringStyle: ring(s.pct, color)
+        };
+      }),
+
+      leaders: (LEADERS[u] || LEADERS.active).map((r, i, arr) => {
+        if (r.gap) return { isGap: true, isRow: false, gapLabel: r.gap };
+        const m = MEDALS[r.rank];
+        return {
+          isGap: false, isRow: true,
+          rank: r.rank, name: r.name, score: r.score,
+          weight: r.me ? "700" : "500",
+          hasMedal: !!m, plain: !m,
+          rankInk: "#9CA3AF",
+          medalStyle: m
+            ? "width:24px;height:24px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;" +
+              "font-size:12px;font-weight:700;line-height:1;background:" + m.bg + ";box-shadow:inset 0 0 0 1px " + m.ring + ";color:" + m.ink
+            : "",
+          rowStyle: "display:flex;align-items:center;gap:10px;padding:11px 16px;" +
+            (r.me ? "background:#F8F3F7;box-shadow:inset 0 0 0 1px #F5EEF3;" : "") +
+            (r.me && i === arr.length - 1 ? "border-radius:0 0 19px 19px;" : "") +
+            (r.me && i === 0 ? "margin-top:-1px;" : "") +
+
+            (!r.me && i < arr.length - 1 && !(arr[i + 1] || {}).me ? "border-bottom:1px solid #F5EEF3" : "")
+        };
+      }),
+
+      nav: NAV.map(n => ({
+        label: n.label, icon: n.icon, link: n.key === "history" ? "TestHistory.dc.html" : n.key === "test" ? "MockTest.dc.html" : "#",
+        pick: () => this.setState({ tab: n.key }),
+        itemStyle: "text-decoration:none;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;" +
+          "height:50px;border-radius:100px;transition:background .18s ease,color .18s ease;" +
+          (this.state.tab === n.key
+            ? "color:" + INK + ";font-weight:700;background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 1px 3px rgba(60,30,55,.12)"
+            : "color:#776D75;font-weight:600")
+      })),
+
+      dailyOpen: this.dailyOpen,
+      dailyChipLabel: "",
+      dailyChipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;white-space:nowrap;" +
+        (this.dailyOpen
+          ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B"
+          : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6"),
+      toggleDaily: () => this.setState({ daily: !this.dailyOpen }),
+      closeDaily: () => this.setState({ daily: false }),
+      claimDaily: () => this.state.claimed ? this.setState({ daily: false }) : this.setState({ claimed: true }),
+      dailyCta: this.state.claimed ? "Nice — back to practice" : "Claim",
+      streakDays: String(streakDays),
+      dailyDays: [1, 2, 3, 4, 5, 6, 7].map(n => {
+        const done = n < streakDays, today = n === streakDays;
+        return {
+          n: String(n),
+          dayStyle: "width:34px;height:34px;border-radius:12px;display:flex;justify-content:center;align-items:center;font-size:13px;font-weight:700;" +
+            (today ? "background:" + INK + ";color:#fff"
+              : done ? "background:#FFFBEB;color:#966010;box-shadow:inset 0 0 0 1px #EDD99A"
+              : "background:#F9FAFB;color:#9CA3AF;box-shadow:inset 0 0 0 1px #EFE3EC")
+        };
+      }),
+
+
+      flags: FLAGS.map(f => {
+        const on = this.flagOn(f);
+        const tag = "font-size:9px;font-weight:700;letter-spacing:.5px;line-height:15px;padding:0 5px;border-radius:4px;flex-shrink:0;width:26px;text-align:center;";
+        const txt = "font-size:11px;font-weight:400;line-height:15px;text-wrap:pretty;flex:1;min-width:0;";
+        return {
+          label: f.label,
+          screenLabel: f.screenLabel,
+          goScreen: () => { if (f.jump) f.jump(this); },
+          onText: f.on,
+          offText: f.off,
+          toggle: () => this.toggleFlag(f),
+          rowStyle: "display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;" +
+            (on ? "background:#fff;box-shadow:inset 0 0 0 1px #F9BD48,0 1px 3px rgba(60,30,55,.08)" : "background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px #D1C4CF"),
+          trackStyle: "width:34px;height:20px;border-radius:100px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;padding:2px;box-sizing:border-box;cursor:pointer;transition:background .15s;" +
+            (on ? "background:#F9BD48;justify-content:flex-end" : "background:#D9CCD6;justify-content:flex-start"),
+          knobStyle: "width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: tag + (on ? "background:#F9BD48;color:#fff" : "background:rgba(214,200,211,.5);color:#857789"),
+          offTagStyle: tag + (on ? "background:rgba(214,200,211,.5);color:#857789" : "background:#3E2D4A;color:#fff"),
+          onTextStyle: txt + (on ? "color:#2E1A3B;font-weight:500" : "color:#857789"),
+          offTextStyle: txt + (on ? "color:#857789" : "color:#2E1A3B;font-weight:500")
+        };
+      }),
+
+      states: ORDER.map(k => ({
+        label: STATES[k].label,
+        go: () => this.setState({ user: k, daily: null, claimed: false }),
+        chipStyle: "font-size:11px;font-weight:600;letter-spacing:.3px;padding:6px 11px;border-radius:100px;cursor:pointer;user-select:none;" +
+          (k === u ? "background:#6A2A5F;color:#fff" : "background:rgba(255,255,255,.55);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6")
+      }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

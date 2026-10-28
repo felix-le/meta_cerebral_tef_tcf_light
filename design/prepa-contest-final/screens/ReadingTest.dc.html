@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes rdFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes rdSheet { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+  .rd-scroll::-webkit-scrollbar { width: 0; }
+  .rd-scroll { scrollbar-width: none; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E1226"/><rect x="26" y="28" width="48" height="44" rx="6" fill="#1A9E94"/><rect x="33" y="38" width="34" height="4" rx="2" fill="#0F6B65"/><rect x="33" y="48" width="34" height="4" rx="2" fill="#0F6B65"/><rect x="33" y="58" width="20" height="4" rx="2" fill="#0F6B65"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<x-import component-from-global-scope="mock-session" from="./mock-session.js" hint-size="0,0"></x-import>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">M8 · Reading Test Engine</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="MockTestDetail.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Test detail</a>
+  </div>
+
+  <div data-screen-label="Reading test engine" style="{{ frameStyle }}">
+
+    <div class="rd-scroll" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+      <!-- ── CONSIGNES (the screen the real exam opens with) ── -->
+      <sc-if value="{{ isConsignes }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;gap:22px;overflow:hidden;animation:rdFade .35s ease both">
+          <div style="position:absolute;left:-90px;top:-110px;width:340px;height:340px;border-radius:9999px;background:#1A9E94;opacity:.3;filter:blur(80px)"></div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">TEF Canada · épreuve 2 sur 4</span>
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-wrap:pretty">Compréhension écrite</span>
+            <span style="font-size:14px;font-weight:500;line-height:21px;color:rgba(255,255,255,.6);text-wrap:pretty">40 questions · 60 minutes · cinq groupes de documents</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#7FD6CE">CONSIGNES</span>
+            <sc-for list="{{ consigneRules }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="width:22px;height:22px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.1);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ r.n }}</span>
+                <span style="flex:1;font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.86);text-wrap:pretty">{{ r.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="position:relative;display:flex;gap:9px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:rgba(249,189,72,.1);box-shadow:inset 0 0 0 1px rgba(249,189,72,.3)">
+            <div style="width:16px;height:16px;flex-shrink:0;margin-top:1px;color:#F9BD48;display:flex;align-items:center;justify-content:center">
+              <fig-icon name="IconDuotoneInfo" size="15"></fig-icon>
+            </div>
+            <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#F9BD48;text-wrap:pretty">Aucune pause n'est autorisée une fois la session lancée : les épreuves sur ordinateur s'enchaînent.</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── PASSAGE READER ── -->
+      <sc-if value="{{ isPassage }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:126px 20px 172px;display:flex;flex-direction:column;gap:18px;animation:rdFade .3s ease both">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#EAF7F5;color:#0F6B65;font-size:10.5px;font-weight:700;letter-spacing:.4px">{{ introKicker }}</span>
+              <span style="font-size:11px;font-weight:500;color:#857789">420 mots</span>
+            </div>
+            <span style="font-family:'Source Serif 4',Georgia,serif;font-size:23px;font-weight:600;line-height:30px;letter-spacing:-.2px;color:#111827;text-wrap:pretty">Le retour des bureaux à la campagne</span>
+            <span style="font-size:11.5px;font-weight:500;letter-spacing:.2px;color:#857789">Le Devoir · mars 2024 · Camille Roy</span>
+          </div>
+
+          <div style="height:1px;background:#EFE3EC"></div>
+
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <sc-for list="{{ paras }}" as="p" hint-placeholder-count="5">
+              <span style="{{ p.style }}">{{ p.text }}</span>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── QUESTION (MCQ + gap fill) ── -->
+      <sc-if value="{{ isQuestion }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:176px 20px 176px;display:flex;flex-direction:column;gap:20px;animation:rdFade .3s ease both">
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#EAF7F5;color:#0F6B65;font-size:10.5px;font-weight:700;letter-spacing:.4px">{{ qKicker }}</span>
+              <sc-if value="{{ isGapQ }}" hint-placeholder-val="{{ false }}">
+                <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#FFFBEB;color:#966010;font-size:10.5px;font-weight:700;letter-spacing:.4px;box-shadow:inset 0 0 0 1px #EDD99A">TEF uniquement</span>
+              </sc-if>
+            </div>
+            <span style="font-size:20px;font-weight:700;line-height:28px;letter-spacing:-.3px;color:#111827;text-wrap:pretty">{{ qText }}</span>
+          </div>
+
+          <sc-if value="{{ isGapQ }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:20px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#857789">PHRASE À COMPLÉTER</span>
+              <span style="font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:400;line-height:26px;color:#1F2937;text-wrap:pretty">Les entreprises qui ouvrent un bureau en région le font <span style="display:inline-block;min-width:74px;border-bottom:2px solid #1A9E94;color:#0F6B65;font-weight:600;text-align:center">{{ gapFill }}</span> pour retenir leurs employés.</span>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ options }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.tap }}" style="{{ o.cardStyle }}">
+                <div style="{{ o.badgeStyle }}">{{ o.letter }}</div>
+                <span style="{{ o.textStyle }}">{{ o.text }}</span>
+                <sc-if value="{{ o.hasMark }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ o.markStyle }}">
+                    <fig-icon name="{{ o.markIcon }}" size="14"></fig-icon>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ showFeedback }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ feedbackStyle }}">
+              <div style="display:flex;align-items:center;gap:8px">
+                <fig-icon name="{{ feedbackIcon }}" size="17"></fig-icon>
+                <span style="font-size:13.5px;font-weight:700;line-height:18px;color:inherit">{{ feedbackTitle }}</span>
+              </div>
+              <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#374151;text-wrap:pretty">{{ feedbackBody }}</span>
+              <div style="display:flex;gap:8px;align-items:flex-start;padding-top:10px;border-top:1px solid rgba(0,0,0,.07)">
+                <span style="font-size:10px;font-weight:700;letter-spacing:.5px;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.06);color:#5E4E69;flex-shrink:0">LIGNE 12</span>
+                <span style="flex:1;font-family:'Source Serif 4',Georgia,serif;font-size:12.5px;font-weight:400;line-height:19px;color:#5E4E69;font-style:italic;text-wrap:pretty">« Ce n'est pas le loyer qui les décide, admet-elle, mais le fait de garder des salariés qui allaient partir. »</span>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </sc-if>
+
+      <!-- ── ORDERING ── -->
+      <sc-if value="{{ isOrderQ }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:176px 20px 176px;display:flex;flex-direction:column;gap:20px;animation:rdFade .3s ease both">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#EAF7F5;color:#0F6B65;font-size:10.5px;font-weight:700;letter-spacing:.4px">Item d'entraînement · 4 phrases</span>
+              <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#FFFBEB;color:#966010;font-size:10.5px;font-weight:700;letter-spacing:.4px;box-shadow:inset 0 0 0 1px #EDD99A">Ordre logique</span>
+            </div>
+            <span style="font-size:20px;font-weight:700;line-height:28px;letter-spacing:-.3px;color:#111827;text-wrap:pretty">Remettez les quatre phrases dans l'ordre du texte.</span>
+            <span style="font-size:12.5px;font-weight:500;line-height:18px;color:#6E5F78;text-wrap:pretty">{{ orderHint }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ orderRows }}" as="r" hint-placeholder-count="4">
+              <div onClick="{{ r.tap }}" style="{{ r.cardStyle }}">
+                <div style="{{ r.slotStyle }}">{{ r.slot }}</div>
+                <span style="{{ r.textStyle }}">{{ r.text }}</span>
+                <sc-if value="{{ r.hasMark }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ r.markStyle }}">
+                    <fig-icon name="{{ r.markIcon }}" size="13"></fig-icon>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ orderHasReset }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ orderReset }}" style="align-self:flex-start;display:flex;align-items:center;height:34px;padding:0 14px;border-radius:100px;cursor:pointer;background:#FFFFFF;box-shadow:inset 0 0 0 1px #DBCED9;font-size:12px;font-weight:600;color:#5E4E69" style-hover="background:#F6F0F5">Effacer l'ordre</div>
+          </sc-if>
+
+          <sc-if value="{{ orderShowVerdict }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ orderVerdictStyle }}">
+              <div style="display:flex;align-items:center;gap:8px">
+                <fig-icon name="{{ orderVerdictIcon }}" size="17"></fig-icon>
+                <span style="font-size:13.5px;font-weight:700;line-height:18px;color:inherit">{{ orderVerdictTitle }}</span>
+              </div>
+              <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#374151;text-wrap:pretty">{{ orderVerdictBody }}</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ── CHART AS DOCUMENT (group 3 · lecture rapide) ── -->
+      <sc-if value="{{ isChartDoc }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:170px 20px 168px;display:flex;flex-direction:column;gap:16px;animation:rdFade .3s ease both">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#EAF7F5;color:#0F6B65;font-size:10.5px;font-weight:700;letter-spacing:.4px">Lecture rapide · item 3 sur 5</span>
+            <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#FFFBEB;color:#966010;font-size:10.5px;font-weight:700;letter-spacing:.4px;box-shadow:inset 0 0 0 1px #EDD99A">Graphique</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;padding:16px 15px 14px;border-radius:20px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#857789">{{ docLabel }}</span>
+              <span style="font-family:'Source Serif 4',Georgia,serif;font-size:15.5px;font-weight:600;line-height:21px;color:#111827;text-wrap:pretty">{{ docTitle }}</span>
+              <span style="font-size:11px;font-weight:400;line-height:15px;color:#857789">{{ docSource }}</span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;padding:0 2px 0 34px;gap:10px">
+                <sc-for list="{{ docBars }}" as="b" hint-placeholder-count="4">
+                  <span style="{{ b.valueStyle }}">{{ b.value }}</span>
+                </sc-for>
+              </div>
+              <div style="position:relative;display:flex;align-items:flex-end;gap:10px;height:148px;padding:0 2px 0 34px;border-bottom:1px solid #E8DFE6">
+                <div style="{{ docRuleStyle }}"></div>
+                <span style="{{ docRuleTextStyle }}">{{ docRuleLabel }}</span>
+                <sc-for list="{{ docBars }}" as="b" hint-placeholder-count="4">
+                  <div style="{{ b.style }}"></div>
+                </sc-for>
+              </div>
+              <div style="display:flex;padding:0 2px 0 34px;gap:10px">
+                <sc-for list="{{ docBars }}" as="b" hint-placeholder-count="4">
+                  <span style="{{ b.tickStyle }}">{{ b.year }}</span>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <span style="font-size:19px;font-weight:700;line-height:25px;letter-spacing:-.3px;color:#111827;text-wrap:pretty">{{ docQuestion }}</span>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ options }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.tap }}" style="{{ o.cardStyle }}">
+                <div style="{{ o.badgeStyle }}">{{ o.letter }}</div>
+                <span style="{{ o.textStyle }}">{{ o.text }}</span>
+                <sc-if value="{{ o.hasMark }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ o.markStyle }}">
+                    <fig-icon name="{{ o.markIcon }}" size="12"></fig-icon>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── GRAPH MATCHING ── -->
+      <sc-if value="{{ isGraphQ }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:170px 20px 158px;display:flex;flex-direction:column;gap:10px;animation:rdFade .3s ease both">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#EAF7F5;color:#0F6B65;font-size:10.5px;font-weight:700;letter-spacing:.4px">{{ graphKicker }}</span>
+              <span style="display:flex;align-items:center;height:24px;padding:0 10px;border-radius:100px;background:#FFFBEB;color:#966010;font-size:10.5px;font-weight:700;letter-spacing:.4px;box-shadow:inset 0 0 0 1px #EDD99A">Lecture de graphiques</span>
+            </div>
+            <span style="font-size:19px;font-weight:700;line-height:25px;letter-spacing:-.3px;color:#111827;text-wrap:pretty">{{ graphQuestion }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:4px;padding:10px 13px;border-radius:16px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#857789">AFFIRMATION</span>
+            <span style="font-family:'Source Serif 4',Georgia,serif;font-size:14px;font-weight:400;line-height:19px;color:#1F2937;text-wrap:pretty">{{ graphStatement }}</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ graphCards }}" as="g" hint-placeholder-count="4">
+              <div onClick="{{ g.tap }}" style="{{ g.cardStyle }}">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="{{ g.badgeStyle }}">{{ g.letter }}</div>
+                  <span style="{{ g.labelStyle }}">{{ g.label }}</span>
+                  <sc-if value="{{ g.hasMark }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ g.markStyle }}">
+                      <fig-icon name="{{ g.markIcon }}" size="12"></fig-icon>
+                    </div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ isBarsChart }}" hint-placeholder-val="{{ true }}">
+                  <div style="position:relative;display:flex;align-items:flex-end;gap:7px;height:64px;padding:0 2px 0 25px;border-bottom:1px solid #E8DFE6">
+                    <div style="position:absolute;left:25px;right:0;bottom:32px;z-index:1;border-top:1px dashed #C4B3C1"></div>
+                    <span style="position:absolute;left:0;bottom:27px;z-index:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;font-weight:500;line-height:11px;color:#9C8F9A">50%</span>
+                    <sc-for list="{{ g.bars }}" as="b" hint-placeholder-count="3">
+                      <div style="{{ b.style }}"></div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isLineChart }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:relative;height:64px;padding-left:25px;border-bottom:1px solid #E8DFE6">
+                    <div style="position:absolute;left:25px;right:0;bottom:32px;z-index:1;border-top:1px dashed #C4B3C1"></div>
+                    <span style="position:absolute;left:0;bottom:27px;z-index:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;font-weight:500;line-height:11px;color:#9C8F9A">50%</span>
+                    <svg viewBox="0 0 100 64" preserveAspectRatio="none" style="position:relative;z-index:2;display:block;width:100%;height:64px;overflow:visible">
+                      <polyline points="{{ g.points }}" fill="none" stroke="#0F6B65" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
+                      <sc-for list="{{ g.dots }}" as="d" hint-placeholder-count="3">
+                        <circle cx="{{ d.cx }}" cy="{{ d.cy }}" r="3" fill="#0F6B65" vector-effect="non-scaling-stroke"></circle>
+                      </sc-for>
+                    </svg>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isDonutChart }}" hint-placeholder-val="{{ false }}">
+                  <div style="height:64px;display:flex;justify-content:center;align-items:center">
+                    <div style="{{ g.donutStyle }}">
+                      <div style="position:absolute;right:-4px;top:50%;width:7px;height:0;border-top:1.5px solid #857789"></div>
+                      <div style="{{ g.holeStyle }}">{{ g.donutInner }}</div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ isStackChart }}" hint-placeholder-val="{{ false }}">
+                  <div style="height:64px;display:flex;flex-direction:column;justify-content:center;gap:8px">
+                    <div style="display:flex;height:18px;border-radius:6px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)">
+                      <sc-for list="{{ g.segs }}" as="sg" hint-placeholder-count="3">
+                        <div style="{{ sg.style }}"></div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;column-gap:7px;row-gap:2px">
+                      <sc-for list="{{ g.segLabels }}" as="sl" hint-placeholder-count="3">
+                        <span style="{{ sl.style }}">{{ sl.label }}</span>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ hasTickRow }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:7px;padding:0 2px 0 25px">
+                    <sc-for list="{{ g.ticks }}" as="t" hint-placeholder-count="3">
+                      <span style="flex:1;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;font-weight:500;letter-spacing:.2px;color:#9C8F9A">{{ t.label }}</span>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <span style="{{ g.valueStyle }}">{{ g.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+        </div>
+      </sc-if>
+
+      <!-- ── SECTION BREAK ── -->
+      <sc-if value="{{ isBreak }}" hint-placeholder-val="{{ false }}">
+        <div style="min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:26px;animation:rdFade .35s ease both">
+          <div style="width:96px;height:96px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:#EAF7F5;box-shadow:inset 0 0 0 2px #C7E8E4;color:#0F6B65">
+            <fig-icon name="IconCheck" size="38"></fig-icon>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+            <span style="font-size:24px;font-weight:700;line-height:30px;letter-spacing:-.5px;color:#111827;text-align:center">Documents administratifs et professionnels terminé</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:#5E4E69;text-align:center;text-wrap:pretty;max-width:280px">Vient ensuite le groupe « article de presse » : 8 items, avec un texte long. Les questions marquées restent accessibles jusqu'à la validation.</span>
+          </div>
+          <div style="display:flex;width:100%;padding:16px 4px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+            <sc-for list="{{ breakStats }}" as="b" hint-placeholder-count="3">
+              <div style="{{ b.cellStyle }}">
+                <span style="font-size:20px;font-weight:700;line-height:24px;letter-spacing:-.4px;color:#111827">{{ b.value }}</span>
+                <span style="font-size:9.5px;font-weight:700;letter-spacing:.7px;color:#857789">{{ b.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── TEST COMPLETE ── -->
+      <sc-if value="{{ isComplete }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 190px;display:flex;flex-direction:column;align-items:center;gap:26px;overflow:hidden;animation:rdFade .35s ease both">
+          <div style="position:absolute;left:-70px;top:-90px;width:320px;height:320px;border-radius:9999px;background:#1A9E94;opacity:.28;filter:blur(80px)"></div>
+          <div style="position:absolute;right:-110px;bottom:120px;width:280px;height:280px;border-radius:9999px;background:#F9BD48;opacity:.18;filter:blur(90px)"></div>
+
+          <div style="position:relative;width:186px;height:186px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:{{ ringBg }};box-shadow:0 0 0 1px rgba(255,255,255,.08)">
+            <div style="width:150px;height:150px;border-radius:9999px;background:#1E1226;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px">
+              <span style="{{ scorePctStyle }}">{{ scorePct }}</span>
+              <span style="font-size:10px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ scoreCaption }}</span>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px;align-items:center">
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-align:center">{{ doneTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.55);text-align:center;text-wrap:pretty;max-width:290px">{{ doneBody }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;width:100%;padding:18px 4px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <sc-for list="{{ doneStats }}" as="d" hint-placeholder-count="3">
+              <div style="{{ d.cellStyle }}">
+                <span style="font-size:20px;font-weight:700;line-height:24px;letter-spacing:-.4px;color:#fff">{{ d.value }}</span>
+                <span style="font-size:9.5px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">{{ d.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <!-- ══ FIXED CHROME ══ -->
+    <div style="{{ chromeStyle }}">
+      <div style="height:62px;display:flex;align-items:center;padding:21px 16px 19px;color:{{ barInk }}">
+        <div style="flex:1;display:flex;justify-content:center">
+          <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:inherit">9:41</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+          <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="currentColor"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+          <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="currentColor"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+          <div style="position:relative;width:27.328px;height:13px">
+            <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px currentColor"></div>
+            <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:currentColor"></div>
+            <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:currentColor"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:52px;display:flex;align-items:center;gap:6px;padding:0 12px 0 8px">
+        <sc-if value="{{ hasClose }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ closeTap }}" style="{{ closeStyle }}">
+            <fig-icon name="IconX" size="20"></fig-icon>
+          </div>
+        </sc-if>
+        <span style="{{ chromeTitleStyle }}">{{ chromeTitle }}</span>
+        <sc-if value="{{ hasFlag }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ flagTap }}" style="{{ flagStyle }}">
+            <fig-icon name="IconDuotoneFlag" size="15"></fig-icon>
+            <span style="font-size:12px;font-weight:700;line-height:1;color:inherit">{{ flagLabel }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasTimer }}" hint-placeholder-val="{{ true }}">
+          <div style="{{ timerStyle }}">
+            <span style="font-size:12.5px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:inherit">{{ clock }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hasProgress }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:2px 20px 0;display:flex;flex-direction:column;gap:6px">
+          <div style="height:5px;border-radius:100px;background:{{ trackBg }};overflow:hidden">
+            <div style="{{ progressFillStyle }}"></div>
+          </div>
+          <div style="display:flex;align-items:center">
+            <span onClick="{{ openNav }}" style="{{ progressLeftStyle }}">{{ progressLeft }}</span>
+            <span style="font-size:10.5px;font-weight:600;letter-spacing:.3px;color:{{ progressInk }}">{{ progressRight }}</span>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ══ FOOTER CTA ══ -->
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:46px 20px 24px;display:flex;flex-direction:column;gap:10px;z-index:8;pointer-events:none">
+      <div style="{{ fadeStyle }}"></div>
+
+      <sc-if value="{{ hasSkip }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ skipTap }}" style="align-self:center;pointer-events:auto;cursor:pointer;user-select:none;display:flex;align-items:center;height:30px;padding:0 14px;border-radius:100px;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px #E8DFE6;font-size:12px;font-weight:600;color:#857789;transition:color .16s ease" style-hover="color:#5E4E69;background:#fff">{{ skipLabel }}</div>
+      </sc-if>
+
+      <sc-if value="{{ hasTextBar }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ textBarTap }}" style="{{ textBarStyle }}">
+          <fig-icon name="IconBulkBook" size="16"></fig-icon>
+          <span style="flex:1;font-size:12.5px;font-weight:600;line-height:1;color:inherit">{{ textBarLabel }}</span>
+          <span style="font-size:11px;font-weight:500;line-height:1;opacity:.75;color:inherit">{{ textBarHint }}</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasAutoStrip }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ autoStripStyle }}">{{ autoStripText }}</div>
+      </sc-if>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <sc-if value="{{ hasBack }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ backTap }}" style="{{ backStyle }}">
+            <fig-icon name="IconArrowRight" size="18"></fig-icon>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasCta }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ ctaTap }}" style="{{ ctaStyle }}">
+            <fig-icon name="{{ ctaIcon }}" size="17"></fig-icon>
+            <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ ctaLabel }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hasCta }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;height:22px">
+          <span onClick="{{ noteTap }}" style="{{ ctaNoteStyle }}">{{ ctaNote }}</span>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ══ PASSAGE SHEET ══ -->
+    <sc-if value="{{ showText }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:18;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ closeText }}" style="position:absolute;inset:0;background:rgba(30,18,38,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="position:relative;display:flex;flex-direction:column;height:672px;padding:14px 0 0;border-radius:28px 28px 0 0;background:#FFFDFB;animation:rdSheet .28s ease both;box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)">
+          <div style="width:38px;height:4px;border-radius:100px;margin:0 auto 12px;background:#E8DFE6"></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:0 20px 12px;border-bottom:1px solid #F5EEF3">
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+              <span style="font-size:10px;font-weight:700;letter-spacing:.8px;color:#857789">ARTICLE DE PRESSE</span>
+              <span style="font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;line-height:21px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Le retour des bureaux à la campagne</span>
+            </div>
+            <div onClick="{{ closeText }}" style="width:34px;height:34px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;cursor:pointer;background:#F5EEF3;color:#5E4E69" style-hover="background:#E9E0E7">
+              <fig-icon name="IconX" size="17"></fig-icon>
+            </div>
+          </div>
+          <div class="rd-scroll" style="flex:1;overflow-y:auto;padding:18px 20px 28px;display:flex;flex-direction:column;gap:16px">
+            <sc-for list="{{ paras }}" as="p" hint-placeholder-count="5">
+              <span style="{{ p.style }}">{{ p.text }}</span>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ QUESTION NAVIGATOR ══ -->
+    <sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:19;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ closeNav }}" style="position:absolute;inset:0;background:rgba(30,18,38,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="position:relative;display:flex;flex-direction:column;gap:16px;padding:14px 20px 26px;border-radius:28px 28px 0 0;background:#FFFDFB;animation:rdSheet .28s ease both;box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)">
+          <div style="width:38px;height:4px;border-radius:100px;margin:0 auto;background:#E8DFE6"></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:19px;font-weight:700;line-height:25px;letter-spacing:-.4px;color:#111827">Les 40 questions</span>
+            <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">{{ navSummary }}</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px">
+            <sc-for list="{{ navCells }}" as="n" hint-placeholder-count="40">
+              <div onClick="{{ n.tap }}" style="{{ n.style }}">{{ n.num }}</div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;gap:14px;flex-wrap:wrap;padding-top:2px">
+            <sc-for list="{{ navLegend }}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="{{ l.dotStyle }}"></div>
+                <span style="font-size:11px;font-weight:500;color:#6E5F78">{{ l.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+            <div onClick="{{ navJump }}" style="{{ navJumpStyle }}">{{ navJumpLabel }}</div>
+            <div onClick="{{ closeNav }}" style="display:flex;justify-content:center;align-items:center;height:44px;border-radius:100px;cursor:pointer;user-select:none;font-size:14px;font-weight:600;color:#5E4E69" style-hover="background:#F6F0F5">Retour à l'épreuve</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ EXIT SHEET ══ -->
+    <sc-if value="{{ showExit }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ dismissExit }}" style="position:absolute;inset:0;background:rgba(30,18,38,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="{{ sheetStyle }}">
+          <div style="{{ sheetGrabStyle }}"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:20px;font-weight:700;line-height:26px;letter-spacing:-.4px;color:{{ sheetTitleInk }};text-wrap:pretty">{{ sheetTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:{{ sheetBodyInk }};text-wrap:pretty">{{ sheetBody }}</span>
+          </div>
+
+          <sc-if value="{{ sheetHasProgress }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;padding:4px 14px;border-radius:18px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+              <sc-for list="{{ sheetRows }}" as="sr" hint-placeholder-count="4">
+                <div style="{{ sr.rowStyle }}">
+                  <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:#5E4E69">{{ sr.label }}</span>
+                  <span style="{{ sr.valueStyle }}">{{ sr.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+            <div onClick="{{ dismissExit }}" style="{{ sheetPrimaryStyle }}">{{ sheetPrimary }}</div>
+            <a href="MockTestDetail.dc.html" style="{{ sheetSecondaryStyle }}">{{ sheetSecondary }}</a>
+          </div>
+          <span style="font-size:11.5px;font-weight:400;line-height:16px;text-align:center;color:{{ sheetBodyInk }};text-wrap:pretty">{{ sheetNote }}</span>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ══ REVIEW CHROME ══ -->
+  <div style="display:flex;gap:6px;width:393px;flex-wrap:wrap">
+    <sc-for list="{{ steps }}" as="st" hint-placeholder-count="14">
+      <div onClick="{{ st.go }}" style="{{ st.chipStyle }}">{{ st.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;width:393px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px #D9CCD6">
+    <span style="flex:1;font-size:12.5px;font-weight:700;color:#2E1A3B">Session mode</span>
+    <sc-for list="{{ modes }}" as="md" hint-placeholder-count="2">
+      <div onClick="{{ md.go }}" style="{{ md.style }}">{{ md.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Scenario flags</span>
+      <span style="font-size:12px;font-weight:400;line-height:17px;color:#6E5F78;text-wrap:pretty">Each flag switches one branch of this flow. Toggle it on the left; tap the pill to jump to the step it changes.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+        <div style="{{ f.rowStyle }}">
+          <div onClick="{{ f.toggle }}" style="{{ f.trackStyle }}">
+            <div style="{{ f.knobStyle }}"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span onClick="{{ f.toggle }}" style="font-size:13px;font-weight:700;line-height:17px;color:#2E1A3B;cursor:pointer;user-select:none">{{ f.label }}</span>
+              <span onClick="{{ f.goScreen }}" style="font-size:10px;font-weight:600;letter-spacing:.3px;padding:3px 8px;border-radius:100px;background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6;cursor:pointer;user-select:none;white-space:nowrap" style-hover="background:#6A2A5F;color:#fff">{{ f.screenLabel }} ↗</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.onTagStyle }}">ON</span>
+              <span style="{{ f.onTextStyle }}">{{ f.onText }}</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.offTagStyle }}">OFF</span>
+              <span style="{{ f.offTextStyle }}">{{ f.offText }}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mock&quot;,&quot;practice&quot;],&quot;default&quot;:&quot;mock&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;startStep&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;consignes&quot;,&quot;passage&quot;,&quot;question&quot;,&quot;feedback&quot;,&quot;gapQ&quot;,&quot;chartDocQ&quot;,&quot;graphQ&quot;,&quot;lineQ&quot;,&quot;donutQ&quot;,&quot;stackQ&quot;,&quot;orderQ&quot;,&quot;textSheet&quot;,&quot;break&quot;,&quot;exitQ&quot;,&quot;complete&quot;],&quot;default&quot;:&quot;consignes&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;flagged&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;lastInSection&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const TEAL = "#1A9E94", DEEP = "#0F6B65", TINT = "#EAF7F5", RING = "#C7E8E4";
+
+/* TEF Reading since 11 Dec 2023: 40 questions in FIVE item groups. The old
+   "sections A–D" model is pre-2023 and no longer exists, so no screen names a
+   section — the exam only ever states the question number out of 40. */
+const GROUPS = [
+  { name: "Documents du quotidien", from: 1, to: 7 },
+  { name: "Phrases lacunaires", from: 8, to: 17 },
+  { name: "Lecture rapide · textes et graphiques", from: 18, to: 22 },
+  { name: "Documents administratifs et professionnels", from: 23, to: 32 },
+  { name: "Article de presse", from: 33, to: 40 }
+];
+const groupOf = n => (GROUPS.filter(g => n >= g.from && n <= g.to)[0] || GROUPS[0]).name;
+
+const STEPS = [
+  { key: "consignes", label: "Consignes" },
+  { key: "passage", label: "Passage reader" },
+  { key: "question", label: "Question · MCQ" },
+  { key: "feedback", label: "Answered" },
+  { key: "gapQ", label: "Phrase completion" },
+  { key: "graphQ", label: "Bar chart" },
+  { key: "lineQ", label: "Line chart" },
+  { key: "donutQ", label: "Donut chart" },
+  { key: "stackQ", label: "Stacked bar" },
+  { key: "chartDocQ", label: "Chart as document" },
+  { key: "orderQ", label: "Sentence ordering · legacy" },
+  { key: "textSheet", label: "Text over question" },
+  { key: "break", label: "Group break" },
+  { key: "exitQ", label: "Exit · question" },
+  { key: "complete", label: "Test complete" }
+];
+
+const LABELS = {
+  consignes: "Consignes — the on-screen instructions the real exam opens with",
+  chartDocQ: "Chart as the document — one graph, text options under it",
+  passage: "Passage reader — serif body, text stays reachable later",
+  question: "Text MCQ, nothing picked yet",
+  feedback: "Answer picked — practice shows the verdict and the line",
+  gapQ: "Phrase completion — phrases lacunaires (group 2)",
+  graphQ: "Graph matching, bars — threshold read (above 50 % in 2023)",
+  lineQ: "Graph matching, lines — two movements in order (dip, then new high)",
+  donutQ: "Graph matching, donut — share against a quarter of the ring",
+  stackQ: "Graph matching, stacked — two parts summed against a third",
+  orderQ: "Sentence ordering — tap the sentences in the order of the text",
+  textSheet: "Passage sheet pulled back up over a question",
+  break: "Between the administrative group and the article group",
+  exitQ: "Exit sheet over a question",
+  complete: "Test complete — score ring, stats, "
+};
+
+const PARAS = [
+  "Il y a cinq ans, Sophie Béchard louait vingt postes de travail au centre-ville de Montréal. Aujourd'hui, son agence de traduction occupe l'ancienne quincaillerie d'un village de deux mille habitants, à deux heures de route de son ancien bureau.",
+  "Le calcul semble évident : le loyer a baissé de soixante pour cent. Ce n'est pas le loyer qui les décide, admet-elle, mais le fait de garder des salariés qui allaient partir. Trois de ses traductrices avaient annoncé leur départ pour des régions plus abordables ; l'agence a préféré les suivre.",
+  "Le mouvement reste minoritaire. Selon l'Institut de la statistique, moins de quatre pour cent des entreprises de services ont déménagé hors des grands centres depuis 2020. Mais celles qui l'ont fait déclarent un taux de rétention supérieur de onze points à la moyenne de leur secteur.",
+  "Tout n'est pas résolu pour autant. Le recrutement de profils très spécialisés devient plus lent, et les municipalités concernées manquent souvent de places en garderie et de logements locatifs — deux conditions que les nouveaux arrivants citent avant le prix du terrain.",
+  "Sophie Béchard, elle, ne prévoit pas de revenir. Elle garde toutefois un espace de réunion loué à la journée en ville, « pour les clients qui n'ont pas encore compris qu'on travaille très bien à quatre-vingts kilomètres d'eux »."
+];
+
+const OPTS_MCQ = [
+  { letter: "A", text: "La baisse du loyer de son bureau." },
+  { letter: "B", text: "Le départ annoncé de plusieurs employées." },
+  { letter: "C", text: "Une demande de ses clients montréalais." },
+  { letter: "D", text: "Un programme d'aide municipal." }
+];
+
+const OPTS_GAP = [
+  { letter: "A", text: "d'abord" },
+  { letter: "B", text: "rarement" },
+  { letter: "C", text: "malgré tout" },
+  { letter: "D", text: "en principe" }
+];
+
+const CORRECT = 1;
+const GAP_CORRECT = 0;
+
+const ORDER_ITEMS = [
+  "Pourtant, les premiers résultats sont encourageants.",
+  "La ville a lancé son service de vélos partagés en avril.",
+  "La municipalité envisage donc d'ajouter vingt stations.",
+  "Les usagers se sont d'abord plaints du manque de stations."
+];
+const ORDER_CORRECT = [1, 3, 0, 2];
+
+const GRAPH_TICKS = ["2015", "2019", "2023"];
+
+/* The group-3 item the four matching steps were missing: the chart IS the
+   document, read once, with ordinary text options under it — never a chart
+   sitting under the answers. */
+const CHART_DOC = {
+  num: 20, pct: 50,
+  label: "DOCUMENT · Ville de Sherbrooke",
+  title: "Part du vélo dans les déplacements quotidiens",
+  source: "Enquête origine-destination · 2024",
+  unit: "%", max: 30, rule: 10,
+  bars: [
+    { year: "2015", v: 6 },
+    { year: "2018", v: 9 },
+    { year: "2021", v: 14 },
+    { year: "2024", v: 23 }
+  ],
+  question: "En quelle année la part du vélo dépasse-t-elle 10 % pour la première fois ?",
+  options: [
+    { letter: "A", text: "En 2015" },
+    { letter: "B", text: "En 2018" },
+    { letter: "C", text: "En 2021" },
+    { letter: "D", text: "En 2024" }
+  ],
+  correct: 2,
+  hint: "2018 reste sous la ligne des 10 % ; 2021 est la première barre à la dépasser."
+};
+
+const CHARTS = {
+  graphQ: {
+    kind: "bars", item: "item 4 sur 7", num: 33, pct: 82, correct: 0,
+    question: "Quel graphique correspond à cette affirmation ?",
+    statement: "« Les énergies renouvelables représentent plus de la moitié de la production électrique nationale en 2023. »",
+    hint: "A est la seule barre de 2023 au-dessus de la ligne des 50 %. C progresse aussi mais reste en dessous.",
+    cards: [
+      { letter: "A", label: "Graphique A", vals: [24, 41, 62], value: "62 % en 2023" },
+      { letter: "B", label: "Graphique B", vals: [45, 38, 32], value: "32 % en 2023" },
+      { letter: "C", label: "Graphique C", vals: [30, 34, 38], value: "38 % en 2023" },
+      { letter: "D", label: "Graphique D", vals: [62, 41, 20], value: "20 % en 2023" }
+    ]
+  },
+  lineQ: {
+    kind: "line", item: "item 5 sur 7", num: 34, pct: 84, correct: 0,
+    question: "Quelle courbe correspond à cette affirmation ?",
+    statement: "« La fréquentation a baissé en 2019, puis a dépassé en 2023 son niveau de 2015. »",
+    hint: "Deux mouvements, dans l'ordre : une baisse, puis un sommet au-dessus du départ. C baisse mais ne repasse jamais au-dessus de 2015.",
+    cards: [
+      { letter: "A", label: "Courbe A", vals: [55, 38, 72], value: "55 → 38 → 72" },
+      { letter: "B", label: "Courbe B", vals: [40, 58, 70], value: "40 → 58 → 70" },
+      { letter: "C", label: "Courbe C", vals: [62, 44, 54], value: "62 → 44 → 54" },
+      { letter: "D", label: "Courbe D", vals: [68, 52, 30], value: "68 → 52 → 30" }
+    ]
+  },
+  donutQ: {
+    kind: "donut", item: "item 6 sur 7", num: 35, pct: 86, correct: 1,
+    question: "Quel diagramme correspond à cette affirmation ?",
+    statement: "« Moins d'un quart des déplacements quotidiens se font en voiture. »",
+    hint: "Le repère à droite marque un quart du cercle : seul B s'arrête avant.",
+    cards: [
+      { letter: "A", label: "Diagramme A", share: 38, value: "voiture 38 %" },
+      { letter: "B", label: "Diagramme B", share: 16, value: "voiture 16 %" },
+      { letter: "C", label: "Diagramme C", share: 48, value: "voiture 48 %" },
+      { letter: "D", label: "Diagramme D", share: 31, value: "voiture 31 %" }
+    ]
+  },
+  stackQ: {
+    kind: "stack", item: "item 7 sur 7", num: 36, pct: 88, correct: 0,
+    question: "Quelle répartition correspond à cette affirmation ?",
+    statement: "« En 2023, le train et le vélo réunis dépassent la voiture. »",
+    hint: "Additionnez les deux parts turquoise avant de comparer : seul A dépasse la moitié de la barre.",
+    cards: [
+      { letter: "A", label: "Répartition A", segs: [34, 22, 44], value: "train + vélo 56 %" },
+      { letter: "B", label: "Répartition B", segs: [28, 14, 58], value: "train + vélo 42 %" },
+      { letter: "C", label: "Répartition C", segs: [30, 18, 52], value: "train + vélo 48 %" },
+      { letter: "D", label: "Répartition D", segs: [22, 20, 58], value: "train + vélo 42 %" }
+    ]
+  }
+};
+const CHART_LETTERS = ["A", "B", "C", "D"];
+const CHART_NEXT = { graphQ: "lineQ", lineQ: "donutQ", donutQ: "stackQ", stackQ: "break" };
+const CHART_PREV = { graphQ: "chartDocQ", lineQ: "graphQ", donutQ: "lineQ", stackQ: "donutQ" };
+const SEG_NAMES = ["train", "vélo", "voiture"];
+const SEG_COLORS = [DEEP, TEAL, "#D9CED7"];
+
+const FLAGS = [
+  /* No official source shows a flag control in the real CBT — the e-TEF guide
+     details every other button and tells candidates to note the screen number
+     themselves. So flags are a practice aid, shown in practice mode only. */
+  { key: "flagged", label: "Question flagged (practice aid)", def: false, screen: "question",
+    on: "Practice mode only — the chip is active and the counters read 3 flagged.",
+    off: "Nothing flagged. In mock mode the chip does not exist at all: the real exam has no flag button." },
+  { key: "lastInSection", label: "Last question of the group", def: false, screen: "question",
+    on: "CTA becomes Finish this group and leads to the group break.",
+    off: "CTA is Next question and stays inside the text." }
+];
+
+class Component extends DCLogic {
+  state = { screen: null, flags: {}, mode: null, picked: null, secs: 2712, textOpen: null, flagOn: null, order: [], advIn: null };
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      const s = this.cur();
+      if (s !== "complete" && s !== "break") this.setState(st => ({ secs: Math.max(0, st.secs - 1) }));
+      /* Mock has no Next button — the exam has none, so a fixed pause after the
+         answer carries you on. Back and the navigator stay: movement is free. */
+      if (this.state.advIn !== null && this.state.advIn !== undefined) {
+        if (this.state.advIn > 1) this.setState(st => ({ advIn: st.advIn - 1 }));
+        else { const go = this.state.advTo; this.setState({ advIn: null, advTo: null }); if (go) this.goto(go); }
+      }
+    }, 260);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  cur() { return this.state.screen || this.props.startStep || "consignes"; }
+  /* PracticeConfig (§9) is the only door into an engine and it knows the mode,
+     so it carries it as ?mode=practice|mock. Without this every route ran mock. */
+  qMode() {
+    if (this._qm === undefined) {
+      const v = new URLSearchParams(location.search).get("mode");
+      this._qm = v === "practice" || v === "mock" ? v : null;
+    }
+    return this._qm;
+  }
+  mode() { return this.state.mode || this.qMode() || this.props.mode || "mock"; }
+  flag(k) {
+    const f = this.state.flags[k];
+    if (f !== undefined) return f;
+    if (this.props[k] !== undefined && this.props[k] !== null) return this.props[k];
+    return FLAGS.filter(x => x.key === k)[0].def;
+  }
+  goto(k) {
+    const next = { screen: k, textOpen: null, flagOn: null, order: [], advIn: null, advTo: null };
+    if (k === "question" || k === "gapQ" || k === "chartDocQ" || CHARTS[k] || k === "orderQ" || k === "textSheet" || k === "exitQ") next.picked = null;
+    if (k === "feedback") next.picked = 3;
+    this.setState(next);
+  }
+  fmt(n) {
+    const m = Math.floor(n / 60), s = n % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  renderVals() {
+    const raw = this.cur();
+    const screen = raw === "feedback" || raw === "textSheet" || raw === "exitQ" ? "question" : raw;
+    const practice = this.mode() === "practice";
+    const gap = raw === "gapQ";
+    const ordering = raw === "orderQ";
+    const order = this.state.order || [];
+    const orderDone = order.length === ORDER_ITEMS.length;
+    const orderRight = orderDone && order.join() === ORDER_CORRECT.join();
+    const chart = CHARTS[raw] || null;
+    const graphing = !!chart;
+    const ck = chart ? chart.kind : "";
+    const chartDoc = raw === "chartDocQ";
+    const isQ = screen === "question" || gap || ordering || graphing || chartDoc;
+    const dark = raw === "complete" || raw === "consignes";
+    /* MCQ text item now sits in group 5 (article de presse), question 35 */
+    const qNum = ordering ? null : chartDoc ? CHART_DOC.num : graphing ? chart.num : gap ? 12 : 35;
+
+    const picked = this.state.picked;
+    const answered = picked !== null;
+    const gCorrect = chart ? chart.correct : 0;
+    const correctIdx = graphing ? gCorrect : chartDoc ? CHART_DOC.correct : gap ? GAP_CORRECT : CORRECT;
+    const showFeedback = practice && answered && !gap && !graphing;
+    const correct = picked === correctIdx;
+
+    const flagged = this.state.flagOn !== null ? this.state.flagOn : this.flag("flagged");
+    const last = this.flag("lastInSection");
+    const textOpen = this.state.textOpen !== null ? this.state.textOpen : raw === "textSheet";
+
+    const src = chartDoc ? CHART_DOC.options : gap ? OPTS_GAP : OPTS_MCQ;
+    const options = src.map((o, i) => {
+      const sel = picked === i;
+      const verdict = practice && answered
+        ? (i === correctIdx ? "right" : sel ? "wrong" : "idle")
+        : sel ? "sel" : "idle";
+      const ring = verdict === "right" ? "#8FD3CD" : verdict === "wrong" ? "#FBD5D5" : verdict === "sel" ? "#2E1A3B" : "#EFE3EC";
+      const ground = verdict === "right" ? "#F0FDF4" : verdict === "wrong" ? "#FEF2F2" : verdict === "sel" ? "#FBF7FA" : "#FFFFFF";
+      const ringW = verdict === "idle" ? 1 : 2;
+      const badgeInk = verdict === "right" ? "#15803D" : verdict === "wrong" ? "#B91C1C" : verdict === "sel" ? "#FFFFFF" : "#5E4E69";
+      const badgeBg = verdict === "right" ? "#DCFCE7" : verdict === "wrong" ? "#FEE2E2" : verdict === "sel" ? "#2E1A3B" : "#F3EDF2";
+      return {
+        letter: o.letter, text: o.text,
+        tap: () => {
+          if (practice && answered) return;
+          if (practice) { this.setState({ picked: i, screen: !gap && !chartDoc ? "feedback" : raw }); return; }
+          this.setState({ picked: i, screen: raw });
+        },
+        cardStyle: "display:flex;align-items:center;gap:12px;padding:15px;border-radius:18px;cursor:pointer;transition:box-shadow .16s ease,background .16s ease;background:" +
+          ground + ";box-shadow:inset 0 0 0 " + ringW + "px " + ring + ",0 1px 2px rgba(0,0,0,.04)",
+        badgeStyle: "width:28px;height:28px;border-radius:9px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:12.5px;font-weight:700;background:" +
+          badgeBg + ";color:" + badgeInk,
+        textStyle: "flex:1;font-size:" + (gap ? "15" : "14.5") + "px;font-weight:" + (gap ? "600" : "500") + ";line-height:20px;color:#111827;text-wrap:pretty",
+        hasMark: practice && answered && (i === correctIdx || (sel && !correct)),
+        markIcon: i === correctIdx ? "IconCheck" : "IconX",
+        markStyle: "width:22px;height:22px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#fff;background:" +
+          (i === correctIdx ? "#15803D" : "#DC2626")
+      };
+    });
+
+    const cta = {};
+    if (raw === "consignes") {
+      cta.label = "Commencer l'épreuve"; cta.icon = "IconArrowRight";
+      cta.note = "Le chronomètre de 60 minutes démarre à l'ouverture du premier document.";
+      cta.go = () => this.goto("passage");
+    } else if (chartDoc) {
+      cta.label = "Question suivante"; cta.icon = "IconArrowRight";
+      cta.disabled = picked === null;
+      cta.note = picked === null
+        ? "Lisez le graphique, puis choisissez une réponse."
+        : practice
+          ? (picked === CHART_DOC.correct ? "Correct — " : "La bonne réponse est « " + CHART_DOC.options[CHART_DOC.correct].text + " ». ") + CHART_DOC.hint
+          : "Question " + CHART_DOC.num + " sur 40 · lecture rapide";
+      cta.go = () => { if (picked !== null) this.goto("graphQ"); };
+    } else if (raw === "passage") {
+      cta.label = "Répondre aux questions"; cta.icon = "IconArrowRight";
+      cta.note = "3 questions sur ce texte · vous pouvez le rouvrir à tout moment";
+      cta.go = () => this.goto("question");
+    } else if (ordering) {
+      cta.label = "Item suivant"; cta.icon = "IconArrowRight";
+      cta.disabled = !orderDone;
+      cta.note = orderDone
+        ? (practice ? (orderRight ? "Ordre correct — B · D · A · C" : "Le texte suit l'ordre B · D · A · C") : "Item hérité — retiré du TEF en décembre 2023")
+        : "Touchez les phrases dans l'ordre du texte.";
+      cta.go = () => { if (orderDone) this.goto("break"); };
+    } else if (graphing) {
+      cta.label = "Item suivant"; cta.icon = "IconArrowRight";
+      cta.disabled = !answered;
+      cta.note = answered
+        ? (practice
+            ? (picked === gCorrect ? "Correct — " : "La bonne réponse est " + CHART_LETTERS[gCorrect] + ". ") + chart.hint
+            : chart.item.charAt(0).toUpperCase() + chart.item.slice(1) + " · lecture rapide")
+        : "Choisissez le graphique qui correspond à l'affirmation.";
+      cta.go = () => { if (answered) this.goto(CHART_NEXT[raw]); };
+    } else if (isQ) {
+      cta.label = gap ? "Item suivant" : last ? "Terminer ce groupe" : "Question suivante";
+      cta.icon = "IconArrowRight";
+      cta.disabled = !answered;
+      cta.note = answered
+        ? (flagged ? "Question marquée — une aide à l'entraînement, pas un outil de l'examen." : gap ? "Item 5 sur 10 · phrases lacunaires" : "Question " + qNum + " sur 40 · vos réponses restent modifiables jusqu'à la validation")
+        : "Choisissez une réponse pour continuer.";
+      cta.go = () => { if (answered) this.goto(gap ? "chartDocQ" : last ? "break" : "gapQ"); };
+    } else if (raw === "break") {
+      cta.label = "Passer au groupe suivant"; cta.icon = "IconArrowRight";
+      cta.note = "32 questions sur 40 répondues · 33 min restantes";
+      cta.go = () => this.goto("complete");
+    } else {
+      /* In a mock session the four skills run back to back, so this screen
+         hands off to the next épreuve instead of ending the attempt. */
+      const nx = window.MockSession && MockSession.active() ? MockSession.nextOf("reading") : null;
+      cta.label = nx ? "Continuer : " + nx.fr : "Voir les résultats";
+      cta.icon = nx ? "IconArrowRight" : "IconSolidRoundedFileCheck";
+      cta.note = nx ? "Aucune pause entre les épreuves." : "Retour au test blanc";
+      cta.go = () => {
+        if (nx) MockSession.handoff("reading");
+        else __go("TestReview.dc.html");
+      };
+      cta.noteHref = "MockTestDetail.dc.html";
+    }
+
+    const ctaBg = cta.disabled ? (dark ? "rgba(255,255,255,.12)" : "#E5E7EB") : (dark ? "#FFFFFF" : "#2E1A3B");
+    const ctaInk = cta.disabled ? (dark ? "rgba(255,255,255,.42)" : "#9CA3AF") : (dark ? "#1E1226" : "#FFFFFF");
+
+    return {
+      stateLabel: LABELS[raw] || "",
+      frameStyle: "position:relative;width:393px;height:852px;overflow:hidden;flex-shrink:0;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);background:" +
+        (dark ? "linear-gradient(170deg,#1A211F 0%,#1E1226 60%,#100D0A 100%)" : "linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 60%)"),
+
+      isPassage: raw === "passage",
+      isQuestion: isQ && !ordering && !graphing && !chartDoc,
+      isGapQ: gap,
+      isOrderQ: ordering,
+      isGraphQ: graphing,
+      isBarsChart: ck === "bars",
+      isLineChart: ck === "line",
+      isDonutChart: ck === "donut",
+      isStackChart: ck === "stack",
+      hasTickRow: ck === "bars" || ck === "line",
+      graphKicker: chart ? "Graphique · " + chart.item.replace("item ", "item ").replace(" of ", " sur ") : "",
+      graphQuestion: chart ? chart.question : "",
+      graphStatement: chart ? chart.statement : "",
+      graphCards: (chart ? chart.cards : []).map((g, i) => {
+        const sel = picked === i;
+        const verdict = practice && answered
+          ? (i === gCorrect ? "right" : sel ? "wrong" : "idle")
+          : sel ? "sel" : "idle";
+        const ring = verdict === "right" ? "#8FD3CD" : verdict === "wrong" ? "#FBD5D5" : verdict === "sel" ? "#2E1A3B" : "#EFE3EC";
+        const ground = verdict === "right" ? "#F0FDF4" : verdict === "wrong" ? "#FEF2F2" : verdict === "sel" ? "#FBF7FA" : "#FFFFFF";
+        const dim = verdict === "idle" && practice && answered;
+        return {
+          letter: g.letter, label: g.label, value: g.value,
+          tap: () => {
+            if (practice && answered) return;
+            /* Picking reveals the submit button — mock reading moves on the
+               candidate's tap, not a countdown. */
+            if (practice) { this.setState({ picked: i, screen: raw }); return; }
+            this.setState({ picked: i, screen: raw });
+          },
+          cardStyle: "display:flex;flex-direction:column;gap:7px;padding:11px;border-radius:16px;cursor:pointer;transition:box-shadow .16s ease,background .16s ease,opacity .16s ease;background:" +
+            ground + ";box-shadow:inset 0 0 0 " + (verdict === "idle" ? 1 : 2) + "px " + ring + ",0 1px 2px rgba(0,0,0,.04)" + (dim ? ";opacity:.55" : ""),
+          badgeStyle: "width:24px;height:24px;border-radius:8px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:11.5px;font-weight:700;background:" +
+            (verdict === "right" ? "#DCFCE7" : verdict === "wrong" ? "#FEE2E2" : verdict === "sel" ? "#2E1A3B" : "#F3EDF2") + ";color:" +
+            (verdict === "right" ? "#15803D" : verdict === "wrong" ? "#B91C1C" : verdict === "sel" ? "#FFFFFF" : "#5E4E69"),
+          labelStyle: "flex:1;font-size:11.5px;font-weight:600;line-height:15px;color:#5E4E69;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
+          bars: (g.vals || []).map(v => ({
+            style: "flex:1;height:" + v + "%;min-height:4px;border-radius:4px 4px 2px 2px;background:linear-gradient(180deg," + TEAL + "," + DEEP + ")"
+          })),
+          ticks: GRAPH_TICKS.map(t => ({ label: t })),
+          valueStyle: "font-size:11.5px;font-weight:700;letter-spacing:-.1px;color:" + DEEP,
+          hasMark: practice && answered && (i === gCorrect || (sel && picked !== gCorrect)),
+          markIcon: i === gCorrect ? "IconCheck" : "IconX",
+          markStyle: "width:20px;height:20px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#fff;background:" +
+            (i === gCorrect ? "#15803D" : "#DC2626"),
+
+          points: ck === "line" ? g.vals.map((v, j) => (14.8 + j * 35.2) + "," + (64 - v * 0.6).toFixed(1)).join(" ") : "",
+          dots: ck === "line" ? g.vals.map((v, j) => ({ cx: 14.8 + j * 35.2, cy: +(64 - v * 0.6).toFixed(1) })) : [],
+
+          donutStyle: "position:relative;width:58px;height:58px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:conic-gradient(" +
+            DEEP + " 0 " + (g.share || 0) + "%,#E0D5DE " + (g.share || 0) + "% 100%)",
+          holeStyle: "width:28px;height:28px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:" + ground +
+            ";font-size:9.5px;font-weight:700;color:#5E4E69",
+          donutInner: ck === "donut" ? g.share + "%" : "",
+
+          segs: (g.segs || []).map((v, j) => ({ style: "width:" + v + "%;background:" + SEG_COLORS[j] })),
+          segLabels: (g.segs || []).map((v, j) => ({
+            label: SEG_NAMES[j] + " " + v,
+            style: "flex:0 0 auto;white-space:nowrap;font-size:8.5px;font-weight:600;letter-spacing:.1px;color:" +
+              (j === 2 ? "#9C8F9A" : DEEP)
+          }))
+        };
+      }),
+      orderHint: orderDone ? "Touchez une phrase à nouveau pour la retirer de l'ordre." : "Touchez-les une par une — encore " + (ORDER_ITEMS.length - order.length) + " à placer.",
+      orderRows: ORDER_ITEMS.map((t, i) => {
+        const pos = order.indexOf(i);
+        const placed = pos >= 0;
+        const verdict = practice && orderDone ? (ORDER_CORRECT[pos] === i ? "right" : "wrong") : placed ? "sel" : "idle";
+        const ring = verdict === "right" ? "#8FD3CD" : verdict === "wrong" ? "#FBD5D5" : verdict === "sel" ? TEAL : "#EFE3EC";
+        const ground = verdict === "right" ? "#F0FDF4" : verdict === "wrong" ? "#FEF2F2" : verdict === "sel" ? TINT : "#FFFFFF";
+        return {
+          text: t,
+          slot: placed ? String(pos + 1) : "",
+          tap: () => this.setState(s => {
+            const cur = s.order || [];
+            return { order: cur.indexOf(i) >= 0 ? cur.filter(x => x !== i) : cur.concat([i]) };
+          }),
+          cardStyle: "display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:18px;cursor:pointer;transition:box-shadow .16s ease,background .16s ease;background:" +
+            ground + ";box-shadow:inset 0 0 0 " + (verdict === "idle" ? 1 : 2) + "px " + ring + ",0 1px 2px rgba(0,0,0,.04)",
+          slotStyle: "width:30px;height:30px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:13px;font-weight:700;background:" +
+            (placed ? TEAL : "#F3EDF2") + ";color:" + (placed ? "#fff" : "#9C8F9A") + (placed ? "" : ";box-shadow:inset 0 0 0 1.5px #E8DFE6"),
+          textStyle: "flex:1;font-family:'Source Serif 4',Georgia,serif;font-size:14.5px;font-weight:400;line-height:21px;color:#1F2937;text-wrap:pretty",
+          hasMark: practice && orderDone,
+          markIcon: ORDER_CORRECT[pos] === i ? "IconCheck" : "IconX",
+          markStyle: "width:22px;height:22px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#fff;background:" +
+            (ORDER_CORRECT[pos] === i ? "#15803D" : "#DC2626")
+        };
+      }),
+      orderHasReset: order.length > 0,
+      orderReset: () => this.setState({ order: [] }),
+      orderShowVerdict: practice && orderDone,
+      orderVerdictStyle: "display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;animation:rdFade .25s ease both;background:" +
+        (orderRight ? "#F0FDF4" : "#FEF2F2") + ";box-shadow:inset 0 0 0 1px " + (orderRight ? "#BBF7D0" : "#FBD5D5") + ";color:" + (orderRight ? "#15803D" : "#B91C1C"),
+      orderVerdictIcon: orderRight ? "IconCheck" : "IconDuotoneAlertCircle",
+      orderVerdictTitle: orderRight ? "Ordre correct" : "Deux phrases sont inversées",
+      orderVerdictBody: orderRight
+        ? "Le lancement ouvre le paragraphe, la plainte suit, « pourtant » marque le retournement et « donc » conclut sur la conséquence."
+        : "Suivez les connecteurs, pas les thèmes : « d'abord » marque la première réaction, « pourtant » la renverse et « donc » énonce la suite. Le texte suit l'ordre B · D · A · C.",
+      isConsignes: raw === "consignes",
+      hasCta: true,
+      hasAutoStrip: false,
+      autoStripText: (this.state.advIn !== null && this.state.advIn !== undefined)
+        ? "Réponse enregistrée · question suivante dans " + this.state.advIn + " s"
+        : "Choisissez une réponse — vous pouvez y revenir avant de terminer l'épreuve.",
+      autoStripStyle: "position:relative;pointer-events:none;display:flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:100px;background:" +
+        ((this.state.advIn !== null && this.state.advIn !== undefined) ? TINT : "rgba(255,255,255,.78)") +
+        ";box-shadow:inset 0 0 0 1px " + ((this.state.advIn !== null && this.state.advIn !== undefined) ? RING : "#E8DFE6") +
+        ";font-size:12.5px;font-weight:600;text-align:center;color:" + ((this.state.advIn !== null && this.state.advIn !== undefined) ? DEEP : "#5E4E69"),
+      passageKicker: "Article de presse · document 5 sur 9",
+      consigneRules: [
+        { n: "1", text: "40 questions, 60 minutes, cinq groupes de documents. Le chronomètre s'affiche en haut à droite." },
+        { n: "2", text: "Vous pouvez circuler librement entre les questions et modifier vos réponses." },
+        { n: "3", text: "Le bouton « Terminer l'épreuve » n'apparaît qu'après la dernière question : une fois validé, plus aucune modification n'est possible." },
+        { n: "4", text: "Il n'y a aucun outil de marquage. Notez vous-même le numéro de l'écran si vous passez une question." }
+      ],
+      /* the group-3 item where the chart is the document, not an answer option */
+      docLabel: CHART_DOC.label,
+      docTitle: CHART_DOC.title,
+      docSource: CHART_DOC.source,
+      docQuestion: CHART_DOC.question,
+      docRuleLabel: CHART_DOC.rule + " %",
+      docRuleStyle: "position:absolute;left:34px;right:0;z-index:1;border-top:1px dashed #C4B3C1;bottom:" + (CHART_DOC.rule / CHART_DOC.max * 148) + "px",
+      docRuleTextStyle: "position:absolute;left:0;z-index:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;font-weight:500;line-height:11px;color:#9C8F9A;bottom:" +
+        (CHART_DOC.rule / CHART_DOC.max * 148 - 5) + "px",
+      docBars: CHART_DOC.bars.map(b => ({
+        year: b.year,
+        value: b.v + " %",
+        style: "flex:1;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg," + TEAL + "," + DEEP + ");position:relative;z-index:2;height:" +
+          (b.v / CHART_DOC.max * 148) + "px",
+        valueStyle: "flex:1;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;font-weight:600;color:" + DEEP,
+        tickStyle: "flex:1;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;font-weight:500;color:#9C8F9A"
+      })),
+      /* "Je ne sais pas" is a real e-TEF control and applies to every MCQ item */
+      hasSkip: isQ && !ordering,
+      skipLabel: "Je ne sais pas",
+      skipTap: () => { const n = graphing ? CHART_NEXT[raw] : chartDoc ? "graphQ" : gap ? "chartDocQ" : "gapQ"; this.goto(n); },
+      isChartDoc: chartDoc,
+      isBreak: raw === "break",
+      isComplete: raw === "complete",
+
+
+      paras: PARAS.map(t => ({
+        text: t,
+        style: "font-family:'Source Serif 4',Georgia,serif;font-size:16.5px;font-weight:400;line-height:27px;color:#1F2937;text-wrap:pretty"
+      })),
+
+      qKicker: gap ? "Phrases lacunaires · item 5 sur 10" : "Article de presse · question 3 sur 8",
+      qText: gap
+        ? "Choisissez le mot ou l'expression qui complète la phrase."
+        : "Qu'est-ce qui a décidé Sophie Béchard à quitter le centre-ville ?",
+      gapFill: answered ? OPTS_GAP[picked].text : "…",
+      options: options,
+      showFeedback: showFeedback,
+      feedbackStyle: "display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;animation:rdFade .25s ease both;background:" +
+        (correct ? "#F0FDF4" : "#FEF2F2") + ";box-shadow:inset 0 0 0 1px " + (correct ? "#BBF7D0" : "#FBD5D5") + ";color:" + (correct ? "#15803D" : "#B91C1C"),
+      feedbackIcon: correct ? "IconCheck" : "IconDuotoneAlertCircle",
+      feedbackTitle: correct ? "Correct — B" : "Presque — la bonne réponse est B",
+      feedbackBody: correct
+        ? "Elle cite le loyer pour l'écarter aussitôt : la raison qu'elle donne, c'est de garder les trois traductrices qui avaient annoncé leur départ."
+        : "La baisse du loyer est réelle, mais elle l'écarte explicitement comme facteur décisif. La phrase qui répond à la question est celle sur les employées qui allaient partir.",
+
+      hasTextBar: screen === "question" && !gap && !ordering && !graphing,
+      textBarTap: () => this.setState({ textOpen: true }),
+      textBarLabel: "Le retour des bureaux à la campagne",
+      textBarHint: "420 mots",
+      textBarStyle: "position:relative;pointer-events:auto;display:flex;align-items:center;gap:10px;height:44px;padding:0 16px;border-radius:100px;cursor:pointer;overflow:hidden;white-space:nowrap;background:" +
+        TINT + ";box-shadow:inset 0 0 0 1px " + RING + ";color:" + DEEP,
+      showText: textOpen,
+      closeText: () => this.setState({ textOpen: false, screen: raw === "textSheet" ? "question" : raw }),
+
+      hasBack: isQ,
+      backTap: () => this.goto(ordering ? "question" : chartDoc ? "gapQ" : graphing ? CHART_PREV[raw] : gap ? "question" : "passage"),
+      backStyle: "position:relative;pointer-events:auto;width:52px;height:52px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;cursor:pointer;transform:rotate(180deg);background:#FFFFFF;box-shadow:inset 0 0 0 1px #DBCED9,0 2px 6px rgba(60,30,55,.08);color:#5E4E69",
+
+      breakStats: [
+        { value: "10 / 10", label: "CE GROUPE" },
+        { value: "32 / 40", label: "TOTAL ÉPREUVE" },
+        { value: "33:12", label: "TEMPS RESTANT" }
+      ].map((b, i) => Object.assign({}, b, {
+        cellStyle: "flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" + (i > 0 ? ";border-left:1px solid #F5EEF3" : "")
+      })),
+      doneStats: ((window.MockSession && MockSession.active() && MockSession.nextOf("reading"))
+        ? [{ value: "40 / 40", label: "RÉPONSES" }, { value: "52:10", label: "TEMPS UTILISÉ" }, { value: "—", label: "SCORE EN ATTENTE" }]
+        : [{ value: "40 / 40", label: "RÉPONSES" }, { value: "52:10", label: "TEMPS UTILISÉ" }, { value: "B2", label: "NIVEAU CECR" }]
+      ).map((d, i, a) => ({
+        value: d.value, label: d.label,
+        cellStyle: "flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" + (i > 0 ? ";border-left:1px solid rgba(255,255,255,.12)" : "")
+      })),
+      /* A mock sitting releases nothing until all four épreuves are in. */
+      doneBody: (window.MockSession && MockSession.active() && MockSession.nextOf("reading"))
+        ? "Vos réponses sont enregistrées. Aucun score n'est affiché avant la fin des quatre épreuves de la session."
+        : "Vos réponses sont enregistrées. La correction montre chaque texte avec les lignes qui portaient la réponse.",
+      holdScore: !!(window.MockSession && MockSession.active() && MockSession.nextOf("reading")),
+      doneTitle: (window.MockSession && MockSession.active() && MockSession.nextOf("reading"))
+        ? "Compréhension écrite enregistrée"
+        : "Compréhension écrite terminée",
+      scorePct: (window.MockSession && MockSession.active() && MockSession.nextOf("reading")) ? "✓" : "8",
+      scorePctStyle: (window.MockSession && MockSession.active() && MockSession.nextOf("reading"))
+        ? "font-size:52px;font-weight:700;line-height:52px;color:#4ADE80"
+        : "font-size:44px;font-weight:700;line-height:48px;letter-spacing:-1.5px;color:#fff",
+      scoreCaption: (window.MockSession && MockSession.active() && MockSession.nextOf("reading")) ? "ENREGISTRÉ" : "NCLC · ESTIMATION",
+      ringBg: (window.MockSession && MockSession.active() && MockSession.nextOf("reading"))
+        ? "conic-gradient(from -90deg,#4ADE80 0deg 360deg)"
+        : "conic-gradient(from -90deg," + TEAL + " 0deg 295deg,rgba(255,255,255,.12) 295deg 360deg)",
+
+      chromeStyle: "position:absolute;left:0;right:0;top:0;z-index:9;padding-bottom:" + (isQ ? "12px" : "0") + ";background:" +
+        (dark ? "linear-gradient(180deg,rgba(30,18,38,.92) 0%,rgba(30,18,38,0) 100%)" : "linear-gradient(180deg,rgba(248,243,247,.96) 0%,rgba(248,243,247,.86) 70%,rgba(248,243,247,0) 100%)") +
+        ";backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)",
+      barInk: dark ? "#FFFFFF" : "#111827",
+      chromeTitle: raw === "complete" ? "" : raw === "consignes" ? "Compréhension écrite"
+        : raw === "break" ? "Documents administratifs · terminé"
+        : ordering ? "Item d'entraînement · hors examen"
+        : "Question " + qNum + " sur 40",
+      chromeTitleStyle: "flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:" +
+        (dark ? "rgba(255,255,255,.85)" : "#111827"),
+      hasClose: raw !== "complete",
+      closeTap: () => this.goto("exitQ"),
+      closeStyle: "width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;flex-shrink:0;cursor:pointer;color:" +
+        (dark ? "#fff" : "#111827"),
+
+      hasFlag: isQ && practice,
+      flagTap: () => this.setState({ flagOn: !flagged }),
+      flagLabel: flagged ? "3 marquées" : "Marquer",
+      flagStyle: "display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:100px;flex-shrink:0;cursor:pointer;transition:background .16s ease;background:" +
+        (flagged ? "#FFFBEB" : "#FFFFFF") + ";box-shadow:inset 0 0 0 1px " + (flagged ? "#EDD99A" : "#E8DFE6") + ";color:" + (flagged ? "#966010" : "#857789"),
+      hasTimer: raw !== "complete",
+      clock: this.fmt(this.state.secs),
+      timerStyle: "display:flex;align-items:center;height:32px;padding:0 12px;border-radius:100px;flex-shrink:0;background:" +
+        (dark ? "rgba(255,255,255,.1)" : this.state.secs < 300 ? "#FEF2F2" : "#F5EEF3") + ";box-shadow:inset 0 0 0 1px " +
+        (dark ? "rgba(255,255,255,.16)" : this.state.secs < 300 ? "#FBD5D5" : "#E8DFE6") + ";color:" +
+        (dark ? "#fff" : this.state.secs < 300 ? "#B91C1C" : "#374151"),
+
+      hasProgress: isQ,
+      progressLeftStyle: "flex:1;font-size:10.5px;font-weight:600;letter-spacing:.3px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;color:#857789",
+      openNav: () => this.setState({ navOpen: true }),
+      closeNav: () => this.setState({ navOpen: false }),
+      showNav: !!this.state.navOpen,
+      navSummary: (flagged ? "3 marquées · " : "") + "28 répondues · 12 encore vides. Touchez un numéro pour y aller directement.",
+      navCells: Array.from({ length: 40 }, (_, i) => {
+        const num = i + 1;
+        const cur = num === qNum;
+        const isFlag = flagged && (num === 12 || num === 19 || num === 31);
+        const done = num <= 28;
+        const bg = cur ? TEAL : isFlag ? "#FFFBEB" : done ? "#F5EEF3" : "#FFFFFF";
+        const ink = cur ? "#fff" : isFlag ? "#966010" : done ? "#5E4E69" : "#9C8F9A";
+        const ring = cur ? TEAL : isFlag ? "#EDD99A" : done ? "#EFE3EC" : "#E8DFE6";
+        return {
+          num: num,
+          tap: () => this.setState({ navOpen: false, screen: num >= 37 ? "orderQ" : num >= 36 ? "stackQ" : num >= 35 ? "donutQ" : num >= 34 ? "lineQ" : num >= 31 ? "graphQ" : num >= 21 ? "gapQ" : "question", picked: null, order: [] }),
+          style: "height:30px;border-radius:9px;display:flex;justify-content:center;align-items:center;cursor:pointer;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;background:" +
+            bg + ";color:" + ink + ";box-shadow:inset 0 0 0 1px " + ring
+        };
+      }),
+      navLegend: [
+        { label: "En cours", c: TEAL, ring: TEAL },
+        { label: "Marquée", c: "#FFFBEB", ring: "#EDD99A" },
+        { label: "Répondue", c: "#F5EEF3", ring: "#EFE3EC" },
+        { label: "Vide", c: "#FFFFFF", ring: "#E8DFE6" }
+      ].map(l => ({ label: l.label, dotStyle: "width:14px;height:14px;border-radius:5px;background:" + l.c + ";box-shadow:inset 0 0 0 1px " + l.ring })),
+      navJumpLabel: flagged ? "Aller à la première question marquée · 12" : "Aller à la première question vide · 20",
+      navJump: () => this.setState({ navOpen: false, screen: flagged ? "gapQ" : "chartDocQ", picked: null, order: [] }),
+      navJumpStyle: "display:flex;justify-content:center;align-items:center;height:52px;border-radius:100px;cursor:pointer;user-select:none;font-size:15px;font-weight:600;background:#6A2A5F;color:#fff",
+      trackBg: "#EFE3EC",
+      progressFillStyle: "height:100%;width:" + (ordering ? 98 : graphing ? chart.pct : gap ? 68 : 35) + "%;border-radius:100px;background:linear-gradient(90deg," + TEAL + "," + DEEP + ")",
+      progressInk: "#857789",
+      progressLeft: ordering ? "Item d'entraînement" : "Question " + qNum + " sur 40",
+      progressRight: ordering ? "Retiré du TEF · déc. 2023" : groupOf(qNum),
+
+      fadeStyle: "position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg," +
+        (dark
+          ? "rgba(17,24,39,0) 0%,rgba(30,18,38,.72) 42%,rgba(30,18,38,.96) 78%,#100D0A 100%"
+          : "rgba(255,255,255,0) 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,.96) 78%,#fff 100%") +
+        ");backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%)",
+      ctaLabel: cta.label,
+      ctaIcon: cta.icon,
+      ctaTap: cta.go,
+      ctaStyle: "position:relative;flex:1;pointer-events:" + (cta.disabled ? "none" : "auto") +
+        ";display:flex;justify-content:center;align-items:center;gap:9px;height:52px;padding:0 18px;border-radius:100px;cursor:pointer;user-select:none;transition:background .2s ease;background:" +
+        ctaBg + ";color:" + ctaInk + (cta.disabled ? "" : ";box-shadow:0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1)"),
+      ctaNote: cta.note,
+      noteTap: () => { if (cta.noteHref) __go(cta.noteHref); },
+      ctaNoteStyle: "font-size:12.5px;font-weight:500;line-height:17px;text-align:center;text-wrap:pretty;" +
+        (cta.noteHref ? "cursor:pointer;text-decoration:underline;text-underline-offset:3px;" : "") + "color:" +
+        (dark ? "rgba(255,255,255,.55)" : "#6E5F78"),
+
+      showExit: raw === "exitQ",
+      dismissExit: () => this.goto("question"),
+      sheetStyle: "position:relative;display:flex;flex-direction:column;gap:18px;padding:14px 20px 26px;border-radius:28px 28px 0 0;animation:rdSheet .28s ease both;background:#FFFFFF;box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)",
+      sheetGrabStyle: "width:38px;height:4px;border-radius:100px;margin:0 auto 4px;background:#E8DFE6",
+      sheetTitleInk: "#111827",
+      sheetBodyInk: "#5E4E69",
+      sheetTitle: "Quitter l'épreuve ?",
+      sheetBody: flagged
+        ? "Votre progression est enregistrée comme tentative inachevée, questions marquées comprises. Le chronomètre continue pendant votre absence."
+        : "Votre progression est enregistrée comme tentative inachevée. Le chronomètre continue pendant votre absence.",
+      sheetHasProgress: true,
+      sheetRows: (flagged
+        ? [
+            { label: "Réponses", value: "13 sur 40" },
+            { label: "Questions marquées", value: "3", warn: true },
+            { label: "Groupe", value: "Article de presse" },
+            { label: "Temps restant", value: this.fmt(this.state.secs) }
+          ]
+        : [
+            { label: "Réponses", value: "13 sur 40" },
+            { label: "Groupe", value: "Article de presse" },
+            { label: "Temps restant", value: this.fmt(this.state.secs) }
+          ]
+      ).map((r, i, a) => Object.assign({}, r, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:11px 0" + (i < a.length - 1 ? ";border-bottom:1px solid #F5EEF3" : ""),
+        valueStyle: "font-size:13px;font-weight:700;line-height:18px;color:" + (r.warn ? "#966010" : "#111827")
+      })),
+      sheetPrimary: "Continuer l'épreuve",
+      sheetPrimaryStyle: "display:flex;justify-content:center;align-items:center;height:52px;border-radius:100px;cursor:pointer;user-select:none;font-size:15px;font-weight:600;background:#6A2A5F;color:#FFFFFF",
+      sheetSecondary: "Enregistrer et quitter",
+      sheetSecondaryStyle: "display:flex;justify-content:center;align-items:center;height:44px;border-radius:100px;font-size:14px;font-weight:600;color:#B4451F",
+      sheetNote: "La reprise est gratuite.",
+
+      steps: STEPS.map(s => ({
+        label: s.label,
+        go: () => this.goto(s.key),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (s.key === raw ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      })),
+      modes: [
+        { key: "mock", label: "Mock test" },
+        { key: "practice", label: "Practice" }
+      ].map(m => ({
+        label: m.label,
+        go: () => this.setState({ mode: m.key, picked: null }),
+        style: "font-size:12px;font-weight:600;border-radius:100px;padding:6px 13px;cursor:pointer;user-select:none;" +
+          (this.mode() === m.key ? "background:#6A2A5F;color:#fff" : "background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6")
+      })),
+      flags: FLAGS.map(f => {
+        const on = this.flag(f.key);
+        const toggle = () => this.setState(s => ({ flags: Object.assign({}, s.flags, { [f.key]: !on }), flagOn: null }));
+        return {
+          label: f.label, screenLabel: STEPS.filter(s => s.key === f.screen)[0].label,
+          onText: f.on, offText: f.off, toggle: toggle,
+          goScreen: () => this.goto(f.screen),
+          rowStyle: "display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:" +
+            (on ? "rgba(255,255,255,.78)" : "rgba(255,255,255,.42)") + ";box-shadow:inset 0 0 0 1px " + (on ? "#D9CCD6" : "#D8CBD5"),
+          trackStyle: "width:38px;height:22px;border-radius:100px;flex-shrink:0;padding:2px;cursor:pointer;display:flex;justify-content:" +
+            (on ? "flex-end" : "flex-start") + ";background:" + (on ? "#2E1A3B" : "#D9CCD6"),
+          knobStyle: "width:18px;height:18px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#2E1A3B" : "#EFE3EC") + ";color:" + (on ? "#fff" : "#857789"),
+          offTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#EFE3EC" : "#2E1A3B") + ";color:" + (on ? "#857789" : "#fff"),
+          onTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#2E1A3B" : "#857789"),
+          offTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#857789" : "#2E1A3B")
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

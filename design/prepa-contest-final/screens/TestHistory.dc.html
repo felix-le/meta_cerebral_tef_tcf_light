@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes thFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes thSpin { to { transform: rotate(360deg); } }
+  /* AI scoring → completed: ochre card settles into a scored one */
+  @keyframes thLand { 0% { transform: scale(.985); background: #EFFBF2; } 55% { background: #F7FEF9; } 100% { transform: none; background: #FFFFFF; } }
+  @keyframes thRise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+  /* the scored card leaves In progress for Completed */
+  @keyframes thLeave { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-8px) scale(.99); } }
+  @keyframes thPop { 0% { opacity: 0; transform: scale(.55); } 60% { transform: scale(1.1); } 100% { opacity: 1; transform: none; } }
+  @keyframes thCollapse { 0% { opacity: 1; max-height: 60px; } 45% { opacity: 0; max-height: 60px; } 100% { opacity: 0; max-height: 0; margin-bottom: -12px; } }
+  .th-scroll::-webkit-scrollbar { width: 0; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#ECE4EA"/><rect x="26" y="24" width="48" height="14" rx="4" fill="#6A2A5F"/><rect x="26" y="44" width="48" height="14" rx="4" fill="#9CA3AF"/><rect x="26" y="64" width="48" height="14" rx="4" fill="#9CA3AF"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Contest · History (guest, on this device)</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="Home.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Home</a>
+  </div>
+
+  <div data-screen-label="Test history" style="position:relative;width:393px;height:852px;overflow:hidden;background:#fff;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);flex-shrink:0">
+
+    <div style="position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 100%)">
+      <div style="position:absolute;left:-136px;top:-178px;width:392px;height:417.522px;opacity:.15;border-radius:9999px;background:#F9BD48;filter:blur(70px)"></div>
+      <div style="position:absolute;left:235.8px;top:511.19px;width:196.5px;height:426px;opacity:.15;border-radius:9999px;background:#6A2A5F;filter:blur(70px)"></div>
+    </div>
+
+    <!-- Status bar -->
+    <div style="position:absolute;left:0;top:0;width:393px;height:62px;display:flex;align-items:center;padding:21px 16px 19px;z-index:5">
+      <div style="flex:1;display:flex;justify-content:center">
+        <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:#000">9:41</span>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+        <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="#000"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+        <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="#000"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+        <div style="position:relative;width:27.328px;height:13px">
+          <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px #000"></div>
+          <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:#000"></div>
+          <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:#000"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App bar -->
+    <div style="position:absolute;left:0;right:0;top:62px;height:52px;display:flex;align-items:center;gap:10px;padding:0 12px 0 8px;z-index:6">
+      
+      <span style="flex:1;padding-left:12px;font-size:17px;font-weight:700;letter-spacing:-.2px;color:#111827">History</span>
+    </div>
+
+    <!-- Tab filter — pinned below the app bar -->
+    <div style="position:absolute;left:0;right:0;top:114px;height:46px;display:flex;padding:0 12px;border-bottom:1px solid #EFE3EC;z-index:5;background:rgba(255,255,255,.75);backdrop-filter:blur(8px)">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+        <div onClick="{{ t.pick }}" style="{{ t.tabStyle }}">
+          <span style="font-size:13px;font-weight:600;line-height:1;color:inherit">{{ t.name }}</span>
+          <div style="{{ t.underlineStyle }}"></div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Content -->
+    <div class="th-scroll" style="position:absolute;left:0;top:160px;right:0;bottom:0;overflow-y:auto">
+      <div style="display:flex;flex-direction:column;gap:18px;padding:16px 20px 120px;animation:thFade .3s ease both">
+
+        <!-- Summary — one anchor line, scrolls away with the list -->
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:2px 2px 4px">
+          <div style="display:flex;flex-direction:column;gap:1px">
+            <span style="font-size:34px;font-weight:700;line-height:36px;letter-spacing:-1.4px;color:#111827">{{ totalCount }}</span>
+            <span style="font-size:12px;font-weight:500;line-height:16px;color:#6E5F78">{{ totalLabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+            <sc-for list="{{ statChips }}" as="c" hint-placeholder-count="2">
+              <div style="{{ c.chipStyle }}">
+                <div style="{{ c.dotStyle }}"></div>
+                <span style="font-size:11px;font-weight:600;line-height:15px;color:inherit;white-space:nowrap">{{ c.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="{{ g.markStyle }}"></div>
+          <span style="font-size:13px;font-weight:700;line-height:17px;letter-spacing:-.1px;color:#2E1A3B">{{ g.label }}</span>
+          <span style="font-size:11px;font-weight:500;line-height:15px;color:#857789">{{ g.count }}</span>
+        </div>
+        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+          <div style="{{ r.cardStyle }}">
+
+            <!-- Card head -->
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="{{ r.badgeStyle }}">
+                <fig-icon name="{{ r.badgeIcon }}" size="18"></fig-icon>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-size:15px;font-weight:700;line-height:20px;letter-spacing:-.2px;color:#111827">{{ r.title }}</span>
+                <span style="font-size:12px;font-weight:400;line-height:16px;color:#5E4E69">{{ r.meta }}</span>
+              </div>
+              <sc-if value="{{ r.partial }}">
+                <span style="flex-shrink:0;font-size:11px;font-weight:600;line-height:15px;padding:4px 10px;border-radius:100px;background:#FEF9EC;box-shadow:inset 0 0 0 1px #F6E3B4;color:#8A5B10;white-space:nowrap">{{ r.scoredLabel }}</span>
+              </sc-if>
+              <sc-if value="{{ r.done }}">
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0;flex-shrink:0;animation:thRise .42s ease both">
+                  <span style="{{ r.levelStyle }}">{{ r.level }}</span>
+                  <span style="font-size:12px;font-weight:500;line-height:16px;color:#5E4E69">{{ r.score }}</span>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- Pending: waiting on AI -->
+            <sc-if value="{{ r.pending }}">
+              <div style="display:flex;align-items:flex-start;gap:8px;color:#8A5B10">
+                <fig-icon name="IconOutlineRoundedLoading" size="14" style="margin-top:1px;animation:thSpin 1.5s linear infinite"></fig-icon>
+                <span style="flex:1;font-size:12px;font-weight:500;line-height:16px;color:#8A5B10;text-wrap:pretty">{{ r.pendingInfo }}</span>
+              </div>
+            </sc-if>
+
+            <!-- Settling: the score has arrived, banner clears itself out -->
+            <sc-if value="{{ r.settling }}">
+              <div style="overflow:hidden;animation:thCollapse .5s cubic-bezier(.4,0,.6,1) both">
+                <div style="display:flex;align-items:flex-start;gap:8px;color:#15803D">
+                  <fig-icon name="IconCheck" size="14" style="margin-top:1px"></fig-icon>
+                  <span style="flex:1;font-size:12px;font-weight:600;line-height:16px;color:#15803D">Score ready</span>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Scored (or partly scored): 2×2 skill grid -->
+            <sc-if value="{{ r.showGrid }}">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <sc-for list="{{ r.skills }}" as="s" hint-placeholder-count="4">
+                  <div style="{{ s.cellStyle }}">
+                    <span style="font-size:11px;font-weight:600;line-height:14px;color:{{ s.ink }}">{{ s.name }}</span>
+                    <sc-if value="{{ s.hasValue }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;align-items:baseline;gap:6px">
+                        <span style="font-size:13px;font-weight:700;line-height:17px;color:{{ s.ink }}">{{ s.value }}</span>
+                        <span style="font-size:11px;font-weight:500;line-height:15px;color:#5E4E69">{{ s.raw }}</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ s.scoring }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:12px;font-weight:600;line-height:17px;color:#8A5B10">Scoring</span>
+                    </sc-if>
+                    <sc-if value="{{ s.hasBar }}" hint-placeholder-val="{{ false }}">
+                      <div style="height:3px;border-radius:100px;background:#DFD4DD;overflow:hidden;margin-top:3px">
+                        <div style="{{ s.barStyle }}"></div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ r.showReview }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ r.reviewTap }}" style="display:flex;align-items:center;justify-content:space-between;padding-top:2px;color:#6A2A5F;cursor:pointer">
+                  <span style="font-size:13px;font-weight:600;line-height:1;color:inherit">{{ r.reviewLabel }}</span>
+                  <fig-icon name="IconArrowRight" size="16"></fig-icon>
+                </div>
+              </sc-if>
+            </sc-if>
+
+            <!-- Incomplete: warning + resume -->
+            <sc-if value="{{ r.open }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                  <span style="font-size:12px;font-weight:600;line-height:16px;color:#5E4E69">{{ r.progLeft }}</span>
+                  <span style="font-size:12px;font-weight:500;line-height:16px;color:#5E4E69">{{ r.timeLeft }}</span>
+                </div>
+                <div style="height:6px;border-radius:100px;background:#EFE3EC;overflow:hidden">
+                  <div style="{{ r.barStyle }}"></div>
+                </div>
+                <sc-if value="{{ r.hasWarning }}">
+                  <div style="display:flex;align-items:flex-start;gap:6px;color:#6E5F78">
+                    <fig-icon name="IconDuotoneInfo" size="14" style="margin-top:1px"></fig-icon>
+                    <span style="flex:1;font-size:12px;font-weight:500;line-height:16px;color:#6E5F78">{{ r.warning }}</span>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="height:44px;border-radius:100px;background:#6A2A5F;display:flex;justify-content:center;align-items:center;gap:8px;cursor:pointer;color:#fff" style-hover="background:#2D2D2D">
+                <span style="font-size:14px;font-weight:600;line-height:1;color:inherit">{{ r.cta }}</span>
+                <fig-icon name="IconArrowRight" size="16"></fig-icon>
+              </div>
+            </sc-if>
+
+          </div>
+        </sc-for>
+        </div>
+        </sc-for>
+
+        <sc-if value="{{ isEmpty }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 24px 28px;border-radius:20px;background:rgba(255,255,255,.55);border:1px dashed #D9CED7">
+            <div style="{{ emptyTileStyle }}">
+              <fig-icon name="{{ emptyIcon }}" size="26"></fig-icon>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+              <span style="font-size:17px;font-weight:700;line-height:22px;letter-spacing:-.2px;color:#111827">{{ emptyTitle }}</span>
+              <span style="max-width:250px;font-size:13px;font-weight:400;line-height:19px;text-align:center;color:#5E4E69;text-wrap:pretty">{{ emptyBody }}</span>
+            </div>
+            <sc-if value="{{ emptyHasCta }}">
+              <div style="display:flex;flex-direction:column;align-items:stretch;gap:4px;align-self:stretch;padding-top:2px">
+                <div style="height:44px;border-radius:100px;background:#6A2A5F;display:flex;justify-content:center;align-items:center;gap:8px;cursor:pointer;color:#fff" style-hover="background:#2D2D2D">
+                  <span style="font-size:14px;font-weight:600;line-height:1;color:inherit">{{ emptyCta }}</span>
+                  <fig-icon name="IconArrowRight" size="16"></fig-icon>
+                </div>
+                <div onClick="{{ emptyLinkGo }}" style="height:38px;border-radius:100px;display:flex;justify-content:center;align-items:center;cursor:pointer" style-hover="background:rgba(46,26,59,.05)">
+                  <span style="font-size:13px;font-weight:600;line-height:1;color:#6A2A5F">{{ emptyLink }}</span>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ emptyLinkOnly }}">
+              <div onClick="{{ emptyLinkGo }}" style="height:38px;padding:0 18px;border-radius:100px;display:flex;justify-content:center;align-items:center;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px #EFE3EC" style-hover="background:#fff">
+                <span style="font-size:13px;font-weight:600;line-height:1;color:#6A2A5F">{{ emptyLink }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+
+
+    <!-- Bottom nav (same as Home) -->
+    <div style="position:absolute;left:0;right:0;bottom:0;height:104px;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.32) 100%);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.5) 38%,#000 72%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.5) 38%,#000 72%)"></div>
+    <div style="position:absolute;left:14px;right:14px;bottom:24px;height:62px;border-radius:100px;display:flex;align-items:center;padding:6px;gap:2px;z-index:4;background:rgba(248,243,247,.82);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.6),0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1)">
+        <a href="Home.dc.html" style="text-decoration:none;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;height:50px;border-radius:100px;color:#776D75;font-weight:600">
+          <fig-icon name="IconOutlineRoundedHome" size="24"></fig-icon>
+          <span style="font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1;color:inherit">Home</span>
+        </a>
+        <a href="MockTest.dc.html" style="text-decoration:none;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;height:50px;border-radius:100px;color:#776D75;font-weight:600">
+          <fig-icon name="IconOutlineRoundedAiDocument" size="24"></fig-icon>
+          <span style="font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1;color:inherit">Mock Test</span>
+        </a>
+        <a href="#" style="text-decoration:none;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;height:50px;border-radius:100px;color:#6A2A5F;font-weight:700;background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 1px 3px rgba(60,30,55,.12)">
+          <fig-icon name="IconOutlineRoundedTransactionHistory" size="24"></fig-icon>
+          <span style="font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1;color:inherit">History</span>
+        </a>
+    </div>
+
+  </div>
+
+  <div style="display:flex;gap:6px;width:393px;flex-wrap:wrap">
+    <sc-for list="{{ states }}" as="st" hint-placeholder-count="3">
+      <div onClick="{{ st.go }}" style="{{ st.chipStyle }}">{{ st.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Scenario flags</span>
+      <span style="font-size:12px;font-weight:400;line-height:17px;color:#6E5F78;text-wrap:pretty">Each flag switches one branch of this screen. Toggle it on the left; tap the pill to jump to the state it changes.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+        <div style="{{ f.rowStyle }}">
+          <div onClick="{{ f.toggle }}" style="{{ f.trackStyle }}">
+            <div style="{{ f.knobStyle }}"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span onClick="{{ f.toggle }}" style="font-size:13px;font-weight:700;line-height:17px;color:#2E1A3B;cursor:pointer;user-select:none">{{ f.label }}</span>
+              <span onClick="{{ f.goScreen }}" style="font-size:10px;font-weight:600;letter-spacing:.3px;padding:3px 8px;border-radius:100px;background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6;cursor:pointer;user-select:none;white-space:nowrap" style-hover="background:#6A2A5F;color:#fff">{{ f.screenLabel }} ↗</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.onTagStyle }}">ON</span>
+              <span style="{{ f.onTextStyle }}">{{ f.onText }}</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.offTagStyle }}">OFF</span>
+              <span style="{{ f.offTextStyle }}">{{ f.offText }}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;userState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;active&quot;,&quot;fresh&quot;],&quot;default&quot;:&quot;active&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;all&quot;,&quot;open&quot;,&quot;done&quot;],&quot;default&quot;:&quot;all&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;emptyHistory&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;hideUnfinished&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;aiScoringDone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const SKILL_COLORS = {
+  Listening: { primary: "#4A7FE5", dark: "#2952A3" },
+  Reading:   { primary: "#1A9E94", dark: "#0F6B65" },
+  Speaking:  { primary: "#8B62E0", dark: "#5535A8" },
+  Writing:   { primary: "#D4860F", dark: "#966010" }
+};
+
+const TABS = [
+  { key: "all", name: "All" },
+  { key: "open", name: "In progress" },
+  { key: "done", name: "Completed" }
+];
+
+// Demo data — newest first. `open` = unfinished attempt (Incomplete card),
+// `pending` = submitted, waiting on AI scoring (Speaking/Writing only).
+const GROUPS = ["Today", "This week", "Older"];
+const ITEMS = {
+  active: [
+    // Full mock, submitted: L/R are scored instantly, S/W are with the AI.
+    { rid: "tef-3", partial: true, pending: true, group: "Today", title: "TEF Canada mock test #3", meta: "Today · 1h 48m · submitted 6 min ago", scoredCount: 2,
+      pendingInfo: "Speaking and Writing are being scored · about 5 min left",
+      // NCLC first, CEFR second; every skill result is an estimate.
+      skills: [["Listening", "NCLC 8", "B2"], ["Reading", "NCLC 6", "B1"], ["Speaking", null], ["Writing", null]],
+      resolvedLevel: "NCLC 5", resolvedScore: "usable level · Estimation", resolvedBand: "B1", resolvedMeta: "Today · 1h 48m · 4 of 4 skills",
+      resolvedSkills: [["Listening", "NCLC 8", "B2"], ["Reading", "NCLC 6", "B1"], ["Speaking", "NCLC 5", "B1"], ["Writing", "NCLC 8", "B2"]] },
+    // Mock still running: one section scored, one paused, two untouched.
+    { rid: "tef-4", open: true, mock: true, group: "Today", title: "TEF Canada mock test #4", meta: "Started today · 42 min in · section 2 of 4",
+      progLabel: "Reading · question 14 of 40", timeLeft: "34 min left", bar: 35, skill: "Reading", cta: "Resume Reading",
+      skills: [["Listening", "NCLC 8", "B2", "scored"], ["Reading", "Q 14/40", "", "active", 35], ["Speaking", "—", "", "todo"], ["Writing", "—", "", "todo"]] },
+    { open: true, group: "This week", title: "Writing practice · Tâche 1", meta: "Sep 10 · 4 min in", bar: 20, progLabel: "Tâche 1 of 2", timeLeft: "48 min left", warning: "Draft saved, not submitted", cta: "Resume writing", skill: "Writing" },
+    { rid: "tef-2", done: true, group: "This week", title: "TEF Canada mock test #2", meta: "Sep 9 · 1h 52m · 4 of 4 skills", level: "NCLC 4", score: "usable level · Estimation", band: "A2",
+      skills: [["Listening", "NCLC 8", "B2"], ["Reading", "NCLC 8", "B2"], ["Speaking", "NCLC 4", "A2"], ["Writing", "NCLC 5", "B1"]] },
+    // Practice, not a mock: accuracy, never a band — 22 questions cannot place a level.
+    { rid: "visa", done: true, group: "Older", title: "Reading practice set · Visa notice", meta: "Sep 4 · 22m · practice set, no estimate", level: "18/22", score: "correct",
+      skills: [["Reading", "18/22", "correct"]] }
+  ],
+  pro: [
+    // All four states on one card: scored · paused · with the AI · untouched.
+    { open: true, mock: true, group: "Today", title: "TEF full mock test #8", meta: "Started today · 1h 06m in · section 3 of 4",
+      progLabel: "Reading · question 24 of 40", timeLeft: "26 min left", bar: 60, skill: "Reading", cta: "Resume Reading",
+      // NCLC first, CEFR second; every skill result is an estimate.
+      skills: [["Listening", "NCLC 9", "C1", "scored"], ["Reading", "Q 24/40", "", "active", 60], ["Speaking", "", "", "scoring"], ["Writing", "—", "", "todo"]],
+      resolvedSkills: [["Listening", "NCLC 9", "C1", "scored"], ["Reading", "Q 24/40", "", "active", 60], ["Speaking", "NCLC 8", "B2", "scored"], ["Writing", "—", "", "todo"]] },
+    { pending: true, group: "Today", title: "Writing practice · Tâche 3", meta: "Submitted 1 h ago", pendingInfo: "AI scoring · about 2 min left · submitted 1 h ago", skill: "Writing",
+      // One practice tâche: a CEFR level from the official criteria, no NCLC and no points.
+      resolvedLevel: "B2", resolvedScore: "AI estimate · official criteria", resolvedMeta: "Just now · practice tâche", resolvedSkills: [["Writing", "B2", "Estimation"]] },
+    { open: true, group: "This week", title: "Writing practice · Tâche 2", meta: "Sep 12 · 11 min in", bar: 35, progLabel: "Tâche 2 of 3", timeLeft: "49 min left", warning: "Draft saved, not submitted", cta: "Resume writing", skill: "Writing" },
+    { open: true, group: "This week", title: "Listening practice · Section 1", meta: "Sep 11 · 5 min in", bar: 27, qDone: 8, qTotal: 29, timeLeft: "31 min left", cta: "Resume test", skill: "Listening" },
+    { open: true, group: "This week", title: "Speaking practice · Tâche 2", meta: "Sep 9 · 3 min in", bar: 50, progLabel: "Tâche 2 of 3", timeLeft: "7 min left", warning: "Recording started, not submitted", cta: "Resume speaking", skill: "Speaking" },
+    { open: true, group: "Older", title: "Reading practice · Section 1", meta: "Sep 7 · 2 min in", bar: 10, qDone: 4, qTotal: 39, timeLeft: "56 min left", cta: "Resume test", skill: "Reading" },
+    { done: true, group: "Older", title: "TEF full mock test #6", meta: "Sep 5 · 2h 04m · 4 of 4 skills", level: "NCLC 8", score: "usable level · Estimation", band: "B2",
+      skills: [["Listening", "NCLC 9", "C1"], ["Reading", "NCLC 9", "C1"], ["Speaking", "NCLC 8", "B2"], ["Writing", "NCLC 8", "B2"]] },
+    { done: true, group: "Older", title: "Speaking practice · Tâche 3", meta: "Sep 2 · 12m · practice tâche", level: "B2", score: "AI estimate · official criteria",
+      skills: [["Speaking", "B2", "Estimation"]] }
+  ],
+  fresh: []
+};
+
+const CEFR_ORDER = ["A1", "A2", "B1", "B1+", "B2", "C1", "C2"];
+const TAB_NOUN = {
+  all: n => (n === 1 ? "attempt logged" : "attempts logged"),
+  open: n => (n === 1 ? "test in progress" : "tests in progress"),
+  done: n => (n === 1 ? "scored attempt" : "scored attempts")
+};
+
+const STATE_LABELS = { active: "guest · saved on this device", fresh: "guest · nothing yet" };
+const ORDER = ["active", "fresh"];
+
+// Scenario flags — reachable in the standalone file via the panel under the device,
+// or a URL query: ?emptyHistory=1&hideUnfinished=1
+const FLAGS = [
+  { key: "emptyHistory", label: "No attempts on record", def: false, screenLabel: "Empty state",
+    jump: c => c.setState({ tab: "all" }),
+    on: "Every tab shows the empty state.",
+    off: "History lists the attempts for the selected user state." },
+  { key: "aiScoringDone", label: "AI finishes scoring", def: false, screenLabel: "Watch it land",
+    jump: c => c.setState({ tab: "open" }),
+    reset: c => c.runLanding(),
+    on: "The waiting attempt settles into a scored one — banner clears, level and skill grid land.",
+    off: "Speaking and Writing sit in In progress waiting on the AI." },
+  { key: "hideUnfinished", label: "Everything submitted", def: false, screenLabel: "In progress",
+    jump: c => c.setState({ tab: "open" }),
+    on: "Unfinished attempts are dropped — In progress holds only items waiting on AI scoring.",
+    off: "Unfinished attempts stay in the list with a Resume CTA." }
+];
+
+class Component extends DCLogic {
+  state = { user: null, tab: null, landPhase: null };
+
+  componentDidMount() {
+    this.readFlagQuery();
+    const h = (location.hash || "").replace("#", "");
+    if (TABS.some(t => t.key === h)) this.setState({ tab: h });
+  }
+
+  get user() { return this.state.user ?? (this.props.userState || "active"); }
+  get tab() { return this.state.tab ?? (this.props.tab || "all"); }
+
+  // Scenario flags — host prop, with the panel / URL override layered on top.
+  opt(key, def) {
+    const o = this._flags || {};
+    if (key in o) return o[key];
+    const p = this.props || {};
+    return (key in p && p[key] != null) ? p[key] : def;
+  }
+  flagOn(f) { return !!this.opt(f.key, f.def); }
+  toggleFlag(f) {
+    this._flags = Object.assign({}, this._flags);
+    this._flags[f.key] = !this.flagOn(f);
+    if (f.reset) f.reset(this); else this.forceUpdate();
+  }
+  readFlagQuery() {
+    const q = new URLSearchParams(location.search);
+    const over = {};
+    FLAGS.forEach(f => { if (q.has(f.key)) over[f.key] = q.get(f.key) !== "0" && q.get(f.key) !== "false"; });
+    if (Object.keys(over).length) this._flags = over;
+  }
+
+
+  // Three-phase landing so the change is legible: banner turns green and clears
+  // (settling) → result mounts with the card flashing to white (done).
+  runLanding() {
+    if (this._land) clearTimeout(this._land);
+    if (this.opt("aiScoringDone", false)) {
+      this.setState({ landPhase: "settling" });
+      this._land = setTimeout(() => {
+        this.setState({ landPhase: "done" });
+        // The scored row is held in In progress only long enough for the landing to
+        // be read, then it leaves for Completed — its real home once AI is finished.
+        this._land = setTimeout(() => {
+          this.setState({ landPhase: "leaving" });
+          this._land = setTimeout(() => this.setState({ landPhase: "settled" }), 340);
+        }, 2100);
+      }, 520);
+    } else {
+      this.setState({ landPhase: null });
+    }
+  }
+  componentWillUnmount() { if (this._land) clearTimeout(this._land); }
+
+  // Pending rows become scored results once the flag is on; `justLanded` keeps the
+  // row in the In progress tab long enough for the animation to be seen.
+  resolvePending(r) {
+    if (!this.opt("aiScoringDone", false)) return r;
+    // A mock still being taken keeps its state; only its Scoring cell resolves.
+    if (!r.pending) {
+      return (r.mock && r.resolvedSkills && this.state.landPhase !== "settling")
+        ? Object.assign({}, r, { skills: r.resolvedSkills })
+        : r;
+    }
+    const phase = this.state.landPhase;
+    if (phase === "settling") return Object.assign({}, r, { pending: false, settling: true });
+    return Object.assign({}, r, {
+      pending: false, partial: false, done: true,
+      justLanded: phase === "done", leaving: phase === "leaving",
+      meta: r.resolvedMeta || r.meta,
+      level: r.resolvedLevel, score: r.resolvedScore, band: r.resolvedBand, skills: r.resolvedSkills
+    });
+  }
+
+  // Chips always add up to the big number above them.
+  summaryChips(tab, all, rows) {
+    const chip = (n, text, ground, ring, ink) => ({ n, text, ground, ring, ink });
+    const done = rows.filter(r => r.done).length;
+    const open = rows.filter(r => r.open).length;
+    const pending = rows.filter(r => r.pending).length;
+    let list;
+    if (tab === "done") {
+      // No sub-states here, so the breakdown is by level reached — the useful cut.
+      // Only mock attempts carry a band, so only they can be cut by level: a
+      // practice row's headline is an accuracy or a rubric score, not a level.
+      const byLevel = {};
+      rows.forEach(r => { if (r.band) byLevel[r.band] = (byLevel[r.band] || 0) + 1; });
+      list = Object.keys(byLevel)
+        .sort((a, b) => CEFR_ORDER.indexOf(b) - CEFR_ORDER.indexOf(a))
+        .slice(0, 3)
+        .map(lv => chip(byLevel[lv], byLevel[lv] + " × " + lv, "#F8F3F7", "#EFE3EC", "#3E2D4A"));
+    } else if (tab === "open") {
+      const landed = rows.filter(r => r.justLanded || r.settling || r.leaving).length;
+      list = [
+        chip(landed, landed + " just scored", "#F0FDF4", "#BBF7D0", "#15803D"),
+        chip(open, open + " unfinished", "#EFE7EE", "#DBCED9", "#5E4E69"),
+        chip(pending, pending + " waiting on AI", "#FEF9EC", "#F6E3B4", "#8A5B10")
+      ];
+    } else {
+      list = [
+        chip(done, done + " scored", "#F0FDF4", "#BBF7D0", "#15803D"),
+        chip(open, open + " unfinished", "#EFE7EE", "#DBCED9", "#5E4E69"),
+        chip(pending, pending + " waiting on AI", "#FEF9EC", "#F6E3B4", "#8A5B10")
+      ];
+    }
+    return list.filter(c => c.n > 0).map(c => ({
+      text: c.text,
+      chipStyle: "display:flex;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:100px;background:" +
+        c.ground + ";box-shadow:inset 0 0 0 1px " + c.ring + ";color:" + c.ink,
+      dotStyle: "width:5px;height:5px;border-radius:9999px;flex-shrink:0;background:" + c.ink
+    }));
+  }
+
+  mapRow(r) {
+    const skill = r.skill ? SKILL_COLORS[r.skill] : null;
+    // Ground carries the type, not a hairline ring — three card types must differ at a glance.
+    const waiting = r.pending || r.settling;
+    const ground = r.open ? "#F6F0F5" : waiting ? "#FEFAF1" : "#FFFFFF";
+    const ring = r.open ? "#E2D5DF" : r.settling ? "#D8EFDC" : r.pending ? "#F3E6C8" : "#EFE3EC";
+    return {
+      done: !!r.done, open: !!r.open, pending: !!r.pending, settling: !!r.settling,
+      // A mock test is one object: it appears the moment it is submitted, with the
+      // AI-scored skills still empty, rather than waiting for all four to be scored.
+      partial: !!r.partial, showGrid: !!r.done || !!r.partial || !!r.mock,
+      scoredLabel: r.partial ? r.scoredCount + " of " + (r.skills || []).length : "",
+      reviewLabel: r.done ? "Review answers" : "Review scored sections",
+      // Opens the result screen on its answer review. The view travels in sessionStorage
+      // because the canvas follows plain artboard links only (no query string).
+      reviewTap: () => {
+        const KEYS = { Listening: "L", Reading: "R", Writing: "W", Speaking: "S" };
+        const scored = (r.skills || []).filter(sk => (sk[3] || (sk[1] ? "scored" : "")) === "scored");
+        const skill = KEYS[(scored[0] || [])[0]] || "L";
+        const view = /practice set/.test(r.meta || "") ? "solo" : r.done ? "done" : "scoring";
+        try { sessionStorage.setItem("testReview.open", JSON.stringify({ view: view, skill: skill, session: r.rid || null })); } catch (e) {}
+        __go("TestReview.dc.html");
+      },
+      showReview: !!r.done || (r.skills || []).some(sk => (sk[3] || (sk[1] ? "scored" : "")) === "scored"),
+      title: r.title, meta: r.meta, level: r.level || "", score: r.score || "",
+      // A band is two or three glyphs; an accuracy or rubric score is longer, so
+      // it steps down a size rather than crowding the title.
+      levelStyle: "font-weight:700;letter-spacing:-.8px;color:#111827;white-space:nowrap;" +
+        (r.band ? "font-size:24px;line-height:26px" : "font-size:18px;line-height:26px"),
+      warning: r.warning || "", hasWarning: !!r.warning, cta: r.cta || "Resume",
+      pendingInfo: r.pendingInfo || "",
+      progLeft: r.progLabel || (r.qTotal ? "Question " + r.qDone + " of " + r.qTotal : ""),
+      timeLeft: r.timeLeft || "",
+      cardStyle: "display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:20px;background:" + ground +
+        ";box-shadow:inset 0 0 0 1px " + ring + ",0 1px 2px rgba(60,30,55,.05),0 " + (r.done ? "6px 16px -8px rgba(60,30,55,.28)" : "3px 10px -6px rgba(60,30,55,.18)") +
+        ";transition:background .45s ease,box-shadow .45s ease" +
+        (r.justLanded ? ";animation:thLand .6s cubic-bezier(.2,.7,.3,1) both" : "") +
+        (r.leaving ? ";animation:thLeave .34s ease both" : ""),
+      badgeIcon: r.open ? "IconPause" : waiting ? "IconSparkles" : "IconCheck",
+      badgeStyle: "width:34px;height:34px;border-radius:11px;display:flex;justify-content:center;align-items:center;flex-shrink:0;transition:background .45s ease,box-shadow .45s ease,color .45s ease;" +
+        (r.justLanded ? "animation:thPop .45s cubic-bezier(.2,.8,.3,1) both;" : "") +
+        (r.open
+          ? "background:#EFE7EE;box-shadow:inset 0 0 0 1px #DBCED9;color:#5E4E69"
+          : waiting
+            ? "background:#FEF9EC;box-shadow:inset 0 0 0 1px #F6E3B4;color:#8A5B10"
+            : "background:#F0FDF4;box-shadow:inset 0 0 0 1px #BBF7D0;color:#15803D"),
+      barStyle: "height:6px;border-radius:100px;background:" + (skill ? skill.primary : "#2E1A3B") + ";width:" + (r.bar || 0) + "%",
+      skills: (r.skills || []).map(([name, value, raw, state, pct], i) => {
+        const c = SKILL_COLORS[name];
+        const st = state || (value ? "scored" : "scoring");
+        // One cell, four possible states — a mock session can hold all four at once.
+        const skin = {
+          scored:  { ground: c.primary + "14", ring: c.primary + "2E", ink: c.dark },
+          scoring: { ground: "#FFFFFF", ring: "#EBD5A6", ink: "#8A5B10" },
+          active:  { ground: "#FFFFFF", ring: c.primary + "3D", ink: c.dark },
+          todo:    { ground: "#EFE8EE", ring: "#E0D4DE", ink: "#5E4E69" }
+        }[st];
+        return {
+          name, value: value || "", raw: raw || "",
+          scoring: st === "scoring", hasValue: st !== "scoring", ink: skin.ink,
+          hasBar: st === "active",
+          barStyle: "height:3px;border-radius:100px;background:" + c.primary + ";width:" + (pct || 0) + "%",
+          cellStyle: "display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;transition:background .45s ease,box-shadow .45s ease;background:" +
+            skin.ground + ";box-shadow:inset 0 0 0 1px " + skin.ring + ";" +
+            (r.justLanded ? "animation:thRise .42s ease both;animation-delay:" + (i * 70) + "ms;" : "")
+        };
+      })
+    };
+  }
+
+  renderVals() {
+    const u = this.user, tab = this.tab;
+    const all = this.opt("emptyHistory", false)
+      ? []
+      : (ITEMS[u] || [])
+          .map(r => this.resolvePending(r))
+          .filter(r => !(this.opt("hideUnfinished", false) && r.open));
+    const rows = all.filter(r => tab === "all" ||
+      (tab === "open" ? (r.open || r.pending || r.settling || r.justLanded || r.leaving) : r.done));
+    const openCount = all.filter(r => r.open).length;
+    const pendingCount = all.filter(r => r.pending).length;
+    const doneCount = all.filter(r => r.done).length;
+
+    return {
+      stateLabel: STATE_LABELS[u],
+      // The summary sits under the tab bar, so it must describe the OPEN TAB:
+      // big number = rows in this tab, chips = the breakdown of that same number.
+      totalCount: rows.length,
+      totalLabel: TAB_NOUN[tab](rows.length),
+      statChips: this.summaryChips(tab, all, rows),
+      isEmpty: rows.length === 0,
+      emptyTitle: all.length === 0 ? "No results yet" : tab === "open" ? "Nothing in progress" : tab === "done" ? "No submitted tests yet" : "No results yet",
+      emptyBody: all.length === 0 ? "Finish a practice test and it shows up here. Results stay on this device." : tab === "open"
+        ? "Every test you started has been submitted. Nothing is waiting for you here."
+        : tab === "done"
+          ? "Finish a test and the scored result lands here with a full answer review."
+          : "Finish a practice test and it shows up here. Results stay on this device.",
+      emptyIcon: all.length === 0 ? "IconOutlineRoundedTransactionHistory" : tab === "open" ? "IconCheck" : tab === "done" ? "IconSolidRoundedFileCheck" : "IconOutlineRoundedTransactionHistory",
+      emptyTileStyle: "width:64px;height:64px;border-radius:9999px;display:flex;justify-content:center;align-items:center;flex-shrink:0;" +
+        (all.length > 0 && tab === "open"
+          ? "background:#F0FDF4;box-shadow:inset 0 0 0 1px #BBF7D0;color:#15803D"
+          : "background:#F8F3F7;box-shadow:inset 0 0 0 1px #EFE3EC;color:#857789"),
+      emptyHasCta: all.length === 0 || tab !== "open",
+      emptyLinkOnly: all.length > 0 && tab === "open",
+      emptyCta: "Start practising",
+      emptyLink: all.length > 0 && tab === "open" ? "See all attempts" : "Back to Home",
+      emptyLinkGo: () => { if (all.length > 0 && tab === "open") this.setState({ tab: "all" });  },
+
+
+      flags: FLAGS.map(f => {
+        const fon = this.flagOn(f);
+        const tag = "font-size:9px;font-weight:700;letter-spacing:.5px;line-height:15px;padding:0 5px;border-radius:4px;flex-shrink:0;width:26px;text-align:center;";
+        const txt = "font-size:11px;font-weight:400;line-height:15px;text-wrap:pretty;flex:1;min-width:0;";
+        return {
+          label: f.label,
+          screenLabel: f.screenLabel,
+          goScreen: () => { if (f.jump) f.jump(this); },
+          onText: f.on,
+          offText: f.off,
+          toggle: () => this.toggleFlag(f),
+          rowStyle: "display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;" +
+            (fon ? "background:#fff;box-shadow:inset 0 0 0 1px #F9BD48,0 1px 3px rgba(60,30,55,.08)" : "background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px #D1C4CF"),
+          trackStyle: "width:34px;height:20px;border-radius:100px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;padding:2px;box-sizing:border-box;cursor:pointer;transition:background .15s;" +
+            (fon ? "background:#F9BD48;justify-content:flex-end" : "background:#D9CCD6;justify-content:flex-start"),
+          knobStyle: "width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: tag + (fon ? "background:#F9BD48;color:#fff" : "background:rgba(214,200,211,.5);color:#857789"),
+          offTagStyle: tag + (fon ? "background:rgba(214,200,211,.5);color:#857789" : "background:#3E2D4A;color:#fff"),
+          onTextStyle: txt + (fon ? "color:#2E1A3B;font-weight:500" : "color:#857789"),
+          offTextStyle: txt + (fon ? "color:#857789" : "color:#2E1A3B;font-weight:500")
+        };
+      }),
+
+      tabs: TABS.map(t => {
+        const on = t.key === tab;
+        return {
+          name: t.name,
+          pick: () => this.setState({ tab: t.key }),
+          tabStyle: "flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:9px;padding-top:14px;cursor:pointer;user-select:none;color:" +
+            (on ? "#111827" : "#9CA3AF"),
+          underlineStyle: "height:2px;width:100%;border-radius:2px 2px 0 0;background:" + (on ? "#2E1A3B" : "transparent")
+        };
+      }),
+
+      groups: GROUPS.map(label => ({ label, rows: rows.filter(r => r.group === label) }))
+        .filter(g => g.rows.length > 0)
+        .map((g, gi) => ({
+          label: g.label,
+          markStyle: "width:3px;height:13px;border-radius:100px;flex-shrink:0;background:" + (gi === 0 ? "#F9BD48" : "#D9CCD6"),
+          count: g.rows.length === 1 ? "1 attempt" : g.rows.length + " attempts",
+          rows: g.rows.map(r => this.mapRow(r))
+        })),
+
+      states: ORDER.map(k => ({
+        label: k,
+        go: () => this.setState({ user: k }),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (k === u
+            ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B"
+            : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

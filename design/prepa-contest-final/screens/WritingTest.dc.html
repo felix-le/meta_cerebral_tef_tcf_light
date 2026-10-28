@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes wrFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes wrSheet { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+  @keyframes wrPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  @keyframes wrSpin { to { transform: rotate(360deg); } }
+  @keyframes wrRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes wrPop { 0% { opacity: 0; transform: scale(.84); } 62% { opacity: 1; transform: scale(1.035); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes wrLand { 0% { transform: scale(1); } 42% { transform: scale(1.09); } 100% { transform: scale(1); } }
+  .wr-scroll::-webkit-scrollbar { width: 0; }
+  .wr-scroll { scrollbar-width: none; }
+  .wr-ta:focus { outline: none; }
+  .wr-ta:empty:before { content: attr(data-placeholder); color: #A2919F; }
+  .wr-ta ul { margin: 0 0 12px; padding-left: 20px; }
+  .wr-ed:focus-within { box-shadow: inset 0 0 0 1.5px #D4860F; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E1226"/><rect x="28" y="30" width="44" height="6" rx="3" fill="#D4860F"/><rect x="28" y="44" width="36" height="6" rx="3" fill="#F9BD48" opacity=".7"/><rect x="28" y="58" width="26" height="6" rx="3" fill="#966010"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<x-import component-from-global-scope="mock-session" from="./mock-session.js" hint-size="0,0"></x-import>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">M10 · Writing Test Engine</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="Home.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Config</a>
+  </div>
+
+  <div data-screen-label="Writing test engine" style="{{ frameStyle }}">
+
+    <!-- ══ SCROLL BODY ══ -->
+    <div class="wr-scroll" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+      <!-- ── CONSIGNES (the screen the real exam opens with) ── -->
+      <sc-if value="{{ isConsignes }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;gap:22px;overflow:hidden;animation:wrFade .35s ease both">
+          <div style="position:absolute;left:-90px;top:-110px;width:340px;height:340px;border-radius:9999px;background:#D4860F;opacity:.3;filter:blur(80px)"></div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">TEF Canada · épreuve 3 sur 4</span>
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-wrap:pretty">Expression écrite</span>
+            <span style="font-size:14px;font-weight:500;line-height:21px;color:rgba(255,255,255,.6);text-wrap:pretty">2 tâches · 60 minutes · temps global</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#F0C98A">CONSIGNES</span>
+            <sc-for list="{{ consigneRules }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="width:22px;height:22px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.1);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ r.n }}</span>
+                <span style="flex:1;font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.86);text-wrap:pretty">{{ r.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ desktopOffer }}" hint-placeholder-val="{{ true }}">
+            <div style="position:relative;display:flex;flex-direction:column;gap:13px;padding:17px 18px;border-radius:22px;background:rgba(212,134,15,.16);box-shadow:inset 0 0 0 1px rgba(249,189,72,.42);animation:wrFade .3s ease both">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <div style="width:36px;height:36px;border-radius:12px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:rgba(249,189,72,.18);color:#F9BD48">
+                  <fig-icon name="IconOutlineRoundedComputer" size="18"></fig-icon>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+                  <span style="font-size:14px;font-weight:700;line-height:19px;color:#fff;text-wrap:pretty">Rédiger sur un ordinateur</span>
+                  <span style="font-size:12.5px;font-weight:400;line-height:18px;color:rgba(255,255,255,.62);text-wrap:pretty">{{ desktopOfferSub }}</span>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div onClick="{{ openPair }}" style="display:flex;justify-content:center;align-items:center;gap:8px;height:42px;border-radius:100px;cursor:pointer;user-select:none;font-size:13.5px;font-weight:600;white-space:nowrap;background:rgba(249,189,72,.12);color:#F9BD48;box-shadow:inset 0 0 0 1px rgba(249,189,72,.5)">
+                  <fig-icon name="IconOutlineRoundedQrCode" size="16"></fig-icon>Afficher le code
+                </div>
+                <span onClick="{{ dismissOffer }}" style="align-self:center;font-size:12px;font-weight:500;line-height:16px;color:rgba(255,255,255,.42);cursor:pointer;user-select:none;text-decoration:underline;text-underline-offset:3px">Pas maintenant — ne plus demander</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="position:relative;display:flex;gap:9px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:rgba(249,189,72,.1);box-shadow:inset 0 0 0 1px rgba(249,189,72,.3)">
+            <div style="width:16px;height:16px;flex-shrink:0;margin-top:1px;color:#F9BD48;display:flex;align-items:center;justify-content:center">
+              <fig-icon name="IconDuotoneInfo" size="15"></fig-icon>
+            </div>
+            <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#F9BD48;text-wrap:pretty">{{ consigneNote }}</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── TASK INTRO ── -->
+      <sc-if value="{{ isIntro }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 180px;display:flex;flex-direction:column;gap:22px;overflow:hidden;animation:wrFade .35s ease both">
+          <div style="position:absolute;left:-90px;top:-110px;width:340px;height:340px;border-radius:9999px;background:#D4860F;opacity:.3;filter:blur(80px)"></div>
+          <div style="position:absolute;right:-120px;bottom:60px;width:300px;height:300px;border-radius:9999px;background:#F9BD48;opacity:.14;filter:blur(90px)"></div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">{{ tKicker }}</span>
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-wrap:pretty">{{ tTitle }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#F9BD48">CONSIGNE</span>
+            <span style="font-size:15px;font-weight:500;line-height:23px;color:#fff;text-wrap:pretty">{{ tConsigne }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ tDocLabel }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.82);text-wrap:pretty">{{ tDoc }}</span>
+          </div>
+
+
+          <div style="position:relative;display:flex;flex-direction:column;padding:4px 18px;border-radius:20px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)">
+            <sc-for list="{{ introMeta }}" as="m" hint-placeholder-count="3">
+              <div style="{{ m.rowStyle }}">
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:rgba(255,255,255,.6)">{{ m.label }}</span>
+                <span style="font-size:13px;font-weight:700;line-height:18px;color:#fff">{{ m.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── WRITING (EDITOR) ── -->
+      <sc-if value="{{ isWrite }}" hint-placeholder-val="{{ false }}">
+        <div style="min-height:852px;padding:168px 20px 170px;display:flex;flex-direction:column;gap:14px;animation:wrFade .3s ease both">
+
+          <sc-if value="{{ timeUp }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:13px 15px;border-radius:18px;background:#FEF2F2;box-shadow:inset 0 0 0 1px #FBD5D5;color:#B91C1C">
+              <fig-icon name="IconDuotoneAlertCircle" size="15"></fig-icon>
+              <span style="flex:1;font-size:12.5px;font-weight:600;line-height:18px;color:inherit;text-wrap:pretty">0:00 — temps écoulé. Les deux textes sont envoyés à l'IA tels quels.</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ timeLow }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:13px 15px;border-radius:18px;background:#FEF9EC;box-shadow:inset 0 0 0 1px #F6E3B4;color:#8A5B10">
+              <fig-icon name="IconDuotoneAlertCircle" size="15"></fig-icon>
+              <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:inherit;text-wrap:pretty">Cinq minutes restantes. Le brouillon est enregistré automatiquement : à 0:00, ce qui est écrit est envoyé.</span>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:9px;padding:15px 16px;border-radius:20px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="flex:1;font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#857789">CONSIGNE · {{ tKicker }}</span>
+              <span onClick="{{ togglePrompt }}" style="font-size:11px;font-weight:700;color:#966010;cursor:pointer;user-select:none;white-space:nowrap">{{ promptToggleLabel }}</span>
+            </div>
+            <span style="font-size:13.5px;font-weight:500;line-height:20px;color:#2E1A3B;text-wrap:pretty">{{ tConsigneShort }}</span>
+            <sc-if value="{{ promptOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:7px;padding-top:9px;border-top:1px solid #EFE3EC;animation:wrFade .22s ease both">
+                <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#857789">{{ tDocLabel }}</span>
+                <span style="font-size:13px;font-weight:400;line-height:20px;color:#4B5563;text-wrap:pretty">{{ tDoc }}</span>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:flex-end;gap:10px">
+              <div style="flex:1;display:flex;align-items:baseline;gap:6px">
+                <span style="{{ wordCountStyle }}">{{ wordCount }}</span>
+                <span style="font-size:12.5px;font-weight:500;line-height:17px;color:#6E5F78">{{ wordCountNote }}</span>
+              </div>
+              <div style="{{ saveChipStyle }}">
+                <fig-icon name="{{ saveIcon }}" size="12"></fig-icon>
+                <span style="font-size:10.5px;font-weight:700;letter-spacing:.2px;color:inherit">{{ saveLabel }}</span>
+              </div>
+            </div>
+            <div style="height:5px;border-radius:100px;background:#EFE3EC;overflow:hidden">
+              <div style="{{ wordFillStyle }}"></div>
+            </div>
+          </div>
+
+          <div style="position:sticky;top:150px;z-index:7;display:flex;flex-direction:column;gap:5px;padding:8px 10px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px #E8DFE6,0 10px 22px -14px rgba(31,41,55,.5)">
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+              <sc-for list="{{ accents }}" as="ac" hint-placeholder-count="16">
+                <div onClick="{{ ac.tap }}" style="{{ ac.style }}" style-hover="background:#FDF3E3">{{ ac.label }}</div>
+              </sc-for>
+            </div>
+            <span style="font-size:10.5px;font-weight:500;color:#A2919F">Clavier d'accents — reste visible pendant le scroll</span>
+          </div>
+
+          <div class="wr-ed" style="display:flex;flex-direction:column;flex:1 1 auto;min-height:210px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #E8DFE6;overflow:hidden">
+            <div class="wr-ta" ref="{{ edRef }}" onInput="{{ onType }}" contentEditable="{{ true }}" suppressContentEditableWarning="{{ true }}" data-placeholder="{{ taPlaceholder }}" style="flex:1;overflow-y:auto;padding:16px;font-family:inherit;font-size:14.5px;font-weight:400;line-height:23px;color:#1F2937"></div>
+          </div>
+
+          <sc-if value="{{ showHints }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:20px;background:#FDF3E3;box-shadow:inset 0 0 0 1px #F0DCB4;animation:wrFade .25s ease both">
+              <div style="display:flex;align-items:center;gap:8px;color:#966010">
+                <fig-icon name="IconDuotoneBulb" size="16"></fig-icon>
+                <span style="font-size:12.5px;font-weight:700;line-height:17px;color:inherit">Aide à l'entraînement — connecteurs utiles</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ hints }}" as="h" hint-placeholder-count="5">
+                  <span style="font-size:12px;font-weight:500;line-height:1;padding:8px 11px;border-radius:100px;background:#fff;color:#7A4E0C;box-shadow:inset 0 0 0 1px #F0DCB4">{{ h.text }}</span>
+                </sc-for>
+              </div>
+              <span style="font-size:11.5px;font-weight:400;line-height:16px;color:#5E4E69;text-wrap:pretty">Ces aides n'existent qu'en entraînement. En test blanc, vous n'avez que la consigne et une page blanche, comme à l'examen.</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ── DRAFT REVIEW ── -->
+      <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:176px 20px 200px;display:flex;flex-direction:column;gap:20px;animation:wrFade .3s ease both">
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+              <span style="font-size:10px;font-weight:700;letter-spacing:.8px;padding:5px 10px;border-radius:100px;background:#FDF3E3;color:#7A4E0C;box-shadow:inset 0 0 0 1px #F0DCB4">{{ tKicker }}</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.8px;padding:5px 10px 5px 8px;border-radius:100px;background:#F0FDF4;color:#15803D;box-shadow:inset 0 0 0 1px #BBF7D0">
+                <fig-icon name="IconCheck" size="11"></fig-icon>Enregistré
+              </span>
+            </div>
+            <span style="font-size:22px;font-weight:700;line-height:29px;letter-spacing:-.4px;color:#111827;text-wrap:pretty">{{ reviewTitle }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;padding:4px 16px;border-radius:20px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+            <sc-for list="{{ reviewRows }}" as="rr" hint-placeholder-count="3">
+              <div style="{{ rr.rowStyle }}">
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:#5E4E69">{{ rr.label }}</span>
+                <span style="{{ rr.valueStyle }}">{{ rr.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:22px;background:#fff;box-shadow:inset 0 0 0 1px #E8DFE6,0 2px 8px -4px rgba(60,30,55,.14)">
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#857789">VOTRE TEXTE</span>
+            <div class="wr-ta" ref="{{ roRef }}" style="font-size:14.5px;font-weight:400;line-height:23px;color:#1F2937;text-wrap:pretty"></div>
+          </div>
+
+          <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#6E5F78;text-wrap:pretty">{{ finalNote }}</span>
+
+          <div onClick="{{ editTap }}" style="display:flex;justify-content:center;align-items:center;gap:8px;height:44px;border-radius:100px;cursor:pointer;user-select:none;font-size:13.5px;font-weight:600;background:#FDF3E3;color:#7A4E0C;box-shadow:inset 0 0 0 1px #F0DCB4">
+            <fig-icon name="IconOutlineRoundedEdit02" size="15"></fig-icon>{{ editLabel }}
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── SUBMIT CONFIRM ── -->
+      <sc-if value="{{ isSubmit }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:176px 20px 200px;display:flex;flex-direction:column;gap:20px;animation:wrFade .3s ease both">
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:22px;font-weight:700;line-height:29px;letter-spacing:-.4px;color:#111827;text-wrap:pretty">Envoyer les deux textes à la correction</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:#5E4E69;text-wrap:pretty">Une fois envoyés, les textes ne peuvent plus être modifiés. L'IA les évalue sur quatre critères et rend un score pour l'épreuve.</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ submitRows }}" as="sb" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #E8DFE6">
+                <div style="width:38px;height:38px;border-radius:12px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:#FDF3E3;color:#966010">
+                  <fig-icon name="IconSolidRoundedFile" size="18"></fig-icon>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0">
+                  <span style="font-size:13.5px;font-weight:700;line-height:18px;color:#111827;text-wrap:pretty">{{ sb.name }}</span>
+                  <span style="font-size:11.5px;font-weight:400;line-height:16px;color:#6E5F78">{{ sb.meta }}</span>
+                </div>
+                <span style="{{ sb.wordStyle }}">{{ sb.words }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:9px;padding:16px;border-radius:20px;background:#FEFAF1;box-shadow:inset 0 0 0 1px #F3E6C8">
+            <div style="display:flex;align-items:center;gap:8px;color:#8A5B10">
+              <fig-icon name="IconSparkles" size="16"></fig-icon>
+              <span style="font-size:12.5px;font-weight:700;line-height:17px;color:inherit">La correction par l'IA prend 1 à 5 minutes</span>
+            </div>
+            <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">Vous pouvez fermer l'application. La tentative apparaît dans l'historique avec le statut « correction IA » et une notification vous prévient dès que le score arrive.</span>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:2px">
+              <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="4">
+                <span style="font-size:11px;font-weight:600;line-height:1;padding:7px 10px;border-radius:100px;background:#fff;color:#8A5B10;box-shadow:inset 0 0 0 1px #F3E6C8">{{ c.text }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── PENDING (WITH THE AI) ── -->
+      <sc-if value="{{ isPending }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 190px;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;animation:wrFade .35s ease both">
+          <div style="position:absolute;left:-70px;top:-90px;width:320px;height:320px;border-radius:9999px;background:#D4860F;opacity:.28;filter:blur(80px)"></div>
+          <div style="position:absolute;right:-110px;bottom:120px;width:280px;height:280px;border-radius:9999px;background:#F9BD48;opacity:.16;filter:blur(90px)"></div>
+
+          <div style="{{ aiRingStyle }}">
+            <div style="{{ aiSpinStyle }}"></div>
+            <div style="position:relative;width:120px;height:120px;border-radius:9999px;background:#1E1226;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;color:#F9BD48">
+              <fig-icon name="{{ aiGlyph }}" size="30"></fig-icon>
+              <span style="font-size:10px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ aiLabel }}</span>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px;align-items:center">
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-align:center;text-wrap:pretty">{{ aiTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.55);text-align:center;text-wrap:pretty;max-width:290px">{{ aiSub }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;width:100%;padding:4px 18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+            <sc-for list="{{ pendingRows }}" as="p" hint-placeholder-count="3">
+              <div style="{{ p.rowStyle }}">
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:rgba(255,255,255,.6)">{{ p.label }}</span>
+                <span style="font-size:13px;font-weight:700;line-height:18px;color:#fff">{{ p.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ── SCORE READY ── -->
+      <sc-if value="{{ isScored }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-height:852px;padding:126px 20px 190px;display:flex;flex-direction:column;align-items:center;gap:22px;overflow:hidden;animation:wrFade .35s ease both">
+          <div style="position:absolute;left:-70px;top:-90px;width:320px;height:320px;border-radius:9999px;background:#D4860F;opacity:.28;filter:blur(80px)"></div>
+          <div style="position:absolute;right:-110px;bottom:120px;width:280px;height:280px;border-radius:9999px;background:#4ADE80;opacity:.12;filter:blur(90px)"></div>
+
+          <div style="position:relative;display:flex;align-items:center;gap:8px;height:30px;padding:0 13px 0 10px;border-radius:100px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);color:#F9BD48;animation:wrRise .45s cubic-bezier(.2,.7,.3,1) .04s both">
+            <fig-icon name="IconSparkles" size="14"></fig-icon>
+            <span style="font-size:11.5px;font-weight:700;letter-spacing:.3px;color:inherit">Corrigé par l'IA · 3 min 48 s</span>
+          </div>
+
+          <div style="position:relative;width:186px;height:186px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:{{ scoreRingBg }};box-shadow:0 0 0 1px rgba(255,255,255,.08);animation:wrPop .55s cubic-bezier(.2,.8,.25,1) .1s both">
+            <div style="width:150px;height:150px;border-radius:9999px;background:#1E1226;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px">
+              <span style="font-size:40px;font-weight:700;line-height:44px;letter-spacing:-1.4px;font-variant-numeric:tabular-nums;color:#fff">{{ scoreValue }}</span>
+              <span style="font-size:10px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.45)">{{ scoreUnit }}</span>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:8px;align-items:center;animation:wrRise .5s cubic-bezier(.2,.7,.3,1) .26s both">
+            <span style="font-size:26px;font-weight:700;line-height:32px;letter-spacing:-.6px;color:#fff;text-align:center">{{ scoreTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:rgba(255,255,255,.55);text-align:center;text-wrap:pretty;max-width:290px">{{ scoreSub }}</span>
+          </div>
+
+          <div style="position:relative;display:flex;flex-direction:column;gap:13px;width:100%;padding:18px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);animation:wrRise .5s cubic-bezier(.2,.7,.3,1) .38s both">
+            <sc-for list="{{ scoreCriteria }}" as="sc" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <div style="display:flex;align-items:center">
+                  <span style="flex:1;font-size:12.5px;font-weight:600;line-height:17px;color:rgba(255,255,255,.8)">{{ sc.label }}</span>
+                  <span style="font-size:12.5px;font-weight:700;line-height:17px;font-variant-numeric:tabular-nums;color:#fff">{{ sc.value }}</span>
+                </div>
+                <div style="height:5px;border-radius:100px;background:rgba(255,255,255,.14);overflow:hidden">
+                  <div style="{{ sc.fillStyle }}"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <!-- ══ FIXED CHROME ══ -->
+    <div style="{{ chromeStyle }}">
+      <div style="height:62px;display:flex;align-items:center;padding:21px 16px 19px;color:{{ barInk }}">
+        <div style="flex:1;display:flex;justify-content:center">
+          <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:inherit">9:41</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+          <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="currentColor"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+          <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="currentColor"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+          <div style="position:relative;width:27.328px;height:13px">
+            <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px currentColor"></div>
+            <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:currentColor"></div>
+            <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:currentColor"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:52px;display:flex;align-items:center;gap:8px;padding:0 12px 0 8px">
+        <sc-if value="{{ hasClose }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ closeTap }}" style="{{ closeStyle }}">
+            <fig-icon name="IconX" size="20"></fig-icon>
+          </div>
+        </sc-if>
+        <span style="{{ chromeTitleStyle }}">{{ chromeTitle }}</span>
+        <sc-if value="{{ hasDesktopBtn }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ openPair }}" style="display:flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 10px;border-radius:100px;flex-shrink:0;cursor:pointer;user-select:none;background:#FDF3E3;color:#966010;box-shadow:inset 0 0 0 1px #F0DCB4">
+            <fig-icon name="IconOutlineRoundedComputer" size="14"></fig-icon>
+            <span style="font-size:11.5px;font-weight:700;letter-spacing:.1px;color:inherit">Ordinateur</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasWordChip }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ wordChipStyle }}">
+            <div style="{{ wordChipDotStyle }}"></div>
+            <span style="font-size:11.5px;font-weight:700;letter-spacing:.2px;font-variant-numeric:tabular-nums;color:inherit">{{ wordChipLabel }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasTimer }}" hint-placeholder-val="{{ true }}">
+          <div style="{{ timerStyle }}">
+            <span style="font-size:13px;font-weight:700;letter-spacing:-.1px;font-variant-numeric:tabular-nums;color:inherit">{{ clock }}</span>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ hasProgress }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px;padding:0 20px">
+          <div style="height:4px;border-radius:100px;background:{{ trackBg }};overflow:hidden">
+            <div style="{{ progressFillStyle }}"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="flex:1;font-size:11px;font-weight:600;line-height:15px;color:{{ progressInk }}">{{ progressLeft }}</span>
+            <span style="font-size:11px;font-weight:600;line-height:15px;color:{{ progressInk }}">{{ progressRight }}</span>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ══ FOOTER CTA ══ -->
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:46px 20px 24px;display:flex;flex-direction:column;gap:10px;z-index:8;pointer-events:none">
+      <div style="{{ fadeStyle }}"></div>
+
+      <div onClick="{{ ctaTap }}" style="{{ ctaStyle }}">
+        <fig-icon name="{{ ctaIcon }}" size="17"></fig-icon>
+        <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ ctaLabel }}</span>
+      </div>
+
+      <div style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;min-height:22px">
+        <span onClick="{{ noteTap }}" style="{{ ctaNoteStyle }}">{{ ctaNote }}</span>
+      </div>
+    </div>
+
+    <!-- ══ DESKTOP PAIRING SHEET ══ -->
+    <sc-if value="{{ pairOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:22;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ closePair }}" style="position:absolute;inset:0;background:rgba(30,18,38,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="position:relative;display:flex;flex-direction:column;gap:18px;padding:14px 20px 26px;border-radius:28px 28px 0 0;animation:wrSheet .28s ease both;background:#fff;box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)">
+          <div style="width:38px;height:4px;border-radius:100px;margin:0 auto 4px;background:#E8DFE6"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:20px;font-weight:700;line-height:26px;letter-spacing:-.4px;color:#111827;text-wrap:pretty">Rédiger cette tâche sur un ordinateur</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:#5E4E69;text-wrap:pretty">Ouvrez la page de rédaction sur votre ordinateur et scannez le code affiché. Le brouillon est enregistré sur les deux appareils : vous pouvez revenir en cours de phrase.</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:18px;background:#F5EEF3;box-shadow:inset 0 0 0 1px #E8DFE6;color:#374151">
+            <fig-icon name="IconPause" size="15"></fig-icon>
+            <span style="flex:1;font-size:12.5px;font-weight:600;line-height:18px;color:inherit;text-wrap:pretty">Chronomètre en pause à {{ clock }} — il repart à l'ouverture de la tâche sur l'ordinateur.</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px;padding:16px;border-radius:18px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+            <sc-for list="{{ pairSteps }}" as="ps" hint-placeholder-count="3">
+              <div style="display:flex;align-items:flex-start;gap:10px">
+                <span style="width:20px;height:20px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:10.5px;font-weight:700;background:#FDF4E5;color:#966010">{{ ps.n }}</span>
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#2E1A3B;text-wrap:pretty">{{ ps.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+            <div onClick="{{ openCamera }}" style="display:flex;justify-content:center;align-items:center;gap:9px;height:52px;border-radius:100px;cursor:pointer;user-select:none;font-size:15px;font-weight:600;background:#6A2A5F;color:#fff">
+              <fig-icon name="IconOutlineRoundedQrCode01" size="17"></fig-icon>Ouvrir l'appareil photo
+            </div>
+            <div onClick="{{ closePair }}" style="display:flex;justify-content:center;align-items:center;height:44px;border-radius:100px;cursor:pointer;user-select:none;font-size:14px;font-weight:600;color:#5E4E69">Continuer sur le téléphone</div>
+          </div>
+          <span style="font-size:11.5px;font-weight:400;line-height:16px;text-align:center;color:#5E4E69;text-wrap:pretty">Rien n'est à retaper : le brouillon suit la session.</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ QR SCANNER ══ -->
+    <sc-if value="{{ cameraOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;background:#0B0908">
+        <div style="height:62px;flex-shrink:0;display:flex;align-items:center;padding:21px 16px 19px;color:#fff">
+          <div style="flex:1;display:flex;justify-content:center">
+            <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:inherit">9:41</span>
+          </div>
+          <div style="flex:1"></div>
+        </div>
+        <div style="height:52px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 12px 0 8px">
+          <div onClick="{{ closeCamera }}" style="width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;flex-shrink:0;cursor:pointer;color:#fff">
+            <fig-icon name="IconX" size="20"></fig-icon>
+          </div>
+          <span style="flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;color:rgba(255,255,255,.85)">Scannez le code affiché sur l'ordinateur</span>
+          <div style="display:flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 10px;border-radius:100px;flex-shrink:0;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);color:#fff">
+            <fig-icon name="IconPause" size="12"></fig-icon>
+            <span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:inherit">{{ clock }}</span>
+          </div>
+        </div>
+
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:26px;padding:20px 24px 40px">
+          <div style="position:relative;width:250px;height:250px">
+            <div style="position:absolute;inset:0;border-radius:26px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)"></div>
+            <div style="position:absolute;left:0;top:0;width:52px;height:52px;border-top:3px solid #D4860F;border-left:3px solid #D4860F;border-radius:26px 0 0 0"></div>
+            <div style="position:absolute;right:0;top:0;width:52px;height:52px;border-top:3px solid #D4860F;border-right:3px solid #D4860F;border-radius:0 26px 0 0"></div>
+            <div style="position:absolute;left:0;bottom:0;width:52px;height:52px;border-bottom:3px solid #D4860F;border-left:3px solid #D4860F;border-radius:0 0 0 26px"></div>
+            <div style="position:absolute;right:0;bottom:0;width:52px;height:52px;border-bottom:3px solid #D4860F;border-right:3px solid #D4860F;border-radius:0 0 26px 0"></div>
+            <div style="position:absolute;left:14px;right:14px;top:50%;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(212,134,15,0),#F9BD48,rgba(212,134,15,0))"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+            <span style="font-size:17px;font-weight:700;line-height:23px;color:#fff;text-align:center;text-wrap:pretty">Visez le QR code affiché sur la page web</span>
+            <span style="font-size:12.5px;font-weight:400;line-height:18px;color:rgba(255,255,255,.55);text-align:center;text-wrap:pretty;max-width:270px">Ouvrez tefprep.app/write sur votre ordinateur. La tâche s'y ouvre avec ce que vous avez déjà écrit.</span>
+          </div>
+          <a href="Home.dc.html" style="display:flex;justify-content:center;align-items:center;gap:9px;height:48px;padding:0 22px;border-radius:100px;font-size:14px;font-weight:600;background:#fff;color:#1E1226">
+            <fig-icon name="IconArrowRight" size="16"></fig-icon>Simuler un scan réussi
+          </a>
+          <span onClick="{{ closeCamera }}" style="font-size:12.5px;font-weight:600;color:rgba(255,255,255,.6);cursor:pointer;user-select:none;text-decoration:underline;text-underline-offset:3px">Saisir plutôt le code à 6 chiffres</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ EXIT SHEET ══ -->
+    <sc-if value="{{ showExit }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ dismissExit }}" style="position:absolute;inset:0;background:rgba(30,18,38,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"></div>
+        <div style="position:relative;display:flex;flex-direction:column;gap:18px;padding:14px 20px 26px;border-radius:28px 28px 0 0;animation:wrSheet .28s ease both;background:#FFFFFF;box-shadow:0 -20px 50px -20px rgba(0,0,0,.6)">
+          <div style="width:38px;height:4px;border-radius:100px;margin:0 auto 4px;background:#E8DFE6"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:20px;font-weight:700;line-height:26px;letter-spacing:-.4px;color:#111827;text-wrap:pretty">{{ sheetTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:20px;color:#5E4E69;text-wrap:pretty">{{ sheetBody }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;padding:4px 14px;border-radius:18px;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC">
+            <sc-for list="{{ sheetRows }}" as="sr" hint-placeholder-count="3">
+              <div style="{{ sr.rowStyle }}">
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:#5E4E69">{{ sr.label }}</span>
+                <span style="font-size:13px;font-weight:700;line-height:18px;color:#111827">{{ sr.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+            <div onClick="{{ dismissExit }}" style="display:flex;justify-content:center;align-items:center;height:52px;border-radius:100px;cursor:pointer;user-select:none;font-size:15px;font-weight:600;background:#6A2A5F;color:#FFFFFF">{{ sheetPrimary }}</div>
+            <a href="Home.dc.html" style="display:flex;justify-content:center;align-items:center;height:44px;border-radius:100px;font-size:14px;font-weight:600;color:#B4451F">Enregistrer le brouillon et quitter</a>
+          </div>
+          <span style="font-size:11.5px;font-weight:400;line-height:16px;text-align:center;color:#5E4E69;text-wrap:pretty">Le brouillon est conservé et la reprise est gratuite.</span>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ══ REVIEW CHROME ══ -->
+  <div style="display:flex;gap:6px;width:393px;flex-wrap:wrap">
+    <sc-for list="{{ steps }}" as="st" hint-placeholder-count="8">
+      <div onClick="{{ st.go }}" style="{{ st.chipStyle }}">{{ st.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;width:393px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px #D9CCD6">
+    <span style="flex:1;font-size:12.5px;font-weight:700;color:#2E1A3B">Session mode</span>
+    <sc-for list="{{ modes }}" as="md" hint-placeholder-count="2">
+      <div onClick="{{ md.go }}" style="{{ md.style }}">{{ md.label }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Scenario flags</span>
+      <span style="font-size:12px;font-weight:400;line-height:17px;color:#6E5F78;text-wrap:pretty">Each flag switches one branch of this flow. Toggle it on the left; tap the pill to jump to the step it changes.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ flags }}" as="f" hint-placeholder-count="3">
+        <div style="{{ f.rowStyle }}">
+          <div onClick="{{ f.toggle }}" style="{{ f.trackStyle }}">
+            <div style="{{ f.knobStyle }}"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span onClick="{{ f.toggle }}" style="font-size:13px;font-weight:700;line-height:17px;color:#2E1A3B;cursor:pointer;user-select:none">{{ f.label }}</span>
+              <span onClick="{{ f.goScreen }}" style="font-size:10px;font-weight:600;letter-spacing:.3px;padding:3px 8px;border-radius:100px;background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6;cursor:pointer;user-select:none;white-space:nowrap" style-hover="background:#6A2A5F;color:#fff">{{ f.screenLabel }} ↗</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.onTagStyle }}">ON</span>
+              <span style="{{ f.onTextStyle }}">{{ f.onText }}</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="{{ f.offTagStyle }}">OFF</span>
+              <span style="{{ f.offTextStyle }}">{{ f.offText }}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mock&quot;,&quot;practice&quot;],&quot;default&quot;:&quot;mock&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;startStep&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;consignes&quot;,&quot;intro&quot;,&quot;write&quot;,&quot;review&quot;,&quot;intro2&quot;,&quot;submit&quot;,&quot;pending&quot;,&quot;scored&quot;,&quot;exitWrite&quot;],&quot;default&quot;:&quot;consignes&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;underWords&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;timeLow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;timeUp&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;hintsOn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;desktopOff&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const GOLD = "#D4860F", DEEP = "#966010", TINT = "#FDF3E3", RING = "#F0DCB4";
+
+/* The exam's on-screen accent keyboard (confirmed by CCI Paris IDF): for
+   keyboards without French characters. Insertion only, no formatting. */
+const ACCENTS = ["é", "è", "ê", "ë", "à", "â", "î", "ï", "ô", "ù", "û", "ü", "ç", "œ", "«", "»"];
+
+const STEPS = [
+  { key: "consignes", label: "Consignes" },
+  { key: "intro", label: "Tâche 1 intro" },
+  { key: "write", label: "Writing" },
+  { key: "review", label: "Draft review" },
+  { key: "intro2", label: "Tâche 2 intro" },
+  { key: "submit", label: "Submit confirm" },
+  { key: "pending", label: "With the AI" },
+  { key: "scored", label: "Score ready" },
+  { key: "exitWrite", label: "Exit · writing" }
+];
+
+const LABELS = {
+  consignes: "Consignes — the on-screen instructions the real exam opens with",
+  intro: "Tâche 1 intro — consigne and the article opening, before the clock starts",
+  write: "Writing — live word count against the minimum, draft saved as you type",
+  review: "Draft saved — read-only text, editable until submission",
+  intro2: "Tâche 2 intro — exprimer et défendre un point de vue, 200 mots",
+  submit: "Submit confirm — both texts listed, async warning",
+  pending: "Submitted — AI scoring, notification when it lands",
+  scored: "Score ready — AI scoring finished, four criteria in",
+  exitWrite: "Exit sheet during writing"
+};
+
+const TASKS = [
+  {
+    kicker: "Tâche 1 · section A",
+    title: "Terminer un fait divers",
+    consigne: "Vous êtes journaliste. Voici le début d'un fait divers paru dans la presse locale. Rédigez la suite de l'article en quatre-vingts mots au minimum, en gardant le même ton.",
+    short: "Rédigez la suite de ce fait divers en gardant le ton de la presse locale. 80 mots minimum.",
+    docLabel: "DÉBUT DE L'ARTICLE",
+    doc: "« Mardi matin, les habitants du quartier Saint-Roch ont découvert que la fontaine de la place avait retrouvé son eau, trente ans après avoir été fermée. Personne ne savait encore qui… »",
+    min: 80, minLabel: "80 mots minimum",
+    draft: "Personne ne savait encore qui avait rouvert la vanne. Les employés municipaux, arrivés vers huit heures, ont trouvé le bassin propre et la margelle réparée. « Ce n'est pas nous », a assuré le responsable des espaces verts, aussi surpris que les riverains. Une voisine affirme avoir vu deux hommes travailler à la lumière d'une lampe, tard dans la nuit de lundi. La mairie a ouvert une enquête, mais le maire a reconnu, avec un sourire, qu'il ne comptait pas refermer la fontaine."
+  },
+  {
+    kicker: "Tâche 2 · section B",
+    title: "Exprimer et défendre un point de vue",
+    consigne: "Votre ville envisage d'interdire les voitures dans le centre historique le week-end. Vous écrivez au courrier des lecteurs du journal local pour donner votre avis et le justifier en deux cents mots au minimum.",
+    short: "Écrivez au courrier des lecteurs pour donner votre avis sur la fermeture du centre aux voitures. 200 mots minimum.",
+    docLabel: "COURRIER DES LECTEURS",
+    doc: "« Centre-ville sans voiture le week-end : la mairie consulte les habitants jusqu'au 15 avril » — Le Journal de la Ville, mars 2025.",
+    min: 200, minLabel: "200 mots minimum",
+    draft: "Madame, Monsieur,\n\nJ'ai lu avec intérêt le projet de fermer le centre historique aux voitures le samedi et le dimanche, et je souhaite dire ici pourquoi j'y suis favorable.\n\nD'abord, les rues du vieux centre n'ont jamais été conçues pour la circulation. Deux voitures ne peuvent pas se croiser rue des Tanneurs sans monter sur le trottoir, ce qui rend la promenade désagréable et parfois dangereuse pour les familles. Le week-end, quand les terrasses sont pleines, la situation devient franchement absurde.\n\nEnsuite, je ne crois pas à l'argument selon lequel les commerçants y perdraient. Les villes voisines qui ont tenté l'expérience ont vu leur fréquentation augmenter, parce qu'on reste plus longtemps dans une rue où l'on peut marcher tranquillement. Un client à pied revient, un automobiliste bloqué ne revient pas.\n\nJe comprends toutefois les inquiétudes des habitants du quartier et des personnes âgées, qui craignent de ne plus pouvoir se garer près de chez elles. C'est pourquoi la mesure devrait s'accompagner de deux garanties : un accès maintenu pour les riverains et les livraisons le matin, et une navette gratuite depuis les parkings de la gare, toutes les dix minutes.\n\nÀ ces conditions, la fermeture du centre le week-end ne serait pas une contrainte de plus, mais un vrai gain de qualité de vie pour tout le monde.\n\nVeuillez agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\nClaire Rousseau, quartier Saint-Roch"
+  }
+];
+
+const HINTS = [
+  "En premier lieu…", "Il me semble que…", "D'une part… d'autre part…",
+  "C'est la raison pour laquelle…", "En définitive…"
+];
+
+const FLAGS = [
+  { key: "underWords", label: "Below the minimum", def: false, screen: "write",
+    on: "The draft is short of the required word count: the counter turns red and the CTA warns before it lets you continue.",
+    off: "The draft is over the minimum — the counter is green and the CTA is plain." },
+  { key: "timeLow", label: "Five minutes left", def: false, screen: "write",
+    on: "Ochre banner over the editor and a red session timer; at 0:00 whatever is written is submitted.",
+    off: "Normal clock, no banner." },
+  { key: "timeUp", label: "Clock hits 0:00", def: false, screen: "write",
+    on: "The clock reads 0:00: the editor shows the red auto-submit banner and 1.6 s later both texts go to the AI as they are — no confirm step.",
+    off: "The session still has time on it; submitting is a decision." },
+  { key: "hintsOn", label: "Practice hints", def: false, screen: "write",
+    on: "The editor adds a card of connecteurs utiles — practice mode only.",
+    off: "Prompt and a blank page, same as the exam." },
+  { key: "desktopOff", label: "Desktop offer remembered", def: false, screen: "intro",
+    on: "The user tapped “don't ask again”: the intro banner is gone for good. The Computer button in the editor bar stays — the feature is never lost, only the prompt.",
+    off: "First time on this account: the tâche intro offers the desktop handoff as a full-width banner." }
+];
+
+class Component extends DCLogic {
+  state = { screen: null, mode: null, flags: {}, task: 0, tick: 0, secs: 3452, drafts: {}, promptOpen: false, typed: false };
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      const s = this.cur();
+      if (s === "pending") this.scheduleLand();
+      else if (this.landQueued) { this.landQueued = false; clearTimeout(this.landWait); clearTimeout(this.landTimer); }
+      const live = s === "write" || s === "review" || s === "submit" || s === "exitWrite";
+      if (this.flag("timeUp") && live) this.scheduleAutoSubmit();
+      else if (this.autoQueued && !live) { this.autoQueued = false; clearTimeout(this.autoWait); }
+      this.setState(st => {
+        const next = { tick: st.tick + 1 };
+        const held = st.pairOpen || st.cameraOpen; // clock is paused while the handoff code is on screen
+        if (s !== "pending" && s !== "scored" && s !== "intro" && !held) next.secs = Math.max(0, st.secs - 1);
+        return next;
+      });
+    }, 260);
+  }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.landTimer); clearTimeout(this.landWait); clearTimeout(this.autoWait); }
+
+  land() {
+    if (this.state.landing) return;
+    this.setState({ landing: true });
+    this.landTimer = setTimeout(() => this.setState({ screen: "scored", landing: false }), 1100);
+  }
+  // at 0:00 the engine submits on its own — the banner promises it, so the prototype keeps that promise
+  scheduleAutoSubmit() {
+    if (this.autoQueued) return;
+    this.autoQueued = true;
+    this.autoWait = setTimeout(() => this.setState({ screen: "pending", autoSent: true }), 1600);
+  }
+  scheduleLand() {
+    if (this.landQueued) return;
+    this.landQueued = true;
+    this.landWait = setTimeout(() => this.land(), 3200);
+  }
+
+  cur() { return this.state.screen || this.props.startStep || "intro"; }
+  /* PracticeConfig (§9) is the only door into an engine and it knows the mode,
+     so it carries it as ?mode=practice|mock. Without this every route ran mock. */
+  qMode() {
+    if (this._qm === undefined) {
+      const v = new URLSearchParams(location.search).get("mode");
+      this._qm = v === "practice" || v === "mock" ? v : null;
+    }
+    return this._qm;
+  }
+  mode() { return this.state.mode || this.qMode() || this.props.mode || "mock"; }
+  taskIdx() { return this.state.task || 0; }
+  flag(k) {
+    const f = this.state.flags[k];
+    if (f !== undefined) return f;
+    if (this.props[k] !== undefined && this.props[k] !== null) return this.props[k];
+    return FLAGS.filter(x => x.key === k)[0].def;
+  }
+  draftOf(i) {
+    const d = this.state.drafts[i];
+    if (d !== undefined) return d;
+    const base = TASKS[i].draft;
+    // "below the minimum" is a scenario, so the seeded draft is cut short
+    const txt = this.flag("underWords") ? base.split(" ").slice(0, Math.round(TASKS[i].min * 0.45)).join(" ") : base;
+    return txt.split("\n\n").map(p => "<p style=\"margin:0 0 12px\">" + p.replace(/\n/g, "<br>") + "</p>").join("");
+  }
+  plain(html) {
+    return String(html)
+      .replace(/<(br|\/p|\/li|\/div)[^>]*>/gi, " ")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ");
+  }
+  words(html) { const t = this.plain(html).trim(); return t ? t.split(/\s+/).length : 0; }
+  /* Confirmed exam feature: an on-screen accent keyboard for keyboards without
+     French characters. Insertion only — the field carries no formatting. */
+  insertChar(ch) {
+    if (!this.ed) return;
+    this.ed.focus();
+    document.execCommand("insertText", false, ch);
+    this.setState(s => ({ drafts: Object.assign({}, s.drafts, { [this.taskIdx()]: this.ed.innerHTML }), typed: true }));
+  }
+  goto(k) {
+    const next = { screen: k, pairOpen: false, cameraOpen: false };
+    if (k === "intro") next.task = 0;
+    if (k === "intro2") next.task = 1;
+    this.setState(next);
+  }
+  fmt(n) {
+    const m = Math.floor(n / 60), s = n % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  renderVals() {
+    const raw = this.cur();
+    const exit = raw === "exitWrite";
+    const screen = raw === "intro2" ? "intro" : raw === "exitWrite" ? "write" : raw;
+    const practice = this.mode() === "practice";
+    const idx = this.taskIdx();
+    const t = TASKS[idx];
+    const dark = screen === "intro" || screen === "pending" || screen === "scored" || screen === "consignes";
+    const landing = !!this.state.landing;
+    const timeLow = this.flag("timeLow");
+    const timeUp = this.flag("timeUp");
+    const secs = timeUp ? 0 : timeLow ? Math.min(this.state.secs, 274) : this.state.secs;
+    const autoSent = !!this.state.autoSent;
+
+    const draft = this.draftOf(idx);
+    const n = this.words(draft);
+    const short = n < t.min;
+    const pct = Math.min(100, Math.round(100 * n / t.min));
+    const CRIT = [
+      { label: "Respect de la situation", v: "B2" },
+      { label: "Organisation du texte", v: "B1" },
+      { label: "Lexique", v: "B1" },
+      { label: "Syntaxe", v: "B1" }
+    ];
+
+    const cta = {};
+    if (screen === "consignes") {
+      cta.label = "Commencer l'épreuve"; cta.icon = "IconArrowRight";
+      cta.note = "Le chronomètre de 60 minutes couvre les deux textes — il démarre à l'écran suivant.";
+      /* Mock runs the exam chain: no per-tâche intro screen, straight into the field. */
+      cta.go = () => this.goto(this.mode() === "mock" ? "write" : "intro");
+    } else if (screen === "intro") {
+      cta.label = "Commencer à rédiger";
+      cta.icon = "IconArrowRight";
+      cta.note = "Le chronomètre de la session tourne déjà. " + t.minLabel + " pour cette tâche.";
+      cta.go = () => this.goto("write");
+    } else if (screen === "write") {
+      cta.label = short ? "Continuer avec " + n + " mots" : "Enregistrer et relire le brouillon";
+      cta.icon = short ? "IconDuotoneAlertCircle" : "IconCheck";
+      cta.disabled = n === 0;
+      cta.note = n === 0
+        ? "Écrivez quelque chose avant d'enregistrer cette tâche."
+        : short
+          ? "Un texte de moins de " + t.min + " mots perd des points de pertinence — encore " + (t.min - n) + "."
+          : "Le brouillon est enregistré au fil de la frappe. Vous pouvez le modifier jusqu'à l'envoi.";
+      cta.go = () => { if (n > 0) this.goto("review"); };
+    } else if (screen === "review") {
+      const last = idx === 1;
+      cta.label = last ? "Vérifier et envoyer" : "Passer à la tâche 2";
+      cta.icon = "IconArrowRight";
+      cta.note = last ? "Rien n'a encore été envoyé à l'IA." : "La tâche 2 est le courrier des lecteurs : 200 mots minimum.";
+      /* Mock skips the per-tâche intro, so the tâche index has to advance here —
+         goto("write") alone kept task 0 and looped tâche 1 → review → tâche 1. */
+      cta.go = () => {
+        if (last) return this.goto("submit");
+        if (this.mode() === "mock") { this.setState({ screen: "write", task: 1, pairOpen: false, cameraOpen: false }); return; }
+        this.goto("intro2");
+      };
+    } else if (screen === "submit") {
+      cta.label = "Envoyer à la correction";
+      cta.icon = "IconSolidRoundedFileCheck";
+      cta.note = "Action irréversible — les textes sont définitifs après envoi.";
+      cta.go = () => this.goto("pending");
+    } else if (screen === "pending") {
+      /* In a mock session the AI keeps scoring in the background while the
+         next épreuve starts — the wait is not a place to stop. */
+      const nx = window.MockSession && MockSession.active() ? MockSession.nextOf("writing") : null;
+      cta.label = nx ? "Continuer : " + nx.fr : "Voir l'historique";
+      cta.icon = nx ? "IconArrowRight" : "IconOutlineRoundedTransactionHistory";
+      cta.note = nx ? "L'IA corrige cette épreuve pendant que vous continuez." : "Retour à l'accueil";
+      if (nx) cta.go = () => MockSession.handoff("writing");
+      if (!nx) cta.go = () => { __go("TestHistory.dc.html"); };
+      cta.noteHref = "Home.dc.html";
+    } else {
+      cta.label = "Voir le résultat complet";
+      cta.icon = "IconSolidRoundedFileCheck";
+      cta.note = "Le retour par tâche et les notes de l'IA se trouvent dans la correction.";
+      cta.go = () => { __go("TestReview.dc.html"); };
+    }
+
+    const ctaBg = cta.disabled ? (dark ? "rgba(255,255,255,.12)" : "#E5E7EB") : (dark ? "#FFFFFF" : "#2E1A3B");
+    const ctaInk = cta.disabled ? (dark ? "rgba(255,255,255,.42)" : "#9CA3AF") : (dark ? "#1E1226" : "#FFFFFF");
+    const taskNo = idx + 1;
+
+    return {
+      stateLabel: LABELS[raw] || "",
+      frameStyle: "position:relative;width:393px;height:852px;overflow:hidden;flex-shrink:0;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);background:" +
+        (dark ? "linear-gradient(170deg,#2A1F12 0%,#1E1226 60%,#100D0A 100%)" : "linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 60%)"),
+
+      isConsignes: screen === "consignes",
+      consigneRules: [
+        { n: "1", text: "Deux textes, 60 minutes en tout. Vous répartissez le temps comme vous voulez : rien n'est imposé par texte." },
+        { n: "2", text: "Tâche A : terminer un fait divers, 80 mots minimum. Tâche B : défendre un point de vue, 200 mots minimum." },
+        { n: "3", text: "Un clavier d'accents est disponible à l'écran. Le champ est en texte brut : l'orthographe et la grammaire sont évaluées, la mise en page non." },
+        { n: "4", text: "Les deux textes sont envoyés ensemble. À la fin du temps imparti, ils partent tels quels." }
+      ],
+      consigneNote: "Le compteur de mots et l'alerte de minimum sont propres à l'application. L'examen annonce un minimum mais rien ne confirme qu'il compte les mots ou bloque un texte trop court.",
+      isIntro: screen === "intro",
+      isWrite: screen === "write",
+      isReview: screen === "review",
+      isSubmit: screen === "submit",
+      isPending: screen === "pending",
+      isScored: screen === "scored",
+
+      // task content
+      tKicker: t.kicker,
+      tTitle: t.title,
+      tConsigne: t.consigne,
+      tConsigneShort: t.short,
+      tDocLabel: t.docLabel,
+      tDoc: t.doc,
+      introMeta: [
+        { label: "Longueur attendue", value: t.minLabel.replace(" minimum", " min.") },
+        { label: "Temps conseillé", value: taskNo === 1 ? "20 min" : "40 min" },
+        { label: "Modification", value: "Jusqu'à l'envoi" }
+      ].map((m, i, a) => Object.assign({}, m, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:12px 0" + (i < a.length - 1 ? ";border-bottom:1px solid rgba(255,255,255,.08)" : "")
+      })),
+
+      // editor
+      timeLow: timeLow && !timeUp,
+      timeUp: timeUp,
+      draft: draft,
+      // contentEditable is written once per task (and on flag reseeds) so the caret survives re-renders
+      edRef: el => {
+        this.ed = el;
+        if (!el) return;
+        const stamp = idx + ":" + (this.state.drafts[idx] === undefined ? "seed" : "own");
+        if (el.dataset.stamp !== stamp) { el.innerHTML = draft; el.dataset.stamp = stamp; }
+      },
+      onType: e => {
+        const v = e.target.innerHTML;
+        this.setState(s => ({ drafts: Object.assign({}, s.drafts, { [idx]: v }), typed: true }));
+      },
+      accents: ACCENTS.map(ch => ({
+        label: ch,
+        tap: () => this.insertChar(ch),
+        style: "min-width:30px;height:30px;padding:0 6px;border-radius:9px;display:flex;justify-content:center;align-items:center;cursor:pointer;user-select:none;font-size:14px;font-weight:600;color:#5E4E69;background:#FBF7FA;box-shadow:inset 0 0 0 1px #EFE3EC;flex-shrink:0;transition:background .14s ease"
+      })),
+      taPlaceholder: taskNo === 1 ? "Continuez l'article…" : "Madame, Monsieur,",
+      promptOpen: this.state.promptOpen,
+      togglePrompt: () => this.setState(s => ({ promptOpen: !s.promptOpen })),
+      promptToggleLabel: this.state.promptOpen ? "Masquer le document" : "Afficher le document",
+      wordCount: n + (n === 1 ? " mot" : " mots"),
+      wordCountStyle: "font-size:19px;font-weight:700;line-height:24px;letter-spacing:-.3px;font-variant-numeric:tabular-nums;color:" +
+        (short ? "#B91C1C" : "#15803D"),
+      wordCountNote: short ? "· encore " + (t.min - n) + " pour atteindre " + t.min : "· au-dessus du minimum de " + t.min,
+      wordFillStyle: "height:100%;width:" + pct + "%;border-radius:100px;transition:width .25s ease;background:" +
+        (short ? "linear-gradient(90deg,#F0A0A0,#DC2626)" : "linear-gradient(90deg," + GOLD + "," + DEEP + ")"),
+      saveChipStyle: "display:flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:100px;flex-shrink:0;background:#F0FDF4;color:#15803D;box-shadow:inset 0 0 0 1px #BBF7D0",
+      saveIcon: "IconCheck",
+      saveLabel: this.state.typed ? "Enregistré en continu" : "Brouillon enregistré",
+      showHints: practice && this.flag("hintsOn"),
+      hints: HINTS.map(h => ({ text: h })),
+
+      // draft review
+      reviewTitle: "Tâche " + taskNo + " rédigée · " + n + " mots",
+      roRef: el => { if (el && el.dataset.html !== draft) { el.innerHTML = draft; el.dataset.html = draft; } },
+      reviewRows: [
+        { label: "Longueur", value: n + " mots", ok: !short },
+        { label: "Minimum", value: t.min + " mots", ok: true },
+        { label: "Section", value: t.kicker.split(" · ")[1], ok: true }
+      ].map((r, i, a) => Object.assign({}, r, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:11px 0" + (i < a.length - 1 ? ";border-bottom:1px solid #F5EEF3" : ""),
+        valueStyle: "font-size:13px;font-weight:700;line-height:18px;font-variant-numeric:tabular-nums;color:" + (r.ok ? "#111827" : "#B91C1C")
+      })),
+      finalNote: short
+        ? "Ce texte est en dessous de la longueur demandée. Vous pouvez le rouvrir et le compléter : rien n'est verrouillé avant l'envoi des deux tâches."
+        : "Les deux tâches restent modifiables jusqu'à l'envoi. Ensuite les textes sont définitifs et partent tels quels vers l'IA.",
+      editLabel: "Modifier à nouveau la tâche " + taskNo,
+      editTap: () => this.goto("write"),
+
+      // submit
+      submitRows: TASKS.map((tt, i) => {
+        const w = this.words(this.draftOf(i));
+        const ok = w >= tt.min;
+        return {
+          name: "Tâche " + (i + 1) + " · " + tt.title,
+          meta: tt.kicker.split(" · ")[1] + " · " + tt.min + " mots min.",
+          words: w + " mots",
+          wordStyle: "font-size:13px;font-weight:700;line-height:18px;font-variant-numeric:tabular-nums;flex-shrink:0;color:" + (ok ? "#15803D" : "#B91C1C")
+        };
+      }),
+      criteria: CRIT.map(c => ({ text: c.label })),
+
+      // pending
+      aiRingStyle: "position:relative;width:150px;height:150px;border-radius:9999px;display:flex;justify-content:center;align-items:center" +
+        (landing ? ";animation:wrLand .6s cubic-bezier(.2,.8,.25,1) both" : ""),
+      aiSpinStyle: "position:absolute;inset:0;border-radius:9999px;will-change:transform;transition:background .3s ease;background:" +
+        (landing
+          ? "conic-gradient(#4ADE80 0deg 360deg)"
+          : "conic-gradient(" + GOLD + " 0deg 90deg,rgba(255,255,255,.1) 90deg 360deg);animation:wrSpin 1.6s linear infinite"),
+      aiGlyph: landing ? "IconCheck" : "IconSparkles",
+      aiLabel: landing ? "TERMINÉ" : "CORRECTION",
+      aiTitle: landing ? "Le score vient d'arriver" : autoSent ? "Temps écoulé — les deux textes ont été envoyés" : "Les deux textes sont chez l'IA",
+      aiSub: landing
+        ? "Les deux tâches sont revenues de l'IA. Ouverture du résultat…"
+        : autoSent
+          ? "Le chronomètre a atteint 0:00 : les textes sont partis à l'IA tels quels. La correction prend environ 4 minutes."
+          : "Environ 4 minutes. Vous n'êtes pas obligé de rester ici : nous vous prévenons dès que le score est prêt.",
+      pendingRows: [
+        { label: "Envoyé", value: autoSent ? "2 tâches · automatiquement" : "2 tâches · 11:47" },
+        { label: "Statut dans l'historique", value: "Correction IA" },
+        { label: "Attente estimée", value: "environ 4 min" }
+      ].map((p, i, a) => Object.assign({}, p, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:12px 0" + (i < a.length - 1 ? ";border-bottom:1px solid rgba(255,255,255,.08)" : "")
+      })),
+
+      // score ready
+      scoreRingBg: "conic-gradient(from -90deg," + GOLD + " 0deg 242deg,rgba(255,255,255,.12) 242deg 360deg)",
+      scoreValue: practice ? "B1" : "6",
+      scoreUnit: practice ? "NIVEAU · ESTIMATION" : "NCLC · ESTIMATION",
+      scoreTitle: practice ? "B1 à l'expression écrite" : "NCLC 6 · B1 à l'expression écrite",
+      scoreSub: practice
+        ? "Une seule tâche : un niveau CECR estimé, pas de NCLC. La situation est respectée ; la syntaxe est à travailler."
+        : "Estimation par l'IA sur les critères officiels, pas une note officielle. La situation est respectée ; la syntaxe est à travailler.",
+      scoreCriteria: CRIT.map(c => ({
+        label: c.label,
+        value: c.v,
+        fillStyle: "height:100%;width:" + Math.round((["A1","A2","B1","B2","C1","C2"].indexOf(c.v) + 1) / 6 * 100) + "%;border-radius:100px;background:linear-gradient(90deg," + GOLD + "," + DEEP + ")"
+      })),
+
+      // chrome
+      chromeStyle: "position:absolute;left:0;right:0;top:0;z-index:9;padding-bottom:" + (screen === "write" || screen === "review" || screen === "submit" ? "12px" : "0") + ";background:" +
+        (dark ? "linear-gradient(180deg,rgba(30,18,38,.92) 0%,rgba(30,18,38,0) 100%)" : "linear-gradient(180deg,rgba(248,243,247,.96) 0%,rgba(248,243,247,.86) 70%,rgba(248,243,247,0) 100%)") +
+        ";backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)",
+      barInk: dark ? "#FFFFFF" : "#111827",
+      chromeTitle: screen === "pending" || screen === "scored" ? "" : screen === "submit" ? "Envoi · 2 tâches" : screen === "write" ? "" : "Tâche " + taskNo + " sur 2",
+      chromeTitleStyle: "flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:" +
+        (dark ? "rgba(255,255,255,.85)" : "#111827"),
+      hasClose: screen !== "pending" && screen !== "scored",
+      closeTap: () => this.goto("exitWrite"),
+      closeStyle: "width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;flex-shrink:0;cursor:pointer;color:" +
+        (dark ? "#fff" : "#111827"),
+      /* Moved to Consignes 9 Sep 2026: the choice of device belongs before the
+         clock matters, not one screen into the first tâche. */
+      desktopOffer: screen === "consignes" && !this.flag("desktopOff"),
+      desktopOfferSub: "Un vrai clavier pour le texte de 200 mots. Le brouillon se synchronise dans les deux sens et le chronomètre se met en pause pendant le scan.",
+      dismissOffer: () => this.setState(s => ({ flags: Object.assign({}, s.flags, { desktopOff: true }) })),
+      pairOpen: !!this.state.pairOpen,
+      cameraOpen: !!this.state.cameraOpen,
+      openPair: () => this.setState({ pairOpen: true }),
+      closePair: () => this.setState({ pairOpen: false, cameraOpen: false }),
+      openCamera: () => this.setState({ cameraOpen: true }),
+      closeCamera: () => this.setState({ cameraOpen: false }),
+      pairSteps: [
+        { n: "1", text: "Sur votre ordinateur, ouvrez tefprep.app/write et connectez-vous." },
+        { n: "2", text: "Touchez « Ouvrir l'appareil photo » ci-dessous et visez le code affiché sur la page." },
+        { n: "3", text: "La tâche s'y ouvre avec tout ce que vous avez déjà écrit." }
+      ],
+      hasDesktopBtn: screen === "write" && !exit,
+      hasWordChip: screen === "write",
+      wordChipStyle: "display:flex;align-items:center;gap:7px;height:32px;padding:0 12px 0 10px;border-radius:100px;flex-shrink:0;background:" +
+        (short ? "#FEF2F2" : "#F0FDF4") + ";box-shadow:inset 0 0 0 1px " + (short ? "#FBD5D5" : "#BBF7D0") + ";color:" + (short ? "#B91C1C" : "#15803D"),
+      wordChipDotStyle: "width:8px;height:8px;border-radius:9999px;background:" + (short ? "#DC2626" : "#22C55E") +
+        (short ? ";animation:wrPulse 1.4s ease-in-out infinite" : ""),
+      wordChipLabel: n + " / " + t.min,
+      hasTimer: screen !== "pending" && screen !== "scored",
+      clock: this.fmt(secs),
+      timerStyle: "display:flex;align-items:center;height:32px;padding:0 12px;border-radius:100px;flex-shrink:0;background:" +
+        (dark ? "rgba(255,255,255,.1)" : secs < 300 ? "#FEF2F2" : "#F5EEF3") + ";box-shadow:inset 0 0 0 1px " +
+        (dark ? "rgba(255,255,255,.16)" : secs < 300 ? "#FBD5D5" : "#E8DFE6") + ";color:" +
+        (dark ? "#fff" : secs < 300 ? "#B91C1C" : "#374151"),
+
+      hasProgress: screen === "write" || screen === "review" || screen === "submit",
+      trackBg: "#EFE3EC",
+      progressFillStyle: "height:100%;width:" + (screen === "submit" ? 100 : screen === "review" ? (taskNo === 1 ? 50 : 92) : (taskNo === 1 ? 22 : 64)) +
+        "%;border-radius:100px;background:linear-gradient(90deg," + GOLD + "," + DEEP + ")",
+      progressInk: "#857789",
+      progressLeft: screen === "submit" ? "Deux tâches rédigées" : "Tâche " + taskNo + " sur 2",
+      progressRight: screen === "submit" ? "Prêt à envoyer" : screen === "review" ? "Enregistré" : "Expression écrite · 60 min",
+
+      // footer
+      fadeStyle: "position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg," +
+        (dark
+          ? "rgba(17,24,39,0) 0%,rgba(30,18,38,.72) 42%,rgba(30,18,38,.96) 78%,#100D0A 100%"
+          : "rgba(255,255,255,0) 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,.96) 78%,#fff 100%") +
+        ");backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%)",
+      ctaLabel: cta.label,
+      ctaIcon: cta.icon,
+      ctaTap: cta.go,
+      ctaStyle: "position:relative;pointer-events:" + (cta.disabled ? "none" : "auto") +
+        ";display:flex;justify-content:center;align-items:center;gap:9px;height:52px;padding:0 18px;border-radius:100px;cursor:pointer;user-select:none;transition:background .2s ease;background:" +
+        ctaBg + ";color:" + ctaInk + (cta.disabled ? "" : ";box-shadow:0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1)"),
+      ctaNote: cta.note,
+      noteTap: () => { if (cta.noteHref) __go(cta.noteHref); },
+      ctaNoteStyle: "font-size:12.5px;font-weight:500;line-height:17px;text-align:center;text-wrap:pretty;" +
+        (cta.noteHref ? "cursor:pointer;text-decoration:underline;text-underline-offset:3px;" : "") + "color:" +
+        (dark ? "rgba(255,255,255,.55)" : "#6E5F78"),
+
+      // exit sheet
+      showExit: exit,
+      dismissExit: () => this.goto("write"),
+      sheetTitle: "Quitter cette tâche ?",
+      sheetBody: "La tâche " + taskNo + " compte " + n + " mots et le brouillon est déjà enregistré. La tentative est conservée comme inachevée et reprendra sur ce texte.",
+      sheetRows: [
+        { label: "Rédaction", value: taskNo === 1 ? "Tâche 1 en cours" : "1 tâche sur 2 terminée" },
+        { label: "Tâche en cours", value: n + " / " + t.min + " mots" },
+        { label: "Temps restant", value: this.fmt(secs) }
+      ].map((r, i, a) => Object.assign({}, r, {
+        rowStyle: "display:flex;align-items:center;gap:12px;padding:11px 0" + (i < a.length - 1 ? ";border-bottom:1px solid #F5EEF3" : "")
+      })),
+      sheetPrimary: "Rester et continuer à rédiger",
+
+      // review chrome
+      steps: STEPS.map(s => ({
+        label: s.label,
+        go: () => this.goto(s.key),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (s.key === raw ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      })),
+      modes: [
+        { key: "mock", label: "Mock test" },
+        { key: "practice", label: "Practice" }
+      ].map(m => ({
+        label: m.label,
+        go: () => this.setState({ mode: m.key }),
+        style: "font-size:12px;font-weight:600;border-radius:100px;padding:6px 13px;cursor:pointer;user-select:none;" +
+          (this.mode() === m.key ? "background:#6A2A5F;color:#fff" : "background:rgba(255,255,255,.7);color:#5E4E69;box-shadow:inset 0 0 0 1px #D9CCD6")
+      })),
+      flags: FLAGS.map(f => {
+        const on = this.flag(f.key);
+        const toggle = () => this.setState(s => ({ flags: Object.assign({}, s.flags, { [f.key]: !on }), drafts: {} }));
+        return {
+          label: f.label, screenLabel: STEPS.filter(s => s.key === f.screen)[0].label,
+          onText: f.on, offText: f.off, toggle: toggle,
+          goScreen: () => this.goto(f.screen),
+          rowStyle: "display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:" +
+            (on ? "rgba(255,255,255,.78)" : "rgba(255,255,255,.42)") + ";box-shadow:inset 0 0 0 1px " + (on ? "#D9CCD6" : "#D8CBD5"),
+          trackStyle: "width:38px;height:22px;border-radius:100px;flex-shrink:0;padding:2px;cursor:pointer;display:flex;justify-content:" +
+            (on ? "flex-end" : "flex-start") + ";background:" + (on ? "#2E1A3B" : "#D9CCD6"),
+          knobStyle: "width:18px;height:18px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#2E1A3B" : "#EFE3EC") + ";color:" + (on ? "#fff" : "#857789"),
+          offTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#EFE3EC" : "#2E1A3B") + ";color:" + (on ? "#857789" : "#fff"),
+          onTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#2E1A3B" : "#857789"),
+          offTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#857789" : "#2E1A3B")
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>
