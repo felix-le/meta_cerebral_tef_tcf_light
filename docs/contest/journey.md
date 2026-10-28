@@ -53,3 +53,10 @@
   non-ASCII left is `é` in the mandated display name "Prépa"); dates and
   order preserved.
 - Redirect: owner request 2026-10-28 — milestone log only from now on.
+
+## 2026-10-28 — Stage 0 scaffold runs
+
+- Milestone: Stage 0 scaffold complete on branch `stage-0-scaffold`; no AI wired yet.
+- Product change: new `apps/mobile` Expo app (TypeScript, expo-router): onboarding (Welcome / Start practising), 3-tab nav (Home · Mock Test · History), Home with 4 skill tiles (Speaking plum, Writing gold, skill colours as accent dots only), shortened 4-skill mock flow (Listening/Reading 2 demo questions each with full-version note; Writing B with 200-word floor warning; Speaking B with editable transcript, "Examinateur IA (démo)" label and demo disclaimer), result screen showing NCLC range + "Estimation" (never an exact score), on-device History, always-open Detailed Analysis. English UI, French exam content, "Prépa" display name, "AI partner" hero copy. Template demo files deleted; no login, TPC, Pro, leaderboard, streak, or TCF data anywhere.
+- Verification: `tsc --noEmit` clean; banned-token sweep (tpc/isPro/TCF_TASKS//699/AI examiner) empty; `expo export --platform web` compiled all 15 route bundles with no errors (live Metro smoke test was blocked by a port clash with another local project and sandbox localhost limits — server itself starts clean).
+- Redirect: `docs/contest/scope-decisions-2026-10-28.md` (decisions 2, 5, 8, 9, 10).
