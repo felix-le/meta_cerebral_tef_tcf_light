@@ -1,4 +1,4 @@
-# TEF & TCF Canada — Speaking & Writing Practice
+# TEF & TCF Canada — Speaking & Writing Practice (Light)
 
 A lightweight Expo mobile app (iOS + Android) to practise the two productive skills of the
 **TEF Canada** and **TCF Canada** French exams: **Speaking** (Expression orale) and
