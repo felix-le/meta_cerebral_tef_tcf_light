@@ -2,11 +2,11 @@
 
 **Final, approved by the owner on 2026-10-27:** the name, the logo, the colours and the screen design are locked.
 
-> Contest build only (Meta Global AI Developer Hackathon, see `HANDOVER-CLAUDE.md`). Does not change the
+> Contest build only (Meta Global AI Developer Hackathon, see `docs/contest/scope-decisions-2026-10-28.md`, which supersedes the old handover). Does not change the
 > Mock Prep brand or the original repo. Design canvas: https://claude.ai/artifact/922UT7mtBxSJQHHz1RKDVq
 
 ## Name
-**Prépa TEF TCF** (chosen 2026-10-26, `HANDOVER-CLAUDE.md` §3.4).
+**Prépa TEF TCF** (chosen 2026-10-26; display name always with the accent: "Prépa", never "Prepa" on UI or logo. ASCII identifier only, e.g. `prepa-tef-tcf`, for file names, code and schema $id).
 Preliminary check on 2026-10-27: `docs/contest/name-check.md` (not legal advice).
 - No app or product with the exact name was found. Close names exist: "TCF TEF Prep", "PrepMyTEF / PrepMyTCF".
 - **TEF is a registered Canadian trademark of CCI Paris (CIPO 0877460, classes incl. 41).**
@@ -33,8 +33,10 @@ The app follows the logo colours (owner, 2026-10-27).
 
 | Token | Hex | Use |
 |---|---|---|
-| plum | `#6A2A5F` | brand: splash, Speaking tile, primary buttons. White on it 10:1 |
-| gold | `#F9BD48` | accent: Writing tile, highlights, the logo accent. **Dark text only** (ink on it 9.3:1; white is 1.7:1, never) |
+| plum | `#6A2A5F` | brand: splash, Speaking tile background, primary buttons. White on it 10:1 |
+| gold | `#F9BD48` | accent: Writing tile background, highlights, the logo accent. **Dark text only** (ink on it 9.3:1; white is 1.7:1, never) |
+
+Tile rule (cleared 2026-10-28, see `scope-decisions-2026-10-28.md` decision 10): tile backgrounds follow this table (Speaking = plum, Writing = gold). The four skill colours (Listening blue, Reading teal, Speaking purple, Writing amber) are a separate system, used only for icon / ring / dot accent, never as a tile background and never as a CTA background. Do not confuse a skill accent colour with a tile background colour.
 | ink | `#2E1A3B` | body text, titles |
 | muted | `#5E4E69` | secondary text on white / mist |
 | lilac | `#EFE3EC` | chips, rings, selected states (tint of plum) |

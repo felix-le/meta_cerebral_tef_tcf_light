@@ -73,7 +73,7 @@ the learner sees English comments plus French quotes and corrections (exam conte
 
 The learner records, Muse Voice Transcribe returns a transcript, the learner can correct transcription mistakes, then
 the transcript is scored. For section B the scored transcript is the **whole conversation**, AI turns included (§3.3). **Not assessed, and never claimed:** pronunciation, intonation, fluency or speed
-(no word-level timestamps, `HANDOVER-CLAUDE.md` §5).
+(no word-level timestamps; rule stated here in §3.2 itself, and in `docs/contest/scope-decisions-2026-10-28.md` — the old handover file is superseded and is not in this repo).
 
 | id | Group | Section | Criterion (official name) | A1–A2 | B1 | B2 | C1–C2 |
 |---|---|---|---|---|---|---|---|
