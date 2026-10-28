@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "voix-plume/feedback-model-output/1.0",
+  "$id": "prepa-tef-tcf/feedback-model-output/1.0",
   "title": "Scorer output (Muse Spark structured output)",
   "description": "FINAL (approved 2026-10-27). What the scorer model returns for one TEF Canada Writing or Speaking answer. The model gives levels only; the app derives the NCLC and the /450 range from config (docs/contest/rubric.md section 2). Comments are in English; quotes, corrections and rewrites are in French, copied from or applied to the learner's text.",
   "type": "object",
