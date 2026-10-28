@@ -1,0 +1,15 @@
+# Secrets - khong commit
+.env
+.env.*
+!.env.example
+
+# Node / Expo
+node_modules/
+.expo/
+web-build/
+dist/
+build/
+
+# Local
+.DS_Store
+*.log
