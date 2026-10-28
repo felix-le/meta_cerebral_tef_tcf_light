@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes daFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes daSheet { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+  @keyframes daReveal { from { opacity: .2; filter: blur(6px); } to { opacity: 1; filter: blur(0); } }
+  .da-scroll::-webkit-scrollbar { width: 0; }
+  .da-scroll { scrollbar-width: none; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E1226"/><circle cx="45" cy="45" r="19" fill="none" stroke="#F9BD48" stroke-width="8"/><rect x="57" y="57" width="24" height="9" rx="4.5" transform="rotate(45 57 57)" fill="#F9BD48"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">M16b · Detailed Analysis</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="TestReview.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Review</a>
+  </div>
+
+  <div data-screen-label="Detailed analysis" style="position:relative;width:393px;height:852px;overflow:hidden;background:#1E1226;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);flex-shrink:0">
+
+    <div class="da-scroll" ref="{{ scrollRef }}" style="{{ bodyStyle }}">
+
+      <!-- HERO — what the AI found, not the score again -->
+      <div style="position:relative;overflow:hidden;padding:126px 20px 44px;background:linear-gradient(165deg,#2A2018 0%,#1E1226 58%,#100D0A 100%)">
+        <div style="position:absolute;left:-90px;top:-120px;width:340px;height:340px;border-radius:9999px;background:#F9BD48;opacity:.3;filter:blur(80px)"></div>
+        <div style="position:absolute;right:-120px;top:130px;width:300px;height:300px;border-radius:9999px;background:#6A2A5F;opacity:.22;filter:blur(90px)"></div>
+
+        <div style="position:relative;display:flex;flex-direction:column;gap:18px;animation:daFade .35s ease both">
+          <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">{{ heroKicker }}</span>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:30px;font-weight:700;line-height:33px;letter-spacing:-.9px;color:#fff">Detailed Analysis</span>
+            <span style="font-size:13px;font-weight:500;line-height:18px;color:rgba(255,255,255,.55)">{{ heroSub }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:13px;padding:16px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 12px 30px -18px rgba(0,0,0,.8)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex-shrink:0;color:#F9BD48;display:flex">
+                <fig-icon name="IconSparkles" size="16"></fig-icon>
+              </div>
+              <span style="flex:1;font-size:9.5px;font-weight:700;letter-spacing:.9px;color:#F9BD48">WHAT THE AI FOUND</span>
+            </div>
+            <span style="font-size:13px;font-weight:400;line-height:19px;color:rgba(255,255,255,.78);text-wrap:pretty">{{ verdict }}</span>
+            <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ patterns }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex;align-items:baseline;gap:10px">
+                  <span style="{{ p.rankStyle }}">{{ p.rank }}</span>
+                  <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:#fff;text-wrap:pretty;min-width:0">{{ p.label }}</span>
+                  <span style="font-size:11.5px;font-weight:600;color:rgba(255,255,255,.5);flex-shrink:0">{{ p.count }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div style="position:relative;margin-top:-22px;border-radius:26px 26px 0 0;background:linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 46%);box-shadow:0 -14px 30px -14px rgba(0,0,0,.5);padding:0 0 150px">
+
+        <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+          <div style="position:sticky;top:114px;z-index:6;display:flex;padding:0 8px;background:rgba(255,253,254,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:26px 26px 0 0;box-shadow:0 1px 0 #EFE3EC">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.go }}" style="{{ t.style }}">
+                <fig-icon name="{{ t.icon }}" size="16"></fig-icon>
+                <div style="display:flex;align-items:center;gap:4px;min-width:0">
+                  <span style="font-size:12px;font-weight:600;line-height:1;color:inherit;white-space:nowrap">{{ t.label }}</span>
+                  <sc-if value="{{ t.hasNote }}" hint-placeholder-val="{{ false }}">
+                    <span style="{{ t.noteStyle }}">{{ t.note }}</span>
+                  </sc-if>
+                </div>
+                <div style="{{ t.underlineStyle }}"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;flex-direction:column;gap:20px;padding:20px 20px 0">
+
+          <!-- Section header for the skill being analysed -->
+          <div style="display:flex;align-items:center;gap:13px">
+            <div style="{{ skillTileStyle }}">
+              <fig-icon name="{{ skillIcon }}" size="21"></fig-icon>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+              <span style="font-size:15px;font-weight:700;line-height:20px;letter-spacing:-.2px;color:#111827">{{ skillName }}</span>
+              <span style="font-size:11.5px;font-weight:500;line-height:16px;color:#857789">{{ skillLine }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0">
+              <span style="{{ skillLevelStyle }}">{{ skillLevel }}</span>
+              <span style="font-size:11px;font-weight:600;line-height:15px;font-variant-numeric:tabular-nums;color:#857789">{{ skillPoints }}</span>
+            </div>
+          </div>
+
+          <!-- SYNC · one card per question the AI has something to say about -->
+          <sc-if value="{{ isSync }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;gap:7px">
+                <sc-for list="{{ filters }}" as="f" hint-placeholder-count="2">
+                  <div onClick="{{ f.go }}" style="{{ f.style }}">{{ f.label }}</div>
+                </sc-for>
+              </div>
+
+              <sc-for list="{{ questions }}" as="q" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;padding:16px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="{{ q.markStyle }}">
+                      <fig-icon name="{{ q.markIcon }}" size="11"></fig-icon>
+                    </div>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#857789">{{ q.num }}</span>
+                  </div>
+                  <sc-if value="{{ q.hasStim }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+                      <sc-if value="{{ q.hasStim }}"><img src="assets/q/stimulus.jpeg" alt="" style="{{ q.stimStyle }}" /></sc-if>
+                      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:14px;color:#9C8F9A">{{ q.stimCap }}</span>
+                    </div>
+                  </sc-if>
+
+                  <span style="margin-top:10px;font-size:13.5px;font-weight:600;line-height:19px;color:#1F2937;text-wrap:pretty">{{ q.text }}</span>
+
+                  <sc-if value="{{ q.hasGrid }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                      <sc-for list="{{ q.grid }}" as="g" hint-placeholder-count="4">
+                        <div style="{{ g.tileStyle }}">
+                          <sc-if value="{{ g.isA }}"><img src="assets/q/opt-a.jpg" alt="" style="{{ g.imgStyle }}" /></sc-if><sc-if value="{{ g.isB }}"><img src="assets/q/opt-b.jpg" alt="" style="{{ g.imgStyle }}" /></sc-if><sc-if value="{{ g.isC }}"><img src="assets/q/opt-c.jpg" alt="" style="{{ g.imgStyle }}" /></sc-if><sc-if value="{{ g.isD }}"><img src="assets/q/opt-d.jpg" alt="" style="{{ g.imgStyle }}" /></sc-if>
+                          <div style="{{ g.chipStyle }}">{{ g.letter }}</div>
+                          <span style="{{ g.capStyle }}">{{ g.cap }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <div style="margin-top:14px;display:flex;flex-direction:column;gap:9px">
+                    <div style="display:flex;align-items:baseline;gap:12px">
+                      <span style="width:58px;flex-shrink:0;font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#9C8F9A">YOU</span>
+                      <span style="{{ q.yourStyle }}">{{ q.your }}</span>
+                    </div>
+                    <sc-if value="{{ q.hasCorrect }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;align-items:baseline;gap:12px">
+                        <span style="width:58px;flex-shrink:0;font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#9C8F9A">CORRECT</span>
+                        <span style="flex:1;font-size:12.5px;font-weight:600;line-height:17px;color:#157F4A;text-wrap:pretty">{{ q.correct }}</span>
+                      </div>
+                    </sc-if>
+                    <div style="display:flex;align-items:baseline;gap:12px">
+                      <span style="width:58px;flex-shrink:0;font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#966010">WHY</span>
+                      <span style="flex:1;font-size:12.5px;font-weight:400;line-height:18px;color:#374151;text-wrap:pretty">{{ q.why }}</span>
+                    </div>
+                    <sc-if value="{{ q.hasDrill }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;align-items:baseline;gap:12px">
+                        <span style="width:58px;flex-shrink:0;font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#966010">DRILL</span>
+                        <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#53374E;text-wrap:pretty">{{ q.drill }}</span>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- ASYNC · still being marked — already paid for, arrives on its own -->
+          <sc-if value="{{ isPending }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;padding:18px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:26px;height:26px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:#FFF6E2;color:#966010">
+                  <fig-icon name="IconSparkles" size="14"></fig-icon>
+                </div>
+                <span style="font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#966010">AI IS STILL MARKING</span>
+              </div>
+              <span style="margin-top:12px;font-size:14px;font-weight:700;line-height:19px;letter-spacing:-.2px;color:#111827">{{ pendingTitle }}</span>
+              <span style="margin-top:6px;font-size:12.5px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">{{ pendingBody }}</span>
+
+              <div style="margin-top:14px;height:5px;border-radius:100px;background:#F0E7EE;overflow:hidden">
+                <div style="height:100%;width:64%;border-radius:100px;background:linear-gradient(90deg,#F9BD48,#D4860F)"></div>
+              </div>
+
+              <div style="margin-top:14px;display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ pendingRows }}" as="p" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:baseline;gap:12px">
+                    <span style="width:58px;flex-shrink:0;font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#9C8F9A">{{ p.label }}</span>
+                    <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#374151;text-wrap:pretty">{{ p.value }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:13px 14px;border-radius:16px;background:#FFFBEB;box-shadow:inset 0 0 0 1px #EDD99A">
+              <div style="width:18px;height:18px;flex-shrink:0;color:#966010;display:flex;align-items:center;justify-content:center;margin-top:-1px">
+                <fig-icon name="IconDuotoneInfo" size="16"></fig-icon>
+              </div>
+              <span style="flex:1;font-size:12px;font-weight:500;line-height:18px;color:#7A4E0C;text-wrap:pretty">{{ pendingNote }}</span>
+            </div>
+          </sc-if>
+
+          <!-- ASYNC · per task, per criterion -->
+          <sc-if value="{{ isAsync }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="{{ t.numStyle }}">{{ t.num }}</div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                      <span style="font-size:14px;font-weight:700;line-height:19px;color:#111827">{{ t.label }}</span>
+                      <span style="font-size:11px;font-weight:500;line-height:15px;color:#857789">{{ t.sub }}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0">
+                      <span style="{{ t.scoreStyle }}">{{ t.score }}</span>
+                      <span style="font-size:9.5px;font-weight:700;letter-spacing:.5px;color:#9C8F9A">AI RUBRIC · 4 CRITERIA</span>
+                    </div>
+                  </div>
+
+                  <sc-for list="{{ t.criteria }}" as="c" hint-placeholder-count="4">
+                    <div style="display:flex;flex-direction:column;gap:11px;padding:16px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <span style="flex:1;font-size:13.5px;font-weight:700;line-height:18px;color:#111827">{{ c.name }}</span>
+                        <span style="{{ c.pillStyle }}">{{ c.score }}</span>
+                      </div>
+                      <div style="height:5px;border-radius:100px;background:#E9E0E7;overflow:hidden">
+                        <div style="{{ c.barStyle }}"></div>
+                      </div>
+                      <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#374151;text-wrap:pretty">{{ c.ai }}</span>
+                      <div style="display:flex;gap:9px;padding:11px 12px;border-radius:14px;background:#FFFBEB;box-shadow:inset 0 0 0 1px #F3E6C8">
+                        <span style="font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#966010;flex-shrink:0;padding-top:2px">DRILL</span>
+                        <span style="flex:1;font-size:12px;font-weight:500;line-height:17px;color:#53374E;text-wrap:pretty">{{ c.tip }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:18px;height:18px;flex-shrink:0;color:#966010;display:flex;align-items:center;justify-content:center">
+              <fig-icon name="IconDuotoneInfo" size="16"></fig-icon>
+            </div>
+            <span style="font-size:12px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">Free for every session. Every skill and every question stays open.</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed dark chrome -->
+    <div style="{{ chromeStyle }}">
+      <div style="height:62px;display:flex;align-items:center;padding:21px 16px 19px">
+        <div style="flex:1;display:flex;justify-content:center">
+          <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:#fff">9:41</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+          <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="#fff"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+          <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="#fff"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+          <div style="position:relative;width:27.328px;height:13px">
+            <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px #fff"></div>
+            <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:#fff"></div>
+            <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:#fff"></div>
+          </div>
+        </div>
+      </div>
+      <div style="height:52px;display:flex;align-items:center;gap:8px;padding:0 12px 0 8px">
+        <a href="TestReview.dc.html" style="width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;color:#fff;flex-shrink:0" style-hover="background:rgba(255,255,255,.12)">
+          <fig-icon name="IconChevronLeft" size="22"></fig-icon>
+        </a>
+        <span style="{{ chromeTitleStyle }}">Detailed Analysis</span>
+        
+      </div>
+    </div>
+
+    <!-- GATE — the paid step, over a blurred preview of the real thing -->
+    <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ dismiss }}" style="position:absolute;inset:0;z-index:20;background:rgba(30,18,38,.55);display:flex;flex-direction:column;justify-content:flex-end"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;z-index:21;border-radius:28px 28px 0 0;padding:22px 20px 28px;display:flex;flex-direction:column;gap:16px;background:#FFFDFB;box-shadow:0 -20px 50px -20px rgba(0,0,0,.6);animation:daSheet .28s cubic-bezier(.2,.8,.2,1) both">
+        <div style="width:36px;height:4px;border-radius:100px;background:#E9E0E7;align-self:center"></div>
+        <div style="display:flex;align-items:center;gap:13px">
+          <div style="width:48px;height:48px;border-radius:15px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:linear-gradient(145deg,#F9BD48,#D4860F);color:#fff;box-shadow:0 8px 18px -8px rgba(212,134,15,.7)">
+            <fig-icon name="IconSparkles" size="22"></fig-icon>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0">
+            <span style="font-size:17px;font-weight:700;line-height:22px;letter-spacing:-.3px;color:#111827">Unlock Detailed Analysis</span>
+            <span style="font-size:12px;font-weight:500;line-height:17px;color:#6E5F78;text-wrap:pretty">{{ gateSub }}</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ gateBullets }}" as="b" hint-placeholder-count="3">
+            <div style="display:flex;align-items:flex-start;gap:9px">
+              <div style="width:18px;height:18px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:#EAF6EC;color:#157F4A;margin-top:1px">
+                <fig-icon name="IconCheck" size="11"></fig-icon>
+              </div>
+              <span style="flex:1;font-size:12.5px;font-weight:500;line-height:18px;color:#374151;text-wrap:pretty">{{ b }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:16px;background:#FFFBEB;box-shadow:inset 0 0 0 1px #EDD99A">
+          <span style="flex:1;font-size:12.5px;font-weight:600;line-height:17px;color:#7A4E0C">{{ gateCost }}</span>
+        </div>
+
+        <sc-if value="{{ gateHasPending }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:flex-start;gap:9px;margin-top:-6px">
+            <div style="width:18px;height:18px;flex-shrink:0;color:#966010;display:flex;align-items:center;justify-content:center;margin-top:-1px">
+              <fig-icon name="IconDuotoneInfo" size="16"></fig-icon>
+            </div>
+            <span style="flex:1;font-size:12px;font-weight:500;line-height:18px;color:#6E5F78;text-wrap:pretty">{{ gatePendingNote }}</span>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div onClick="{{ unlock }}" style="{{ gateCtaStyle }}">
+            <fig-icon name="{{ gateCtaIcon }}" size="17"></fig-icon>
+            <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ gateCtaLabel }}</span>
+          </div>
+          <div onClick="{{ dismiss }}" style="display:flex;justify-content:center;align-items:center;height:40px;cursor:pointer;user-select:none">
+            <span style="font-size:13px;font-weight:600;color:#6E5F78">Not now</span>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Sticky CTA once unlocked — the next action, not the purchase -->
+    <sc-if value="{{ isUnlocked }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:46px 20px 24px;display:flex;flex-direction:column;gap:10px;z-index:8;pointer-events:none">
+        <div style="position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,.96) 78%,#fff 100%);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%)"></div>
+        <div onClick="{{ practiceTap }}" style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;gap:9px;height:52px;padding:0 18px;border-radius:100px;cursor:pointer;user-select:none;background:#6A2A5F;box-shadow:0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1);color:#fff">
+          <fig-icon name="IconPlay" size="17"></fig-icon>
+          <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ practiceLabel }}</span>
+        </div>
+        <div style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;height:22px">
+          <span style="font-size:12.5px;font-weight:500;line-height:17px;text-align:center;text-wrap:pretty;color:#6E5F78">{{ practiceNote }}</span>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;unlocked&quot;],&quot;default&quot;:&quot;unlocked&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;skill&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;L&quot;,&quot;R&quot;,&quot;W&quot;,&quot;S&quot;],&quot;default&quot;:&quot;L&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;wsPending&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const SKILLS = {
+  L: { name: "Listening", french: "Compréhension orale", icon: "IconBulkHeadphone", color: "#4A7FE5", deep: "#2F5FC0", type: "sync",
+    level: "NCLC 8", points: "B2 · Estimation", line: "8 of 40 questions carry an AI note · 2 missed, 2 skipped",
+    verdict: "You hold the main idea of every dialogue. What you lose is detail: names, numbers and time expressions, always in the second half of the audio.",
+    patterns: [
+      { label: "Proper nouns dropped on first hearing", count: "2 items" },
+      { label: "Number distractors taken at face value", count: "2 items" },
+      { label: "Time expressions late in the dialogue", count: "1 item" }
+    ],
+    questions: [
+      { n: 3, st: "wrong", text: "Écoutez le message et choisissez la photo qui correspond au lieu décrit.",
+        grid: [
+          { l: "A", src: "assets/q/opt-a.jpg", cap: "La montagne" },
+          { l: "B", src: "assets/q/opt-b.jpg", cap: "Le lac" },
+          { l: "C", src: "assets/q/opt-c.jpg", cap: "La route de campagne" },
+          { l: "D", src: "assets/q/opt-d.jpg", cap: "Le ciel au couchant" }
+        ],
+        pick: "C", key: "B",
+        your: "C — La route de campagne", correct: "B — Le lac",
+        why: "The speaker says «on longe la route pendant vingt minutes, puis on arrive au bord de l'eau». The road is the way there, not the place described. Section A always names one landmark on the route before naming the destination.",
+        drill: "In image questions, listen for the verb of arrival — «on arrive à», «se trouve», «devant» — and only then look at the options. Everything before it is the journey." },
+      { n: 4, st: "wrong", text: "D'après l'annonce, que propose le club pour le week-end du 14 ?",
+        stim: { src: "assets/q/stimulus.jpeg", cap: "Affiche du Club Alpin — projetée pendant l'annonce" },
+        your: "A — Une sortie d'une journée", correct: "D — Une randonnée de deux jours avec nuit en refuge",
+        why: "The poster shows «14–15 mars» and «nuit en refuge»; the speaker only says «le week-end du 14». You answered from the audio alone, but the date range on the image is what makes it two days.",
+        drill: "When a question carries an image, read every number on the image before the audio starts. The audio names one date, the image gives the range." },
+      { n: 2, st: "wrong", text: "Quel document Thomas montre-t-il pendant la réunion ?",
+        your: "C — Un calendrier", correct: "A — Un graphique",
+        why: "Thomas refers to a «graphique de performances». «Calendrier» belongs to the next sentence, where the meeting date is set. TEF places an object and a date side by side precisely so the two swap in memory.",
+        drill: "Before the audio plays, read the options and mark which are objects and which are dates — you then hear them as two separate slots." },
+      { n: 5, st: "skip", text: "Comment s'appelle la nouvelle responsable du projet ?",
+        your: "Unanswered", correct: "B — Sophie Marchand",
+        why: "Sophie Marchand is named once, halfway through, and never repeated. Nothing later in the dialogue recovers the name for you.",
+        drill: "Write proper nouns as two letters (SM) the instant you hear them. Two letters cost no attention and are enough to match an option." },
+      { n: 6, st: "skip", text: "Quand aura lieu la formation pour les nouveaux outils ?",
+        your: "Unanswered", correct: "C — La semaine prochaine, jeudi matin.",
+        why: "«La semaine prochaine, jeudi matin» lands in the closing lines. You were still resolving question 5, so the answer passed while your attention was behind.",
+        drill: "Abandon a lost item immediately and jump to the next question stem. One missed item costs 1 point; falling behind costs three." },
+      { n: 8, st: "wrong", text: "Combien d'employés seront affectés par la réorganisation ?",
+        your: "B — Douze", correct: "D — Vingt",
+        why: "«Vingt employés» is stated plainly. «Douze» is the number of departments, mentioned first — the earlier number wins unless you attach a unit to it.",
+        drill: "Note numbers with their unit: 12 dép · 20 emp. A bare number is the trap TEF is built on." },
+      { n: 1, st: "correct", text: "Pourquoi Marie cherche-t-elle à changer de poste ?",
+        your: "B — Elle veut des projets plus créatifs.",
+        why: "«Cherche quelque chose de plus stimulant» is a paraphrase, not a repetition, of the option — you resolved it correctly, which is the harder skill." },
+      { n: 7, st: "correct", text: "Quelle est la réaction de Sophie face à la nouvelle organisation ?",
+        your: "A — Elle est enthousiaste.",
+        why: "You read tone rather than words: «c'est une bonne opportunité» plus delivery. Attitude questions are reliably yours." }
+    ] },
+  R: { name: "Reading", french: "Compréhension écrite", icon: "IconBulkBook", color: "#1A9E94", deep: "#0E766E", type: "sync",
+    level: "NCLC 8", points: "B2 · Estimation", line: "8 of 40 questions carry an AI note · 3 missed",
+    verdict: "Main idea and factual retrieval are solid. Both losses are lexical precision: near-synonyms that differ in intensity, and connectors that order a paragraph.",
+    patterns: [
+      { label: "Near-synonyms judged by meaning, not intensity", count: "2 items" },
+      { label: "Discourse connectors in reordering", count: "1 item" },
+      { label: "Register in gap-fill", count: "1 item" }
+    ],
+    questions: [
+      { n: 3, st: "wrong", text: "Quel mot dans le texte est synonyme de « indispensable » ?",
+        your: "A — Fondamental", correct: "C — Incontournable",
+        why: "«Incontournable» means unavoidable — you cannot get around it. «Fondamental» means foundational. Both are positive and strong, but only one matches «indispensable» in what it claims.",
+        drill: "For synonym items, replace the candidate back into the sentence and read it aloud. The wrong intensity sounds off even when the meaning is close." },
+      { n: 6, st: "wrong", text: "Réordonnez les phrases pour former un paragraphe cohérent.",
+        your: "C → A → D → B", correct: "A → C → B → D",
+        why: "A carries no pronoun and no connector, so nothing precedes it — it is the topic sentence. «Ainsi» in D marks a conclusion, so D cannot sit in the middle.",
+        drill: "Order by signals before meaning: no reference = first, «ainsi / donc / en somme» = last, «cependant» = follows a claim." },
+      { n: 8, st: "wrong", text: "Le mot « déclin » (ligne 4) peut être remplacé par :",
+        your: "B — chute", correct: "A — diminution",
+        why: "The article frames a slow, decade-long process. «Diminution» is gradual; «chute» is sudden. The text, not the dictionary, picks between them.",
+        drill: "Ask of every synonym option: fast or slow, neutral or loaded? Then match it to the paragraph's timescale." },
+      { n: 7, st: "correct", text: "Complétez : « Les chercheurs ___ que la situation est alarmante. »",
+        your: "B — soulignent",
+        why: "You matched register, not just meaning: «souligner» belongs to scientific writing where «dire» would flatten it." }
+    ] },
+  W: { name: "Writing", french: "Expression écrite", icon: "IconBulkWrite", color: "#D4860F", deep: "#A86200", type: "async",
+    level: "NCLC 6", points: "B1 · Estimation", line: "2 tâches · four official criteria each · AI estimate",
+    verdict: "Structure and vocabulary are already at B2. Accents and agreement are what hold the estimate at NCLC 6 (B1), and both are mechanical — they respond fast to drilling.",
+    patterns: [
+      { label: "Missing accents on é / è", count: "9 words" },
+      { label: "Tense mixing in narration", count: "3 paragraphs" },
+      { label: "Relative pronoun dont / que", count: "2 clauses" }
+    ],
+    tasks: [
+      { num: 1, label: "Tâche 1 — Terminer un fait divers", sub: "Fontaine Saint-Roch · 96 mots", score: "B1",
+        criteria: [
+          { name: "Organisation du texte", level: "B2", ai: "The continuation follows the article's order — what was found, who reacted, what happens next — and the last line closes the story.", tip: "Keep the press skeleton: fait · réaction · suite." },
+          { name: "Lexique", level: "B2", ai: "Press register held: «selon la mairie», «les riverains», «aux dires d'un témoin».", tip: "Bank two attribution formulas: «d'après un témoin» · «la municipalité indique que…»" },
+          { name: "Syntaxe", level: "B1", ai: "Tense mixing is the recurring error: the passé composé narration drifts into présent mid-paragraph.", tip: "One narrative tense per paragraph: passé composé for events, imparfait for background." },
+          { name: "Orthographe", level: "B1", ai: "Nine missing accents, including «reparee» and «regle». Accents are scored explicitly in TEF, so each one costs.", tip: "Reread once for accents only: réparée, réglé, mairie, découvert, témoin." }
+        ] },
+      { num: 2, label: "Tâche 2 — Exprimer et défendre un point de vue", sub: "Voitures dans le centre · 231 mots", score: "B1",
+        criteria: [
+          { name: "Organisation du texte", level: "B1", ai: "Three-part structure is clear, but the turn from advantages to drawbacks arrives without a connector, so the contrast reads abrupt.", tip: "Mark the pivot: «Certes… mais» · «D'un côté… de l'autre» · «Bien que + subjonctif»." },
+          { name: "Lexique", level: "B2", ai: "Good urban-policy lexis: «zone piétonne», «riverains», «mobilité douce». «Problème» appears six times.", tip: "Rotate: problème → enjeu, défi · conséquence → impact, retombée." },
+          { name: "Syntaxe", level: "B1", ai: "«la rue dont j'ai parcouru» should be «que j'ai parcourue». «Dont» stands in for de qui / de quoi, never for a direct object.", tip: "Test it: if the verb takes «de», use dont. Parcourir takes no «de», so que." },
+          { name: "Orthographe", level: "B1", ai: "Accents again: «economique», «piéton» without its accent, and «malgres» for «malgré».", tip: "Fix the frequent five: économique, bénéfice, développement, également, malgré." }
+        ] },
+    ] },
+  S: { name: "Speaking", french: "Expression orale", icon: "IconBulkMic", color: "#8B62E0", deep: "#6A3FC0", type: "async",
+    level: "NCLC 8", points: "B2 · Estimation", line: "2 tâches · four official criteria each · AI estimate",
+    verdict: "The transcript shows a wide vocabulary and a clear position. Answering the examiner's objections before moving on is the change that moves this estimate. Pronunciation is not assessed from a transcript.",
+    patterns: [
+      { label: "Objections left unanswered", count: "3 turns" },
+      { label: "Agreement inside questions", count: "2 questions" },
+      { label: "Arguments without an example", count: "Tâche 2" }
+    ],
+    tasks: [
+      { num: 1, label: "Tâche 1 — Obtenir des informations", sub: "Atelier Le Panier · 5 min", score: "B2",
+        criteria: [
+          { name: "Qualité de l'échange", level: "B1", ai: "You cover the advert point by point, but several questions open with «et aussi», so the call reads as a list rather than a conversation.", tip: "Signpost: d'abord… ensuite… une dernière chose." },
+          { name: "Lexique", level: "B2", ai: "Question forms are precise and varied: «pourriez-vous me préciser», «est-ce qu'il reste des places».", tip: "Bank two follow-ups: et en cas d'annulation ? · le matériel est-il compris ?" },
+          { name: "Syntaxe", level: "B1", ai: "«combien coûte les cours» — the verb agrees with «les cours»: «combien coûtent les cours».", tip: "Drill aloud: combien coûtent… / quels jours ont lieu… / y a-t-il encore…" },
+          { name: "Pertinence du questionnement", level: "B2", ai: "Your questions cover price, dates and place. Nothing asks about conditions, so one key point of the advert stays open.", tip: "Close with a condition question: «Et en cas d'annulation ?» · «Faut-il s'inscrire à l'avance ?»" }
+        ] },
+      { num: 2, label: "Tâche 2 — Présenter et convaincre", sub: "Semaine de quatre jours · 10 min", score: "B1",
+        criteria: [
+          { name: "Qualité de l'échange", level: "B1", ai: "You respond to what the examiner actually says, but the gaps before each turn run past three seconds.", tip: "Buy time out loud: «Euh, voyons voir…» · «C'est une bonne question…»" },
+          { name: "Lexique", level: "B2", ai: "Formal register and vouvoiement held throughout. «Bien» and «bon» carry too much of the work.", tip: "Swap in: tout à fait · parfaitement · effectivement · volontiers." },
+          { name: "Syntaxe", level: "B1", ai: "Questions are well formed. Past participle agreement slips: «les jours que j'ai récupéré» → «récupérés».", tip: "Rule: the participle agrees when the direct object comes before the verb." },
+          { name: "Qualité de l'argumentation", level: "B1", ai: "Three arguments for the four-day week, but only the first comes with an example, so the other two read as claims.", tip: "One argument, one case: «Par exemple, dans mon entreprise…»" }
+        ] },
+    ] }
+};
+
+const ORDER = ["L", "R", "W", "S"];
+const FILTERS = [{ k: "todo", label: "Needs work" }, { k: "all", label: "All noted" }];
+
+class Component extends DCLogic {
+  state = { view: null, skill: null, filter: "todo", scrolled: false };
+
+  scrollRef = el => {
+    if (!el || this._el === el) return;
+    this._el = el;
+    el.addEventListener("scroll", () => {
+      const on = el.scrollTop > 20;
+      if (on !== this.state.scrolled) this.setState({ scrolled: on });
+    }, { passive: true });
+  };
+
+  view() { return "unlocked"; }
+  skillKey() { return this.state.skill || this.props.skill || "L"; }
+
+  renderVals() {
+    const view = this.view();
+    const locked = view === "locked";
+    const pro = view === "pro";
+    const key = this.skillKey();
+    const s = SKILLS[key];
+    const isSync = s.type === "sync";
+    const wsPending = this.state.wsPending !== undefined && this.state.wsPending !== null
+      ? this.state.wsPending
+      : (this.props.wsPending ?? true);
+    const pending = !isSync && wsPending;
+    const balance = 24;
+
+    const tabs = ORDER.map(k => {
+      const sk = SKILLS[k];
+      const on = k === key;
+      return {
+        label: sk.name.slice(0, 4) === "List" ? "Listen" : sk.name,
+        icon: sk.icon,
+        go: () => this.setState({ skill: k, filter: "todo" }),
+        hasNote: wsPending && sk.type !== "sync",
+        note: "AI",
+        noteStyle: "font-size:8.5px;font-weight:700;letter-spacing:.5px;line-height:1;padding:3px 5px;border-radius:100px;background:#FFF1D2;color:#966010",
+        style: "position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;height:52px;flex-shrink:0;padding:0 2px;cursor:pointer;user-select:none;color:" +
+          (on ? sk.deep : "#6E5F78"),
+        underlineStyle: on
+          ? "position:absolute;left:14px;right:14px;bottom:0;height:2.5px;border-radius:100px 100px 0 0;background:" + sk.color
+          : "display:none"
+      };
+    });
+
+    let questions = [];
+    if (isSync) {
+      const list = this.state.filter === "todo" ? s.questions.filter(q => q.st !== "correct") : s.questions;
+      questions = list.map(q => {
+        const ok = q.st === "correct";
+        const wrong = q.st === "wrong";
+        const mark = ok ? { bg: "#EAF6EC", ink: "#157F4A", icon: "IconCheck" }
+          : wrong ? { bg: "#FDF2EE", ink: "#B4451F", icon: "IconX" }
+          : { bg: "#F5EEF3", ink: "#857789", icon: "IconX" };
+        return {
+          num: "Q" + q.n + (ok ? " · correct" : wrong ? " · missed" : " · skipped")
+            + (q.grid || q.stim ? " · image" : ""),
+          text: q.text,
+          hasStim: !!q.stim,
+          stimStyle: q.stim
+            ? "width:100%;aspect-ratio:16/9;border-radius:14px;object-fit:cover;background:#F5EEF3;box-shadow:inset 0 0 0 1px #E9E0E7"
+            : "display:none",
+          stimCap: q.stim ? q.stim.cap : "",
+          hasStim: !!q.stim,
+          hasGrid: !!q.grid,
+          grid: (q.grid || []).map(g => {
+            const isKey = g.l === q.key, isPick = g.l === q.pick && !isKey;
+            const ring = isKey ? "#157F4A" : isPick ? "#B4451F" : "#E9E0E7";
+            return {
+              letter: g.l, cap: g.cap,
+              tileStyle: "position:relative;border-radius:12px;overflow:hidden;background:#F5EEF3;box-shadow:inset 0 0 0 " +
+                (isKey || isPick ? "2px " : "1px ") + ring + ";" + (isKey || isPick ? "" : "opacity:.55"),
+              isA: g.l === "A", isB: g.l === "B", isC: g.l === "C", isD: g.l === "D",
+              imgStyle: "display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#F5EEF3",
+              chipStyle: "position:absolute;left:7px;top:7px;min-width:19px;height:19px;padding:0 5px;border-radius:100px;display:flex;justify-content:center;align-items:center;font-size:10px;font-weight:700;line-height:1;color:#fff;background:" +
+                (isKey ? "#157F4A" : isPick ? "#B4451F" : "rgba(46,26,59,.6)"),
+              capStyle: "display:block;padding:7px 8px 8px;font-size:10.5px;font-weight:600;line-height:14px;color:" +
+                (isKey ? "#157F4A" : isPick ? "#B4451F" : "#857789")
+            };
+          }),
+          your: q.your,
+          yourStyle: "flex:1;font-size:12.5px;font-weight:600;line-height:17px;text-wrap:pretty;color:" +
+            (ok ? "#157F4A" : wrong ? "#B4451F" : "#857789"),
+          hasCorrect: !ok,
+          correct: q.correct || "",
+          why: q.why,
+          hasDrill: !!q.drill,
+          drill: q.drill || "",
+          markStyle: "width:24px;height:24px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:" + mark.bg + ";color:" + mark.ink,
+          markIcon: mark.icon
+        };
+      });
+    }
+
+    const tasks = (s.tasks || []).map(t => ({
+      num: t.num, label: t.label, sub: t.sub, score: t.score,
+      numStyle: "width:32px;height:32px;border-radius:11px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(145deg," + s.color + "," + s.deep + ")",
+      scoreStyle: "font-size:15px;font-weight:700;line-height:19px;flex-shrink:0;color:" + s.deep,
+      criteria: t.criteria.map(c => ({
+        name: c.name, score: c.level, ai: c.ai, tip: c.tip,
+        pillStyle: "font-size:12px;font-weight:700;line-height:1;padding:6px 11px;border-radius:100px;flex-shrink:0;background:" +
+          (c.level === "B2" || c.level === "C1" ? "#EAF6EC;color:#157F4A" : c.level === "B1" ? "#F6F0F5;color:#5E4E69" : "#FDF2EE;color:#B4451F"),
+        barStyle: "height:100%;width:" + Math.round((["A1","A2","B1","B2","C1","C2"].indexOf(c.level) + 1) / 6 * 100) + "%;border-radius:100px;background:linear-gradient(90deg," + s.color + "," + s.deep + ")"
+      }))
+    }));
+
+    return {
+      scrollRef: this.scrollRef,
+      stateLabel: locked ? "Unused in contest build"
+        : pro ? "Unused in contest build"
+        : "Unlocked — full AI breakdown",
+      bodyStyle: "position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;" +
+        (locked ? "filter:blur(6px);opacity:.5;pointer-events:none" : "animation:daReveal .5s ease both"),
+
+      chromeStyle: "position:absolute;left:0;right:0;top:0;height:114px;z-index:9;transition:background .25s ease,box-shadow .25s ease,backdrop-filter .25s ease;" +
+        (this.state.scrolled && !locked
+          ? "background:linear-gradient(180deg,rgba(30,18,38,.94) 0%,rgba(30,18,38,.8) 100%);box-shadow:0 1px 0 rgba(255,255,255,.08),0 10px 24px -18px rgba(0,0,0,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)"
+          : "background:transparent"),
+      chromeTitleStyle: "flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .22s ease,transform .22s ease;color:rgba(255,255,255,.85);" +
+        (this.state.scrolled && !locked ? "opacity:1;transform:none" : "opacity:0;transform:translateY(4px)"),
+      balance: view === "unlocked" ? balance - 1 : balance,
+      balanceStyle: "font-size:12.5px;font-weight:700;line-height:1;color:#F9BD48",
+
+      heroKicker: "Session 03 · 2025 · TEF Canada",
+      heroSub: s.name + " · March 2025 · taken 12 March",
+      verdict: s.verdict,
+      patterns: s.patterns.map((p, i) => ({
+        rank: i + 1,
+        label: p.label,
+        count: p.count,
+        rankStyle: "width:18px;height:18px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:10px;font-weight:700;background:rgba(255,255,255,.12);color:#fff"
+      })),
+
+      showTabs: true,
+      tabs: tabs,
+      skillName: s.name,
+      skillLine: pending ? "AI is still marking your two tâches · about 5 minutes left" : s.line,
+      skillLevel: pending ? "—" : s.level,
+      skillPoints: pending ? "not scored yet" : s.points,
+      skillLevelStyle: "font-size:20px;font-weight:700;line-height:22px;letter-spacing:-.4px;flex-shrink:0;color:" + s.deep,
+      skillIcon: s.icon,
+      skillTileStyle: "width:48px;height:48px;border-radius:15px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#fff;background:linear-gradient(145deg," +
+        s.color + " 0%," + s.deep + " 100%);box-shadow:0 6px 14px -6px " + s.color + "99",
+
+      flagRows: [{
+        label: "Writing & Speaking still with the AI",
+        screenLabel: "Writing tab",
+        on: "W and S heads read “—  / not scored yet”, tabs carry the AI chip, and the body shows the still-marking card instead of the criteria.",
+        off: "Both are estimated: NCLC first, then CEFR, labelled Estimation (W NCLC 6 · S NCLC 8), plus one level per official criterion."
+      }].map(f => {
+        const on = wsPending;
+        return {
+          label: f.label, screenLabel: f.screenLabel, onText: f.on, offText: f.off,
+          toggle: () => this.setState({ wsPending: !on }),
+          goScreen: () => this.setState({ skill: "W", filter: "todo" }),
+          rowStyle: "display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:" +
+            (on ? "rgba(255,255,255,.78)" : "rgba(255,255,255,.42)") + ";box-shadow:inset 0 0 0 1px " + (on ? "#D9CCD6" : "#D8CBD5"),
+          trackStyle: "width:38px;height:22px;border-radius:100px;flex-shrink:0;padding:2px;cursor:pointer;display:flex;justify-content:" +
+            (on ? "flex-end" : "flex-start") + ";background:" + (on ? "#2E1A3B" : "#D9CCD6"),
+          knobStyle: "width:18px;height:18px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#2E1A3B" : "#EFE3EC") + ";color:" + (on ? "#fff" : "#857789"),
+          offTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#EFE3EC" : "#2E1A3B") + ";color:" + (on ? "#857789" : "#fff"),
+          onTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#2E1A3B" : "#857789"),
+          offTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#857789" : "#2E1A3B")
+        };
+      }),
+
+      isSync: isSync,
+      isAsync: !isSync && !pending,
+      isPending: pending,
+      pendingTitle: s.name + " analysis is on its way",
+      pendingBody: "Your two tâches are with the AI marker. The moment it finishes, the per-criterion breakdown and drills appear right here, free — nothing to tap.",
+      pendingRows: [
+        { label: "COVERED", value: "Free, every skill and every question" },
+        { label: "ETA", value: "About 5 minutes · we notify you when it lands" }
+      ],
+      pendingNote: "If the marking fails, try again from History.",
+      filters: FILTERS.map(f => ({
+        label: f.label,
+        go: () => this.setState({ filter: f.k }),
+        style: "font-size:12px;font-weight:600;line-height:1;padding:8px 14px;border-radius:100px;cursor:pointer;user-select:none;" +
+          (this.state.filter === f.k
+            ? "background:#6A2A5F;color:#fff;box-shadow:inset 0 0 0 1px #2E1A3B"
+            : "background:#fff;color:#5E4E69;box-shadow:inset 0 0 0 1px #E9E0E7")
+      })),
+      questions: questions,
+      tasks: tasks,
+
+      isLocked: locked,
+      isUnlocked: !locked,
+      gateSub: "Covers all four skills of this session — including the ones still being marked.",
+      gateBullets: [
+        "Why each answer is right or wrong, question by question",
+        "A drill for every pattern the AI found — not generic advice",
+        "Writing and Speaking arrive here as soon as marking ends"
+      ],
+      gateHasPending: wsPending,
+      gatePendingNote: "Writing and Speaking are still being marked (~5 min). They appear here as soon as marking ends.",
+      gateCost: "",
+      gateCtaLabel: "Open",
+      gateCtaIcon: "IconSparkles",
+      gateCtaStyle: "display:flex;justify-content:center;align-items:center;gap:9px;height:52px;border-radius:100px;cursor:pointer;user-select:none;background:#6A2A5F;box-shadow:0 10px 30px -6px rgba(60,30,55,.28);color:#fff",
+      unlock: () => this.setState({ view: "unlocked" }),
+      dismiss: () => { __go("TestReview.dc.html"); },
+
+      practiceLabel: isSync ? "Drill these " + s.patterns.length + " patterns" : "Practise " + s.name + " again",
+      practiceNote: pending
+        ? "Writing and Speaking analysis lands here automatically."
+        : isSync
+          ? "Back to Home to practise the sections you missed."
+          : "Back to Home to practise the two weakest criteria.",
+      practiceTap: () => { __go("Home.dc.html"); },
+
+      states: ["locked", "unlocked", "pro"].map(k => ({
+        label: k === "locked" ? "Locked" : k === "unlocked" ? "Open" : "Open",
+        go: () => this.setState({ view: k }),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (k === view ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

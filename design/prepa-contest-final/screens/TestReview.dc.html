@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes trFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes trPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  .tr-scroll::-webkit-scrollbar { width: 0; }
+  .tr-scroll { scrollbar-width: none; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E1226"></rect><path d="M32 52l12 12 24-26" fill="none" stroke="#F9BD48" stroke-width="8" stroke-linecap="round"></path></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">M16 · Test Review</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="MockTestDetail.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Mock test</a>
+  </div>
+
+  <div data-screen-label="Test review" style="position:relative;width:393px;height:852px;overflow:hidden;background:#1E1226;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);flex-shrink:0">
+
+    <div class="tr-scroll" ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+      <!-- HERO — the session result, not the skill -->
+      <div style="position:relative;overflow:hidden;padding:126px 20px 46px;background:linear-gradient(165deg,#2A2018 0%,#1E1226 58%,#100D0A 100%)">
+        <div style="position:absolute;left:-90px;top:-120px;width:340px;height:340px;border-radius:9999px;background:#F9BD48;opacity:.3;filter:blur(80px)"></div>
+        <div style="position:absolute;right:-120px;top:120px;width:300px;height:300px;border-radius:9999px;background:#6A2A5F;opacity:.22;filter:blur(90px)"></div>
+        <span style="position:absolute;right:-6px;top:74px;font-size:190px;font-weight:700;line-height:.8;letter-spacing:-10px;color:rgba(255,255,255,.05);user-select:none;pointer-events:none">{{ heroNumber }}</span>
+
+        <div style="position:relative;display:flex;flex-direction:column;gap:18px;animation:trFade .35s ease both">
+          <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">{{ heroKicker }}</span>
+
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:32px;font-weight:700;line-height:34px;letter-spacing:-1px;color:#fff">{{ heroTitle }}</span>
+            <span style="font-size:13px;font-weight:500;line-height:18px;color:rgba(255,255,255,.55)">{{ heroSub }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 12px 30px -18px rgba(0,0,0,.8)">
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="{{ donutStyle }}">
+                <div style="width:58px;height:58px;border-radius:9999px;background:#181310;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px">
+                  <span style="font-size:18px;font-weight:700;line-height:22px;letter-spacing:-.4px;color:#fff">{{ donutValue }}</span>
+                  <span style="font-size:8px;font-weight:700;letter-spacing:.7px;padding-left:.7px;color:rgba(255,255,255,.42)">{{ donutCaption }}</span>
+                </div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;min-width:0">
+                <span style="font-size:14px;font-weight:700;line-height:19px;color:#fff;text-wrap:pretty">{{ heroPanelTitle }}</span>
+                <span style="font-size:12px;font-weight:400;line-height:17px;color:rgba(255,255,255,.55);text-wrap:pretty">{{ heroPanelLine }}</span>
+              </div>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+            <div style="display:flex;align-items:center">
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <span style="font-size:14px;font-weight:700;line-height:18px;color:#7BD48F">{{ statCorrect }}</span>
+                <span style="font-size:9px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">CORRECT</span>
+              </div>
+              <div style="width:1px;height:26px;background:rgba(255,255,255,.1)"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;padding-left:14px">
+                <span style="font-size:14px;font-weight:700;line-height:18px;color:#F09A8A">{{ statWrong }}</span>
+                <span style="font-size:9px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">MISSED</span>
+              </div>
+              <div style="width:1px;height:26px;background:rgba(255,255,255,.1)"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;padding-left:14px">
+                <span style="font-size:14px;font-weight:700;line-height:18px;color:#fff">{{ statTasks }}</span>
+                <span style="font-size:9px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">{{ statTasksLabel }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div style="position:relative;margin-top:-22px;border-radius:26px 26px 0 0;background:linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 46%);box-shadow:0 -14px 30px -14px rgba(0,0,0,.5);padding:0 0 150px">
+
+        <!-- Skill tabs — sticky under the chrome band -->
+        <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+          <div style="position:sticky;top:114px;z-index:6;display:flex;padding:0 8px;background:rgba(255,253,254,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:26px 26px 0 0;box-shadow:0 1px 0 #EFE3EC">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.go }}" style="{{ t.style }}">
+                <fig-icon name="{{ t.icon }}" size="16"></fig-icon>
+                <div style="display:flex;align-items:center;gap:4px;min-width:0">
+                  <span style="font-size:12px;font-weight:600;line-height:1;color:inherit;white-space:nowrap">{{ t.label }}</span>
+                  <sc-if value="{{ t.hasNote }}" hint-placeholder-val="{{ false }}">
+                    <span style="{{ t.noteStyle }}">{{ t.note }}</span>
+                  </sc-if>
+                </div>
+                <div style="{{ t.underlineStyle }}"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;flex-direction:column;gap:20px;padding:20px 20px 0">
+
+          <!-- Skill score panel -->
+          <div style="{{ scoreCardStyle }}">
+            <div style="display:flex;align-items:center;gap:13px">
+              <div style="{{ scoreTileStyle }}">
+                <fig-icon name="{{ skillIcon }}" size="21"></fig-icon>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-size:15px;font-weight:700;line-height:20px;letter-spacing:-.2px;color:#111827">{{ skillName }}</span>
+                <span style="font-size:11px;font-weight:500;line-height:15px;color:#857789">{{ skillFrench }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+                <span style="{{ skillLevelStyle }}">{{ skillLevel }}</span>
+                <span style="font-size:10.5px;font-weight:500;color:#6E5F78">{{ skillRaw }}</span>
+              </div>
+            </div>
+            <div style="height:5px;border-radius:100px;background:#E9E0E7;overflow:hidden">
+              <div style="{{ skillBarStyle }}"></div>
+            </div>
+            <span style="font-size:11.5px;font-weight:500;line-height:16px;color:#5E4E69;text-wrap:pretty">{{ skillMeta }}</span>
+          </div>
+
+          <!-- SYNC · question review -->
+          <sc-if value="{{ isSync }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:baseline;gap:10px">
+                <span style="flex:1;font-size:17px;font-weight:700;line-height:22px;letter-spacing:-.3px;color:#111827">Your answers</span>
+                <span style="font-size:11px;font-weight:500;color:#857789">{{ listHint }}</span>
+              </div>
+
+              <div style="display:flex;gap:7px">
+                <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+                  <div onClick="{{ f.go }}" style="{{ f.style }}">{{ f.label }}</div>
+                </sc-for>
+              </div>
+
+              <sc-for list="{{ questions }}" as="q" hint-placeholder-count="4">
+                <div style="{{ q.cardStyle }}">
+                  <div onClick="{{ q.toggle }}" style="display:flex;align-items:flex-start;gap:11px;cursor:pointer">
+                    <div style="{{ q.markStyle }}">
+                      <fig-icon name="{{ q.markIcon }}" size="12"></fig-icon>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0">
+                      <span style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#857789">{{ q.num }}</span>
+                      <span style="{{ q.textStyle }}">{{ q.text }}</span>
+                    </div>
+                    <div style="{{ q.chevronStyle }}">
+                      <fig-icon name="{{ q.chevronIcon }}" size="14"></fig-icon>
+                    </div>
+                  </div>
+
+                  <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:9px;padding-top:11px;border-top:1px solid #F5EEF3">
+                      <div style="display:flex;gap:10px">
+                        <span style="width:78px;flex-shrink:0;font-size:11px;font-weight:600;line-height:17px;color:#857789">Your answer</span>
+                        <span style="{{ q.yourStyle }}">{{ q.your }}</span>
+                      </div>
+                      <sc-if value="{{ q.hasCorrect }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;gap:10px">
+                          <span style="width:78px;flex-shrink:0;font-size:11px;font-weight:600;line-height:17px;color:#857789">Correct</span>
+                          <span style="flex:1;font-size:12.5px;font-weight:600;line-height:17px;color:#157F4A;text-wrap:pretty">{{ q.correct }}</span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ q.hasExplain }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;gap:9px;padding:11px 12px;border-radius:14px;background:#FFFBEB;box-shadow:inset 0 0 0 1px #F3E6C8">
+                          <div style="flex-shrink:0;color:#966010;display:flex;align-items:flex-start;padding-top:1px">
+                            <fig-icon name="IconSparkles" size="14"></fig-icon>
+                          </div>
+                          <span style="flex:1;font-size:12px;font-weight:400;line-height:17px;color:#53374E;text-wrap:pretty">{{ q.explain }}</span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ q.explainLocked }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:14px;background:#F6F0F5;box-shadow:inset 0 0 0 1px #E9E0E7;color:#857789">
+                          <fig-icon name="IconLock" size="13"></fig-icon>
+                          <span style="flex:1;font-size:11.5px;font-weight:500;line-height:16px;color:#6E5F78">Explanation comes with Detailed Analysis.</span>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+
+              <!-- Explanations are the only paid part — every answered question stays visible -->
+              <sc-if value="{{ hasWall }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ unlock }}" style="display:flex;align-items:center;gap:13px;padding:16px;border-radius:20px;cursor:pointer;background:#FFFBEB;box-shadow:inset 0 0 0 1px #EDD99A">
+                  <div style="width:38px;height:38px;border-radius:12px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:#FDF1CE;color:#966010">
+                    <fig-icon name="IconSparkles" size="18"></fig-icon>
+                  </div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0">
+                    <span style="font-size:13.5px;font-weight:700;line-height:18px;color:#7A4E0C;text-wrap:pretty">{{ wallTitle }}</span>
+                    <span style="font-size:11.5px;font-weight:400;line-height:16px;color:#966010;text-wrap:pretty">{{ wallLine }}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;color:#7A4E0C">
+                    <span style="font-size:12px;font-weight:700">Free</span>
+                    <fig-icon name="IconChevronRight" size="16"></fig-icon>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ASYNC · AI criteria + tasks -->
+          <sc-if value="{{ isAsync }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+
+              <sc-if value="{{ isPending }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:13px;align-items:center;padding:24px 18px;border-radius:22px;background:#FFFBEB;box-shadow:inset 0 0 0 1px #EDD99A">
+                  <div style="width:54px;height:54px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:#FDF1CE;color:#966010;animation:trPulse 1.8s ease-in-out infinite">
+                    <fig-icon name="IconSparkles" size="24"></fig-icon>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:5px;align-items:center">
+                    <span style="font-size:15px;font-weight:700;line-height:20px;color:#7A4E0C">{{ pendingTitle }}</span>
+                    <span style="font-size:12px;font-weight:400;line-height:17px;text-align:center;color:#966010;text-wrap:pretty">{{ pendingLine }}</span>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ hasAi }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:22px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+                    <span style="font-size:14px;font-weight:700;line-height:19px;color:#111827">Four criteria</span>
+                    <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="4">
+                      <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="display:flex;align-items:baseline;gap:8px">
+                          <span style="flex:1;font-size:12.5px;font-weight:600;line-height:17px;color:#374151">{{ c.name }}</span>
+                          <span style="{{ c.scoreStyle }}">{{ c.score }}</span>
+                        </div>
+                        <div style="height:5px;border-radius:100px;background:#E9E0E7;overflow:hidden">
+                          <div style="{{ c.barStyle }}"></div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="display:flex;gap:11px;padding:16px;border-radius:22px;background:#FFFBEB;box-shadow:inset 0 0 0 1px #F3E6C8">
+                    <div style="flex-shrink:0;color:#966010;display:flex;align-items:flex-start;padding-top:1px">
+                      <fig-icon name="IconSparkles" size="16"></fig-icon>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:5px;min-width:0">
+                      <span style="font-size:9.5px;font-weight:700;letter-spacing:.8px;color:#966010">AI SUMMARY</span>
+                      <span style="font-size:12.5px;font-weight:400;line-height:18px;color:#53374E;text-wrap:pretty">{{ aiSummary }}</span>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <span style="font-size:17px;font-weight:700;line-height:22px;letter-spacing:-.3px;color:#111827">Task by task</span>
+                    <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="2">
+                      <div style="display:flex;flex-direction:column;gap:11px;padding:14px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+                        <div style="display:flex;align-items:center;gap:12px">
+                          <div style="{{ t.numStyle }}">{{ t.num }}</div>
+                          <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                            <span style="font-size:13.5px;font-weight:700;line-height:18px;color:#111827">{{ t.label }}</span>
+                            <span style="font-size:11px;font-weight:500;line-height:15px;color:#857789">{{ t.sub }}</span>
+                          </div>
+                          <span style="{{ t.scoreStyle }}">{{ t.score }}</span>
+                        </div>
+                        <sc-if value="{{ t.hasFeedback }}" hint-placeholder-val="{{ false }}">
+                          <div style="display:flex;flex-direction:column;gap:8px;padding-top:11px;border-top:1px solid #F5EEF3">
+                            <sc-for list="{{ t.feedback }}" as="f" hint-placeholder-count="2">
+                              <div style="display:flex;gap:9px">
+                                <span style="width:78px;flex-shrink:0;font-size:11px;font-weight:600;line-height:17px;color:#857789">{{ f.name }}</span>
+                                <span style="flex:1;font-size:12px;font-weight:400;line-height:17px;color:#374151;text-wrap:pretty">{{ f.text }}</span>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ t.locked }}" hint-placeholder-val="{{ true }}">
+                          <div onClick="{{ unlock }}" style="display:flex;align-items:center;gap:9px;padding-top:11px;border-top:1px solid #F5EEF3;cursor:pointer;color:#966010">
+                            <fig-icon name="IconLock" size="14"></fig-icon>
+                            <span style="flex:1;font-size:12px;font-weight:600;line-height:16px;color:inherit">Per-criterion feedback with Detailed Analysis</span>
+                            <fig-icon name="IconChevronRight" size="14"></fig-icon>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:18px;height:18px;flex-shrink:0;color:#966010;display:flex;align-items:center;justify-content:center">
+              <fig-icon name="IconDuotoneInfo" size="16"></fig-icon>
+            </div>
+            <span style="font-size:12px;font-weight:400;line-height:18px;color:#5E4E69;text-wrap:pretty">{{ footNote }}</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed dark chrome -->
+    <div style="{{ chromeStyle }}">
+      <div style="height:62px;display:flex;align-items:center;padding:21px 16px 19px">
+        <div style="flex:1;display:flex;justify-content:center">
+          <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:#fff">9:41</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+          <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="#fff"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+          <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="#fff"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+          <div style="position:relative;width:27.328px;height:13px">
+            <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px #fff"></div>
+            <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:#fff"></div>
+            <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:#fff"></div>
+          </div>
+        </div>
+      </div>
+      <div style="height:52px;display:flex;align-items:center;gap:8px;padding:0 12px 0 8px">
+        <a href="MockTestDetail.dc.html" style="width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;color:#fff;flex-shrink:0" style-hover="background:rgba(255,255,255,.12)">
+          <fig-icon name="IconChevronLeft" size="22"></fig-icon>
+        </a>
+        <span style="{{ chromeTitleStyle }}">{{ chromeTitle }}</span>
+        
+      </div>
+    </div>
+
+    <!-- Sticky CTA -->
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:46px 20px 24px;display:flex;flex-direction:column;gap:10px;z-index:8;pointer-events:none">
+      <div style="position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,.96) 78%,#fff 100%);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%)"></div>
+      <div onClick="{{ ctaTap }}" style="{{ ctaStyle }}">
+        <fig-icon name="{{ ctaIcon }}" size="17"></fig-icon>
+        <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ ctaLabel }}</span>
+      </div>
+      <div style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;height:22px">
+        <span style="font-size:12.5px;font-weight:500;line-height:17px;text-align:center;text-wrap:pretty;color:#6E5F78">{{ ctaNote }}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;gap:6px;width:393px;flex-wrap:wrap">
+    <sc-for list="{{ states }}" as="st" hint-placeholder-count="2">
+      <div onClick="{{ st.go }}" style="{{ st.chipStyle }}">{{ st.label }}</div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;scoring&quot;,&quot;done&quot;,&quot;solo&quot;],&quot;default&quot;:&quot;scoring&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;skill&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;L&quot;,&quot;R&quot;,&quot;W&quot;,&quot;S&quot;],&quot;default&quot;:&quot;L&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;isPro&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const SKILLS = {
+  L: { name: "Listening", french: "Compréhension orale", icon: "IconBulkHeadphone", color: "#4A7FE5", deep: "#2F5FC0",
+    type: "sync", level: "NCLC 8", raw: "B2 · Estimation", pct: 67, meta: "40 questions · 7 groupes · 8 missed, 2 skipped", sample: "showing 8 of 40",
+    questions: [
+      { n: 1, st: "correct", text: "Pourquoi Marie cherche-t-elle à changer de poste ?", your: "B — Elle veut des projets plus créatifs.",
+        explain: "The dialogue states Marie finds her current role repetitive. Key phrase: «cherche quelque chose de plus stimulant»." },
+      { n: 2, st: "wrong", text: "Quel document Thomas montre-t-il pendant la réunion ?", your: "C — Un calendrier", correct: "A — Un graphique",
+        explain: "Thomas refers to a «graphique de performances». «Calendrier» was the next meeting date — a classic distractor placed right beside the object." },
+      { n: 3, st: "correct", text: "Où se déroulera la prochaine réunion d'équipe ?", your: "D — Dans la salle de conférence au 3e étage.",
+        explain: "Stated directly at the end of the dialogue: «salle de conférence, troisième étage»." },
+      { n: 4, st: "correct", text: "Quel est le principal sujet de la conversation ?", your: "A — La réorganisation des équipes de travail.",
+        explain: "The dialogue centers on the restructuring announcement, catchable from the opening sentences." },
+      { n: 5, st: "skip", text: "Comment s'appelle la nouvelle responsable du projet ?", your: "Unanswered", correct: "B — Sophie Marchand",
+        explain: "Sophie Marchand is introduced midway. Note proper nouns on first hearing — they are rarely repeated." },
+      { n: 6, st: "skip", text: "Quand aura lieu la formation pour les nouveaux outils ?", your: "Unanswered", correct: "C — La semaine prochaine, jeudi matin.",
+        explain: "Time expressions often land near the end of a dialogue. Anticipate them instead of catching them retroactively." },
+      { n: 7, st: "correct", text: "Quelle est la réaction de Sophie face à la nouvelle organisation ?", your: "A — Elle est enthousiaste.",
+        explain: "Her tone and «c'est une bonne opportunité» signal enthusiasm clearly." },
+      { n: 8, st: "wrong", text: "Combien d'employés seront affectés par la réorganisation ?", your: "B — Douze", correct: "D — Vingt",
+        explain: "«Vingt employés» is stated clearly. «Douze» was the number of departments — a number distractor typical of TEF listening." }
+    ] },
+  R: { name: "Reading", french: "Compréhension écrite", icon: "IconBulkBook", color: "#1A9E94", deep: "#0E766E",
+    type: "sync", level: "NCLC 8", raw: "B2 · Estimation", pct: 67, meta: "40 questions · 5 groupes · 11 missed", sample: "showing 8 of 40",
+    questions: [
+      { n: 1, st: "correct", text: "Selon le texte, quelle est la principale cause du déclin des abeilles ?", your: "B — L'utilisation des pesticides agricoles.",
+        explain: "Paragraph 2 explicitly names «pesticides agricoles» as the primary factor. Direct comprehension, no inference needed." },
+      { n: 2, st: "correct", text: "Que suggèrent les scientifiques pour protéger les pollinisateurs ?", your: "A — Réduire l'usage des produits chimiques et créer des zones protégées.",
+        explain: "Both measures appear in paragraph 3 as complementary recommendations." },
+      { n: 3, st: "wrong", text: "Quel mot dans le texte est synonyme de « indispensable » ?", your: "A — Fondamental", correct: "C — Incontournable",
+        explain: "«Incontournable» carries unavoidable/essential. «Fondamental» implies foundational importance — subtly different. TCF synonym items need the surrounding context." },
+      { n: 4, st: "correct", text: "D'après l'auteur, quel est l'impact économique de la pollinisation ?", your: "C — Elle représente des milliards d'euros pour l'agriculture mondiale.",
+        explain: "Stated in the introduction: «une valeur estimée à 153 milliards d'euros par an»." },
+      { n: 5, st: "correct", text: "Quel est le ton général de cet article ?", your: "B — Informatif et préoccupé.",
+        explain: "Facts presented with concern about environmental consequences — balanced but alert." },
+      { n: 6, st: "wrong", text: "Réordonnez les phrases pour former un paragraphe cohérent.", your: "C → A → D → B", correct: "A → C → B → D",
+        explain: "Order follows cause → evidence → consequence → recommendation. The topic sentence (A) has no pronoun reference, a signal it comes first; «Ainsi» (D) marks the conclusion." },
+      { n: 7, st: "correct", text: "Complétez : « Les chercheurs ___ que la situation est alarmante. »", your: "B — soulignent",
+        explain: "«Souligner» matches the register of formal scientific writing; «dire» would be too neutral." },
+      { n: 8, st: "wrong", text: "Le mot « déclin » (ligne 4) peut être remplacé par :", your: "B — chute", correct: "A — diminution",
+        explain: "«Diminution» is a gradual, ongoing decrease, matching the long-term ecological framing. «Chute» implies a sudden drop." }
+    ] },
+  W: { name: "Writing", french: "Expression écrite", icon: "IconBulkWrite", color: "#D4860F", deep: "#A86200",
+    type: "async", level: "NCLC 6", raw: "B1 · Estimation", pct: 50, meta: "2 tâches · AI estimate on the official criteria",
+    ai: "Your writing is well organised and your vocabulary is strong. Task 1 held the press register of the fait divers. Main areas to improve: accents on é/è words and agreement in complex sentences.",
+    criteria: [
+      { name: "Respect de la situation", level: "B2" },
+      { name: "Organisation du texte", level: "B2" },
+      { name: "Lexique", level: "B1" },
+      { name: "Orthographe", level: "B1" }
+    ],
+    tasks: [
+      { num: 1, label: "Tâche 1 — Terminer un fait divers", sub: "Fontaine Saint-Roch · 96 mots", score: "B1",
+        feedback: [
+          { name: "Cohérence", text: "The continuation follows the order a fait divers needs: what was found, who reacted, what happens next." },
+          { name: "Grammaire", text: "The narration drifts from passé composé into présent mid-paragraph. Hold one narrative tense." },
+          { name: "Orthographe", text: "Missing accents: «reparee» → «réparée», «regle» → «réglé». Accents are scored explicitly in TEF." }
+        ] },
+      { num: 2, label: "Tâche 2 — Exprimer et défendre un point de vue", sub: "Voitures dans le centre · 231 mots", score: "B1",
+        feedback: [
+          { name: "Cohérence", text: "Good three-part structure; the pros → cons turn needs a smoother connector (Certes… mais)." },
+          { name: "Vocabulaire", text: "Strong urban-policy lexis. «Problème» repeats — vary with «enjeu», «défi»." },
+          { name: "Grammaire", text: "«la rue dont j'ai parcouru» → «que j'ai parcourue». «Dont» stands for de qui/de quoi." }
+        ] }
+    ] },
+  S: { name: "Speaking", french: "Expression orale", icon: "IconBulkMic", color: "#8B62E0", deep: "#6A3FC0",
+    type: "async", level: "NCLC 8", raw: "B2 · Estimation", pct: 67, meta: "2 tâches · AI estimate on the official criteria",
+    ai: "Varied vocabulary and a clear line of argument in the transcript. Priorities: accuracy in question forms and longer answers to the examiner's objections. Pronunciation is not assessed from a transcript.",
+    criteria: [
+      { name: "Présentation des faits", level: "B2" },
+      { name: "Qualité de l'argumentation", level: "B2" },
+      { name: "Qualité de l'interaction", level: "B1" },
+      { name: "Lexique", level: "B2" }
+    ],
+    tasks: [
+      { num: 1, label: "Tâche 1 — Obtenir des informations", sub: "Atelier Le Panier · 5 min", score: "B2",
+        feedback: [
+          { name: "Vocabulaire", text: "Question forms are varied: «est-ce qu'il reste des places», «pourriez-vous me préciser»." },
+          { name: "Grammaire", text: "«combien coûte les cours» → «combien coûtent les cours». Watch agreement inside questions." },
+          { name: "Pertinence", text: "Questions cover price, dates and places; ask one more about conditions (inscription, annulation)." }
+        ] },
+      { num: 2, label: "Tâche 2 — Présenter et convaincre", sub: "Semaine de quatre jours · 10 min", score: "B2",
+        feedback: [
+          { name: "Argumentation", text: "Three arguments, but only the first has an example. Add one concrete case to each." },
+          { name: "Vocabulaire", text: "Formal register and vouvoiement held. «Bien» and «bon» repeat too often." },
+          { name: "Interaction", text: "Answer each objection before adding a new argument: «Je comprends, mais…»." }
+        ] }
+    ] }
+};
+
+const ORDER = ["L", "R", "W", "S"];
+
+const VIEWS = {
+  scoring: {
+    label: "Two skills scored · Writing and Speaking with the AI",
+    pending: { W: true, S: true },
+    donut: "2/4", caption: "SCORED",
+    panel: { t: "Listening and Reading are open", l: "Writing and Speaking land in about 5 minutes — you will get a notification." },
+    correct: "62 / 80", wrong: "18", tasks: "0 / 4"
+  },
+  done: {
+    label: "All four estimated — NCLC 6 usable level",
+    pending: {},
+    donut: "6", caption: "NCLC",
+    panel: { t: "NCLC 6 · Estimation", l: "Your usable level is your weakest skill (Writing). Full answer review is open for this session." },
+    correct: "62 / 80", wrong: "18", tasks: "4 / 4"
+  },
+  // One practice set, one skill — no tabs, no session numbers
+  solo: {
+    label: "Solo skill — one practice set, no tabs",
+    pending: {}, solo: true,
+    kicker: "Travel · practice set",
+    title: "Review",
+    sub: "Airport announcements · taken 12 March · 14m",
+    donut: "4/8", caption: "CORRECT",
+    panel: { t: "4 of 8 correct", l: "Practice set: too short for an NCLC estimate. It stays open for review." },
+    correct: "4 / 8", wrong: "2", tasks: "2", tasksLabel: "SKIPPED",
+    perSkill: { level: "4 / 8", raw: "Practice set · no estimate", pct: 50, syncMeta: "8 questions · one practice set · 2 missed, 2 skipped" },
+    chrome: "Review · Airport announcements"
+  }
+};
+
+
+// Sample sessions behind History's cards. History hands over the card id
+// (sessionStorage "testReview.open"), so the review shows the same test as the card.
+// Each entry layers over its VIEWS base: header, totals, and per-skill levels.
+const SESSIONS = {
+  "tef-3": {
+    cfg: { kicker: "Mock test #3 · TEF Canada", number: "03", sub: "Today · 1h 48m · submitted 6 min ago",
+      chrome: "Review · Mock test #3", correct: "58 / 80", wrong: "22" },
+    levels: { L: ["NCLC 8", "B2", 67], R: ["NCLC 6", "B1", 50] },
+    meta: { L: "40 questions · 7 groupes · 6 missed, 2 skipped", R: "40 questions · 5 groupes · 14 missed" }
+  },
+  "tef-4": {
+    cfg: { label: "Mock in progress · Listening scored, Reading running", kicker: "Mock test #4 · TEF Canada", number: "04",
+      sub: "Started today · 42 min in · section 2 of 4", chrome: "Review · Mock test #4",
+      pending: { R: true, W: true, S: true }, notes: { R: "Q14", W: "to do", S: "to do" },
+      donut: "1/4", caption: "SCORED",
+      panel: { t: "Listening is open", l: "Reading is in progress. Writing and Speaking follow it in the same sitting." },
+      correct: "31 / 40", wrong: "9", tasks: "0 / 4" },
+    levels: { L: ["NCLC 8", "B2", 67] },
+    meta: { L: "40 questions · 7 groupes · 7 missed, 2 skipped" }
+  },
+  "tef-2": {
+    cfg: { kicker: "Mock test #2 · TEF Canada", number: "02", sub: "Sep 9 · 1h 52m · 4 of 4 skills", chrome: "Review · Mock test #2",
+      label: "All four estimated — NCLC 4 usable level", donut: "4",
+      panel: { t: "NCLC 4 · Estimation", l: "Your usable level is your weakest skill (Speaking). Full answer review is open for this session." },
+      correct: "65 / 80", wrong: "15" },
+    levels: { L: ["NCLC 8", "B2", 67], R: ["NCLC 8", "B2", 67], W: ["NCLC 5", "B1", 42], S: ["NCLC 4", "A2", 33] },
+    meta: { L: "40 questions · 7 groupes · 5 missed, 2 skipped", R: "40 questions · 5 groupes · 8 missed" },
+    crit: { S: ["A2", "A2", "B1", "A2"] },
+    taskScore: { S: ["A2", "A2"] }
+  },
+  "visa": {
+    cfg: { kicker: "Reading · practice set", sub: "Visa notice · taken 4 Sep · 22m", chrome: "Review · Visa notice",
+      donut: "18/22", panel: { t: "18 of 22 correct", l: "Practice set: too short for an NCLC estimate. It stays open for review." },
+      correct: "18 / 22", wrong: "3", tasks: "1",
+      perSkill: { level: "18 / 22", raw: "Practice set · no estimate", pct: 82, syncMeta: "22 questions · one practice set · 3 missed, 1 skipped" } },
+    sample: { R: "showing 8 of 22" },
+    questions: { R: [
+      { n: 1, st: "correct", text: "À qui s'adresse cet avis ?", your: "A — Aux personnes dont le permis de travail expire dans les 90 jours.",
+        explain: "The first line names the audience: «titulaires d'un permis de travail arrivant à échéance dans les 90 prochains jours»." },
+      { n: 2, st: "correct", text: "Quel délai l'avis recommande-t-il pour déposer la demande ?", your: "C — Au moins 30 jours avant la date d'expiration.",
+        explain: "Stated in the second paragraph: «au plus tard 30 jours avant l'expiration»." },
+      { n: 3, st: "wrong", text: "Quel document faut-il obligatoirement joindre au formulaire ?", your: "B — Une lettre de recommandation", correct: "D — Une copie du passeport en cours de validité",
+        explain: "Only the passport copy is listed under «pièces obligatoires». The recommendation letter appears under «pièces facultatives» — a distractor placed right after the list." },
+      { n: 4, st: "correct", text: "Que se passe-t-il si la demande est déposée à temps ?", your: "B — Le demandeur peut continuer à travailler aux mêmes conditions.",
+        explain: "The notice says the person keeps «le droit de travailler aux mêmes conditions» while the file is processed." },
+      { n: 5, st: "skip", text: "Où peut-on suivre l'état de son dossier ?", your: "Unanswered", correct: "A — Dans son compte en ligne, rubrique « Mes demandes ».",
+        explain: "The last paragraph points to the online account. Practical details like this often sit at the end of an administrative notice." },
+      { n: 6, st: "correct", text: "Dans l'avis, le mot « échéance » signifie :", your: "C — la date limite",
+        explain: "«Arriver à échéance» means reaching the end date — here, the permit's expiry." },
+      { n: 7, st: "wrong", text: "Quel document n'est PAS accepté comme preuve d'emploi ?", your: "A — Une lettre de l'employeur", correct: "C — Une capture d'écran d'une offre d'emploi",
+        explain: "An employer letter is accepted. A job ad shows an offer, not employment, so the notice excludes it. Watch the negation «n'est PAS» in the question." },
+      { n: 8, st: "correct", text: "Quel est le but principal de cet avis ?", your: "D — Expliquer les étapes pour renouveler un permis de travail.",
+        explain: "Every paragraph is a step of the renewal: deadline, documents, status while waiting, follow-up." }
+    ] }
+  }
+};
+
+const FREE_OPEN = 3;
+const FILTERS = [{ k: "all", label: "All" }, { k: "wrong", label: "Missed" }, { k: "correct", label: "Correct" }];
+
+class Component extends DCLogic {
+  state = { view: null, skill: null, session: null, filter: "all", open: {}, unlocked: true, scrolled: false };
+
+  scrollRef = el => {
+    if (!el || this._el === el) return;
+    this._el = el;
+    el.addEventListener("scroll", () => {
+      const on = el.scrollTop > 20;
+      if (on !== this.state.scrolled) this.setState({ scrolled: on });
+    }, { passive: true });
+  };
+
+  componentDidMount() {
+    const v = new URLSearchParams(location.search).get("state");
+    if (v && VIEWS[v]) { this.setState({ view: v }); return; }
+    // One-shot hand-off from History's "Review answers" (see TestHistory reviewTap).
+    let o = null;
+    try { o = JSON.parse(sessionStorage.getItem("testReview.open") || "null"); sessionStorage.removeItem("testReview.open"); } catch (e) {}
+    if (o && VIEWS[o.view]) this.setState({ view: o.view, skill: o.skill || null, session: SESSIONS[o.session] ? o.session : null });
+  }
+
+  view() { return this.state.view || this.props.state || "scoring"; }
+  ses() { return SESSIONS[this.state.session] || null; }
+  cfg() { const s = this.ses(); return Object.assign({}, VIEWS[this.view()], s ? s.cfg : {}); }
+  skillKey() {
+    const v = this.cfg();
+    const k = this.state.skill || this.props.skill || "L";
+    return v.pending[k] ? "L" : k;
+  }
+  isPro() { return this.state.unlocked || !!this.props.isPro; }
+
+  renderVals() {
+    const view = this.view();
+    const cfg = this.cfg();
+    const ses = this.ses() || {};
+    const key = this.skillKey();
+    // A session can swap in its own levels, counts, questions and AI scores per skill.
+    const pick = (field) => (ses[field] || {})[key];
+    const lv = pick("levels");
+    const base = SKILLS[key];
+    const s = Object.assign({}, base, {
+      level: lv ? lv[0] : base.level, raw: lv ? lv[1] + " · Estimation" : base.raw, pct: lv ? lv[2] : base.pct,
+      meta: pick("meta") || base.meta, sample: pick("sample") || base.sample, questions: pick("questions") || base.questions,
+      criteria: pick("crit") ? base.criteria.map((c, i) => Object.assign({}, c, { level: pick("crit")[i] || c.level })) : base.criteria,
+      tasks: pick("taskScore") ? base.tasks.map((tk, i) => Object.assign({}, tk, { score: pick("taskScore")[i] || tk.score })) : base.tasks
+    });
+    const pro = this.isPro();
+    const pending = !!cfg.pending[key];
+
+    const tabs = ORDER.map(k => {
+      const sk = SKILLS[k];
+      const off = !!cfg.pending[k];
+      const on = k === key;
+      return {
+        label: sk.name.slice(0, 4) === "List" ? "Listening" : sk.name,
+        icon: sk.icon,
+        go: off ? () => {} : () => this.setState({ skill: k, filter: "all", open: {} }),
+        hasNote: off,
+        note: (cfg.notes && cfg.notes[k]) || "5m",
+        noteStyle: "font-size:8.5px;font-weight:700;letter-spacing:.3px;line-height:1;padding:2px 4px;border-radius:5px;flex-shrink:0;background:#FFFBEB;color:#966010;box-shadow:inset 0 0 0 1px #EDD99A",
+        style: "position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;height:52px;flex-shrink:0;padding:0 2px;user-select:none;" +
+          (off ? "opacity:.5;cursor:default;color:#857789" : "cursor:pointer;color:" + (on ? sk.deep : "#6E5F78")),
+        underlineStyle: on
+          ? "position:absolute;left:14px;right:14px;bottom:0;height:2.5px;border-radius:100px 100px 0 0;background:" + sk.color
+          : "display:none"
+      };
+    });
+
+    const isSync = s.type === "sync";
+    let questions = [];
+    let hidden = 0;
+    if (isSync) {
+      let list = s.questions;
+      if (this.state.filter === "wrong") list = list.filter(q => q.st !== "correct");
+      else if (this.state.filter === "correct") list = list.filter(q => q.st === "correct");
+
+      // Every answered question is visible on free — only the AI explanation is paid.
+      hidden = pro ? 0 : list.length;
+
+      questions = list.map(q => {
+        const open = !!this.state.open[key + q.n];
+        const ok = q.st === "correct";
+        const wrong = q.st === "wrong";
+        const ring = ok ? "#CFE9D6" : wrong ? "#F6D5CE" : "#E9E0E7";
+        const mark = ok ? { bg: "#EAF6EC", ink: "#157F4A", icon: "IconCheck" }
+          : wrong ? { bg: "#FDF2EE", ink: "#B4451F", icon: "IconX" }
+          : { bg: "#F5EEF3", ink: "#857789", icon: "IconX" };
+        return {
+          num: "Q" + q.n + (ok ? "" : wrong ? " · missed" : " · skipped"),
+          text: q.text,
+          textStyle: "font-size:13px;font-weight:500;line-height:18px;color:#1F2937;text-wrap:pretty",
+          your: q.your,
+          yourStyle: "flex:1;font-size:12.5px;font-weight:600;line-height:17px;text-wrap:pretty;color:" +
+            (ok ? "#157F4A" : wrong ? "#B4451F" : "#857789"),
+          hasCorrect: !ok,
+          correct: q.correct || "",
+          hasExplain: pro,
+          explainLocked: !pro,
+          explain: q.explain,
+          open: open,
+          toggle: () => this.setState(st => ({ open: Object.assign({}, st.open, { [key + q.n]: !open }) })),
+          cardStyle: "display:flex;flex-direction:column;padding:14px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px " + ring + ",0 1px 2px rgba(0,0,0,.04)",
+          markStyle: "width:24px;height:24px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:" + mark.bg + ";color:" + mark.ink,
+          markIcon: mark.icon,
+          chevronIcon: open ? "IconChevronDown" : "IconChevronRight",
+          chevronStyle: "flex-shrink:0;color:#B3A4B0;display:flex;align-items:center;padding-top:2px"
+        };
+      });
+    }
+
+    const tasks = (s.tasks || []).map(t => ({
+      num: t.num,
+      label: t.label,
+      sub: t.sub,
+      score: t.score,
+      numStyle: "width:30px;height:30px;border-radius:10px;flex-shrink:0;display:flex;justify-content:center;align-items:center;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(145deg," + s.color + "," + s.deep + ")",
+      scoreStyle: "font-size:14px;font-weight:700;line-height:18px;flex-shrink:0;color:" + s.deep,
+      hasFeedback: pro,
+      locked: !pro,
+      feedback: t.feedback,
+      unlock: () => { __go("DetailedAnalysis.dc.html"); }
+    }));
+
+    const cta = pro
+      ? { label: "Detailed Analysis", icon: "IconOutlineRoundedAiDocument", note: "Unlocked for this session — every skill, every question." }
+      : { label: "Detailed Analysis", icon: "IconOutlineRoundedAiDocument", cost: "−1",
+          note: isSync ? "Adds an AI note to all " + s.questions.length + " questions." : "Opens per-criterion AI feedback for both tâches." };
+
+    return {
+      scrollRef: this.scrollRef,
+      chromeStyle: "position:absolute;left:0;right:0;top:0;height:114px;z-index:9;transition:background .25s ease,box-shadow .25s ease,backdrop-filter .25s ease;" +
+        (this.state.scrolled
+          ? "background:linear-gradient(180deg,rgba(30,18,38,.94) 0%,rgba(30,18,38,.8) 100%);box-shadow:0 1px 0 rgba(255,255,255,.08),0 10px 24px -18px rgba(0,0,0,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)"
+          : "background:transparent"),
+      chromeTitle: cfg.chrome || "Review · March 2025",
+      chromeTitleStyle: "flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .22s ease,transform .22s ease;color:rgba(255,255,255,.85);" +
+        (this.state.scrolled ? "opacity:1;transform:none" : "opacity:0;transform:translateY(4px)"),
+
+      stateLabel: cfg.label,
+      heroKicker: cfg.kicker || "Session 03 · 2025 · TEF Canada",
+      heroTitle: cfg.title || "Review",
+      heroSub: cfg.sub || "March 2025 · taken 12 March · 2h 11m",
+      heroNumber: cfg.solo ? "" : (cfg.number || "03"),
+      showTabs: !cfg.solo,
+      donutStyle: "width:78px;height:78px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;box-shadow:0 0 0 1px rgba(255,255,255,.08);background:" + (cfg.solo
+        ? "conic-gradient(from -90deg," + s.color + " 0deg " + Math.round(cfg.perSkill.pct * 3.6) + "deg,rgba(255,255,255,.14) " + Math.round(cfg.perSkill.pct * 3.6) + "deg 360deg)"
+        : "conic-gradient(from -90deg," +
+        ORDER.map((k, i) => {
+          const sk = SKILLS[k];
+          const c = cfg.pending[k] ? "#E0B457" : sk.color;
+          return "#181310 " + (i * 90) + "deg " + (i * 90 + 2.5) + "deg," + c + " " + (i * 90 + 2.5) + "deg " + ((i + 1) * 90) + "deg";
+        }).join(",") + ")"),
+      donutValue: cfg.donut,
+      donutCaption: cfg.caption,
+      heroPanelTitle: cfg.panel.t,
+      heroPanelLine: cfg.panel.l,
+      statCorrect: cfg.correct,
+      statWrong: cfg.wrong,
+      statTasks: cfg.tasks,
+      statTasksLabel: cfg.tasksLabel || "AI TÂCHES",
+      balance: 24,
+
+      tabs: tabs,
+      skillName: s.name,
+      skillFrench: s.french,
+      skillIcon: s.icon,
+      skillLevel: (cfg.perSkill && cfg.perSkill.level) || s.level,
+      skillRaw: (cfg.perSkill && cfg.perSkill.raw) || s.raw,
+      skillMeta: cfg.solo ? (isSync ? cfg.perSkill.syncMeta : "1 tâche · AI estimate on the official criteria") : s.meta,
+      skillLevelStyle: "font-size:20px;font-weight:700;line-height:22px;letter-spacing:-.4px;color:#111827",
+      skillBarStyle: "height:100%;width:" + ((cfg.perSkill && cfg.perSkill.pct) || s.pct) + "%;border-radius:100px;background:linear-gradient(90deg," + s.color + "," + s.deep + ")",
+      scoreCardStyle: "display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:22px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 2px 10px -4px rgba(60,30,55,.18)",
+      scoreTileStyle: "width:48px;height:48px;border-radius:15px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#fff;background:linear-gradient(145deg," +
+        s.color + " 0%," + s.deep + " 100%);box-shadow:0 6px 14px -6px " + s.color + "99",
+
+      isSync: isSync,
+      isAsync: !isSync,
+      isPending: pending,
+      hasAi: !isSync && !pending,
+      pendingTitle: s.name + " is with the AI",
+      pendingLine: "About 5 minutes. The NCLC estimate and the four criteria appear here as soon as scoring lands.",
+
+      listHint: (pick("sample") || (cfg.solo || !s.sample ? (s.questions ? s.questions.length + " questions" : "") : s.sample)) + (pro ? "" : " · explanations locked"),
+      filters: FILTERS.map(f => ({
+        label: f.label,
+        go: () => this.setState({ filter: f.k, open: {} }),
+        style: "font-size:12px;font-weight:600;line-height:1;padding:8px 14px;border-radius:100px;cursor:pointer;user-select:none;" +
+          (this.state.filter === f.k
+            ? "background:#6A2A5F;color:#fff;box-shadow:inset 0 0 0 1px #2E1A3B"
+            : "background:#fff;color:#5E4E69;box-shadow:inset 0 0 0 1px #E9E0E7")
+      })),
+      questions: questions,
+      hasWall: isSync && !pro,
+      wallTitle: "Why each answer is right or wrong",
+      wallLine: "Detailed Analysis adds an AI note to all " + hidden + " questions, with the grammar and vocabulary behind each one.",
+      unlock: () => { __go("DetailedAnalysis.dc.html"); },
+
+      criteria: (s.criteria || []).map(c => ({
+        name: c.name,
+        score: c.level,
+        scoreStyle: "font-size:12.5px;font-weight:700;line-height:17px;color:" + s.deep,
+        barStyle: "height:100%;width:" + Math.round((["A1","A2","B1","B2","C1","C2"].indexOf(c.level) + 1) / 6 * 100) + "%;border-radius:100px;background:linear-gradient(90deg," + s.color + "," + s.deep + ")"
+      })),
+      aiSummary: s.ai || "",
+      tasks: tasks,
+
+      footNote: cfg.solo
+        ? "Your answers stay open for review at no cost. Detailed Analysis is free."
+        : isSync
+        ? "Review is free for this session — Detailed Analysis is free."
+        : "AI feedback stays available for every scored tâche. Re-recording or rewriting a tâche is not possible after submission.",
+
+      ctaLabel: cta.label,
+      ctaIcon: cta.icon,
+      ctaNote: cta.note,
+      ctaHasCost: !!cta.cost,
+      ctaCost: cta.cost || "",
+      ctaStyle: "position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;gap:9px;height:52px;padding:0 18px;border-radius:100px;cursor:pointer;user-select:none;background:#6A2A5F;box-shadow:0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1);color:#fff",
+      ctaTap: () => { __go("DetailedAnalysis.dc.html"); },
+
+      states: ["scoring", "done", "solo"].map(k => ({
+        label: k === "scoring" ? "AI scoring (2 of 4)" : k === "done" ? "All four scored" : "Solo skill (practice set)",
+        go: () => this.setState({ view: k, skill: null, open: {}, unlocked: true }),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (k === view ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

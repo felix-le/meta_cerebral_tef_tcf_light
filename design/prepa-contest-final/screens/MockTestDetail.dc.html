@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes mdFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes mdPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  @keyframes mdSpin { to { transform: rotate(360deg); } }
+  .md-scroll::-webkit-scrollbar { width: 0; }
+  .md-scroll { scrollbar-width: none; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E1226"/><circle cx="50" cy="44" r="20" fill="none" stroke="#F9BD48" stroke-width="7"/><rect x="30" y="72" width="40" height="8" rx="4" fill="#F9BD48"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<x-import component-from-global-scope="mock-session" from="./mock-session.js" hint-size="0,0"></x-import>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">M3a · Mock Test Detail</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="MockTest.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Mock tests</a>
+  </div>
+
+  <div data-screen-label="Mock test detail" style="position:relative;width:393px;height:852px;overflow:hidden;background:#1E1226;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);flex-shrink:0">
+
+    <!-- Scroll body — the hero scrolls under a permanent dark chrome band -->
+    <div class="md-scroll" ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+      <!-- HERO -->
+      <div style="position:relative;overflow:hidden;padding:126px 20px 54px;background:linear-gradient(165deg,#2A2018 0%,#1E1226 58%,#100D0A 100%)">
+        <div style="position:absolute;left:-90px;top:-120px;width:340px;height:340px;border-radius:9999px;background:#F9BD48;opacity:.3;filter:blur(80px)"></div>
+        <div style="position:absolute;right:-120px;top:120px;width:300px;height:300px;border-radius:9999px;background:#6A2A5F;opacity:.22;filter:blur(90px)"></div>
+        <span style="position:absolute;right:-14px;top:74px;font-size:190px;font-weight:700;line-height:.8;letter-spacing:-10px;color:rgba(255,255,255,.05);user-select:none;pointer-events:none">{{ heroNumber }}</span>
+
+        <div style="position:relative;display:flex;flex-direction:column;gap:18px;animation:mdFade .35s ease both">
+
+          <div style="display:flex;align-items:center;gap:8px">
+            <sc-if value="{{ isPro }}" hint-placeholder-val="{{ true }}">
+              <span style="display:flex;align-items:center;height:20px;padding:0 8px;border-radius:100px;background:#F9BD48;color:#3F2A05;font-size:9px;font-weight:700;letter-spacing:.6px">PRO</span>
+            </sc-if>
+            <span style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45)">{{ heroKicker }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:32px;font-weight:700;line-height:34px;letter-spacing:-1px;color:#fff">{{ title }}</span>
+            <span style="font-size:13px;font-weight:500;line-height:18px;color:rgba(255,255,255,.55)">{{ subtitle }}</span>
+          </div>
+
+          <!-- Readiness panel -->
+          <div style="display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:22px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 12px 30px -18px rgba(0,0,0,.8)">
+            <sc-if value="{{ hasAttempts }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:6px">
+                <sc-for list="{{ attempts }}" as="a" hint-placeholder-count="2">
+                  <div onClick="{{ a.pick }}" style="{{ a.chipStyle }}">
+                    <span style="font-size:11px;font-weight:700;line-height:1;color:inherit;white-space:nowrap">{{ a.label }}</span>
+                    <sc-if value="{{ a.latest }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:8px;font-weight:700;letter-spacing:.5px;line-height:1;color:inherit;opacity:.65">LATEST</span>
+                    </sc-if>
+                  </div>
+                </sc-for>
+                <span style="flex:1"></span>
+              </div>
+              <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="{{ donutStyle }}">
+                <div style="width:58px;height:58px;border-radius:9999px;background:#181310;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px">
+                  <span style="{{ donutValueStyle }}">{{ donutValue }}</span>
+                  <span style="font-size:8px;font-weight:700;letter-spacing:.7px;text-align:center;padding-left:.7px;color:rgba(255,255,255,.42)">{{ donutCaption }}</span>
+                </div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;min-width:0">
+                <span style="font-size:14px;font-weight:700;line-height:19px;color:#fff;text-wrap:pretty">{{ readyTitle }}</span>
+                <span style="font-size:12px;font-weight:400;line-height:17px;color:rgba(255,255,255,.55);text-wrap:pretty">{{ readyLine }}</span>
+              </div>
+            </div>
+            <sc-if value="{{ hasMixed }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:14px;color:#F9BD48;background:rgba(249,189,72,.12);box-shadow:inset 0 0 0 1px rgba(249,189,72,.28)">
+                <fig-icon name="IconDuotoneInfo" size="14"></fig-icon>
+                <span style="flex:1;font-size:11.5px;font-weight:600;line-height:16px;color:inherit;text-wrap:pretty">{{ mixedNote }}</span>
+              </div>
+            </sc-if>
+            <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+            <div style="display:flex;align-items:center">
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <span style="font-size:14px;font-weight:700;line-height:18px;color:#fff">2h 55m</span>
+                <span style="font-size:9px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">DURATION</span>
+              </div>
+              <div style="width:1px;height:26px;background:rgba(255,255,255,.1)"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;padding-left:14px">
+                <span style="font-size:14px;font-weight:700;line-height:18px;color:#fff">80 + 4</span>
+                <span style="font-size:9px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">Q · TÂCHES</span>
+              </div>
+              <div style="width:1px;height:26px;background:rgba(255,255,255,.1)"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;padding-left:14px">
+                <div style="display:flex;align-items:center;gap:5px">
+                  <span style="{{ costValueStyle }}">Free</span>
+                </div>
+                <span style="font-size:9px;font-weight:700;letter-spacing:.7px;color:rgba(255,255,255,.4)">FULL TEST</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BODY — lifted sheet over the hero -->
+      <div style="position:relative;margin-top:-22px;border-radius:26px 26px 0 0;background:linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 46%);box-shadow:0 -14px 30px -14px rgba(0,0,0,.5);padding:22px 20px 150px;display:flex;flex-direction:column;gap:22px">
+
+        <!-- Skills -->
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <span style="flex:1;font-size:17px;font-weight:700;line-height:22px;letter-spacing:-.3px;color:#111827">Four skills, one session</span>
+            <span style="font-size:11px;font-weight:500;color:#857789">{{ skillsHint }}</span>
+          </div>
+
+          <sc-for list="{{ skills }}" as="s" hint-placeholder-count="4">
+            <div onClick="{{ s.tap }}" style="{{ s.cardStyle }}">
+              <div style="display:flex;align-items:center;gap:13px">
+                <div style="{{ s.tileStyle }}">
+                  <fig-icon name="{{ s.icon }}" size="21"></fig-icon>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="{{ s.nameStyle }}">{{ s.name }}</span>
+                  <span style="font-size:11px;font-weight:500;line-height:15px;color:#857789">{{ s.french }}</span>
+                </div>
+                <sc-if value="{{ s.hasScore }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+                    <span style="font-size:20px;font-weight:700;line-height:22px;letter-spacing:-.4px;color:#111827">{{ s.level }}</span>
+                    <span style="font-size:10.5px;font-weight:500;color:#6E5F78">{{ s.raw }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ s.hasChip }}" hint-placeholder-val="{{ true }}">
+                  <div style="{{ s.chipStyle }}">
+                    <sc-if value="{{ s.chipCoin }}" hint-placeholder-val="{{ true }}">
+                    </sc-if>
+                    <sc-if value="{{ s.chipIconShown }}" hint-placeholder-val="{{ false }}">
+                      <fig-icon name="{{ s.chipIcon }}" size="13"></fig-icon>
+                    </sc-if>
+                    <span style="font-size:11.5px;font-weight:600;line-height:15px;color:inherit;white-space:nowrap">{{ s.chipText }}</span>
+                  </div>
+                </sc-if>
+              </div>
+              <span style="font-size:11.5px;font-weight:500;line-height:16px;color:#5E4E69">{{ s.meta }}</span>
+              <sc-if value="{{ s.hasBar }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <div style="height:5px;border-radius:100px;background:#E9E0E7;overflow:hidden">
+                    <div style="{{ s.barStyle }}"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="{{ s.barLabelStyle }}">{{ s.barLabel }}</span>
+                    <div onClick="{{ s.overTap }}" style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;user-select:none;color:#6E5F78;padding:7px 8px;margin:-7px -8px -7px 0;border-radius:100px" style-hover="color:#2E1A3B;background:#ECE2EA">
+                      <span style="font-size:11.5px;font-weight:600;line-height:16px;color:inherit;white-space:nowrap;text-decoration:underline;text-decoration-color:#D9CCD6;text-underline-offset:2px">Start over</span>
+                      <span style="font-size:11.5px;font-weight:700;line-height:16px;color:inherit;white-space:nowrap">{{ s.overCostShort }}</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ s.hasKey }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ s.keyTap }}" style="{{ s.keyRowStyle }}">
+                  <fig-icon name="{{ s.keyIcon }}" size="14"></fig-icon>
+                  <span style="flex:1;font-size:12px;font-weight:600;line-height:16px;color:inherit;min-width:0">{{ s.keyLabel }}</span>
+                  <fig-icon name="IconChevronRight" size="14"></fig-icon>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Exam structure — time is the story, so it is one bar, not a table -->
+        <div style="display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:22px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 1px 2px rgba(0,0,0,.04)">
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <span style="flex:1;font-size:14px;font-weight:700;line-height:19px;color:#111827">How the session runs</span>
+            <span style="font-size:11.5px;font-weight:500;color:#6E5F78">80 questions + 4 tâches</span>
+          </div>
+          <div style="display:flex;gap:3px;height:12px">
+            <sc-for list="{{ struct }}" as="t" hint-placeholder-count="4">
+              <div style="{{ t.segStyle }}"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ struct }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px">
+                <div style="{{ t.dotStyle }}"></div>
+                <span style="flex:1;font-size:12.5px;font-weight:500;line-height:17px;color:#374151;min-width:0">{{ t.french }}</span>
+                <span style="font-size:11.5px;font-weight:500;color:#857789">{{ t.items }}</span>
+                <span style="font-size:12.5px;font-weight:700;color:#111827;width:52px;text-align:right">{{ t.mins }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        
+      </div>
+    </div>
+
+    <!-- Fixed dark chrome: status bar + app bar -->
+    <div style="{{ chromeStyle }}">
+      <div style="height:62px;display:flex;align-items:center;padding:21px 16px 19px">
+        <div style="flex:1;display:flex;justify-content:center">
+          <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:#fff">9:41</span>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+          <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="#fff"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+          <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="#fff"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+          <div style="position:relative;width:27.328px;height:13px">
+            <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px #fff"></div>
+            <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:#fff"></div>
+            <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:#fff"></div>
+          </div>
+        </div>
+      </div>
+      <div style="height:52px;display:flex;align-items:center;gap:8px;padding:0 12px 0 8px">
+        <a href="MockTest.dc.html" style="width:40px;height:40px;border-radius:9999px;display:flex;justify-content:center;align-items:center;color:#fff;flex-shrink:0" style-hover="background:rgba(255,255,255,.12)">
+          <fig-icon name="IconChevronLeft" size="22"></fig-icon>
+        </a>
+        <span style="{{ chromeTitleStyle }}">{{ title }}</span>
+        
+      </div>
+    </div>
+
+    <!-- Sticky CTA — same pattern as M12b: fade band, dark pill, secondary line under it -->
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:46px 20px 24px;display:flex;flex-direction:column;gap:10px;z-index:8;pointer-events:none">
+      <div style="position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,.96) 78%,#fff 100%);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 58%)"></div>
+      <div onClick="{{ ctaTap }}" style="{{ ctaStyle }}">
+        <fig-icon name="{{ ctaIcon }}" size="17"></fig-icon>
+        <span style="{{ ctaLabelStyle }}">{{ ctaLabel }}</span>
+        <sc-if value="{{ false }}">
+          <div style="{{ ctaCostStyle }}">
+            <span style="font-size:12.5px;font-weight:700;line-height:1;color:inherit">{{ ctaCost }}</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;height:22px">
+        <sc-if value="{{ noteIsAction }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ noteTap }}" style="{{ noteActionStyle }}">
+            <fig-icon name="IconSolidRoundedFileCheck" size="14"></fig-icon>
+            <span style="font-size:12.5px;font-weight:600;line-height:1;color:inherit;white-space:nowrap">{{ ctaNote }}</span>
+            <fig-icon name="IconChevronRight" size="14"></fig-icon>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noteIsPlain }}" hint-placeholder-val="{{ true }}">
+          <span style="{{ ctaNoteStyle }}">{{ ctaNote }}</span>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- The Gate (§5w) — it confirms destruction, never price. Three kinds on this
+         screen: discard a running skill · sit a scored skill again · retake the session.
+         A first sitting raises nothing: its price is on the card chip and §9 charges it. -->
+    <sc-if value="{{ overOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ overClose }}" style="position:absolute;inset:0;background:rgba(30,18,38,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)"></div>
+        <div style="position:relative;display:flex;flex-direction:column;gap:16px;padding:22px 20px 30px;border-radius:26px 26px 0 0;background:#fff;box-shadow:0 -18px 44px -18px rgba(30,18,38,.5);animation:mdFade .22s ease both">
+          <div style="width:38px;height:4px;border-radius:100px;background:#E9E0E7;align-self:center"></div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-size:19px;font-weight:700;line-height:25px;letter-spacing:-.3px;color:#2E1A3B">{{ overTitle }}</span>
+            <span style="font-size:13.5px;font-weight:400;line-height:19px;color:#5E4E69;text-wrap:pretty">{{ overBody }}</span>
+            <sc-if value="{{ overMetaShown }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:12px;font-weight:600;line-height:17px;color:#857789">{{ overMeta }}</span>
+            </sc-if>
+          </div>
+          <sc-if value="{{ overWarnShown }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:flex-start;gap:9px;padding:12px 13px;border-radius:16px;background:#F2F7FD;box-shadow:inset 0 0 0 1px #CFE0F5">
+              <div style="flex-shrink:0;color:#6A2A5F;display:flex"><fig-icon name="IconDuotoneInfo" size="16"></fig-icon></div>
+              <span style="font-size:12.5px;font-weight:500;line-height:17px;color:#1F4B7A;text-wrap:pretty">{{ overWarn }}</span>
+            </div>
+          </sc-if>
+          <div style="{{ overCostStyle }}">
+            <span style="flex:1;font-size:12.5px;font-weight:600;line-height:17px;color:inherit">{{ overCost }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div onClick="{{ overGo }}" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:100px;cursor:pointer;user-select:none;background:#6A2A5F;color:#fff" style-hover="background:#000">
+              <sc-if value="{{ overCharging }}" hint-placeholder-val="{{ false }}">
+                <div style="width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:mdSpin .7s linear infinite"></div>
+              </sc-if>
+              <sc-if value="{{ overIdle }}" hint-placeholder-val="{{ true }}">
+                <fig-icon name="{{ overGoIcon }}" size="17"></fig-icon>
+              </sc-if>
+              <span style="font-size:15px;font-weight:600;line-height:1;color:inherit">{{ overGoLabel }}</span>
+            </div>
+            <div onClick="{{ overClose }}" style="display:flex;align-items:center;justify-content:center;height:46px;border-radius:100px;cursor:pointer;user-select:none;color:#5E4E69" style-hover="background:#F6F0F5;color:#2E1A3B">
+              <span style="font-size:14px;font-weight:600;line-height:1;color:inherit">{{ overSecondary }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;fresh&quot;,&quot;progress&quot;,&quot;scoring&quot;,&quot;done&quot;],&quot;default&quot;:&quot;progress&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;exam&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;TEF Canada&quot;,&quot;TCF Canada&quot;],&quot;default&quot;:&quot;TEF Canada&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;lowBalance&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;skillRedone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;watermark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+// The app sells both exams, and they score the same four skills on different
+// scales, so a score is meaningless without knowing which exam it came from.
+//   TEF Canada — CO /360 · CE /300 · EE /450 · EO /450 (calibrated points)
+//   TCF Canada — CO /699 · CE /699 · EE /20 · EO /20 (comprehension points,
+//                production marked out of twenty)
+// Neither exam publishes a composite total: IRCC converts each skill to its own
+// NCLC level and never averages them, so the weakest skill is the usable one.
+const SCALES = {
+  "TEF Canada": { L: 360, R: 300, W: 450, S: 450 },
+  "TCF Canada": { L: 699, R: 699, W: 20, S: 20 }
+};
+
+const SKILLS = [
+  { key: "L", name: "Listening", french: "Compréhension orale", icon: "IconBulkHeadphone", color: "#4A7FE5", deep: "#2F5FC0", items: "40 questions · 7 groupes", mins: 40, cost: 3 },
+  { key: "R", name: "Reading", french: "Compréhension écrite", icon: "IconBulkBook", color: "#1A9E94", deep: "#0E766E", items: "40 questions · 5 groupes", mins: 60, cost: 3 },
+  { key: "W", name: "Writing", french: "Expression écrite", icon: "IconBulkWrite", color: "#D4860F", deep: "#A86200", items: "2 tâches · A + B", mins: 60, cost: 6, ai: true },
+  { key: "S", name: "Speaking", french: "Expression orale", icon: "IconBulkMic", color: "#8B62E0", deep: "#6A3FC0", items: "2 tâches · A + B", mins: 15, cost: 6, ai: true }
+];
+
+// Per review state: what each skill is doing. done → level + raw · running → pct
+const STATES = {
+  fresh: { label: "Nothing started — every skill is ready", per: {} },
+  progress: {
+    label: "Listening scored · Reading mid-test",
+    per: {
+      L: { st: "done", level: "B2", of: 80 },
+      R: { st: "running", pct: 45, answered: 21, line: "Question 22 of 40 · 24 min left" }
+    }
+  },
+  scoring: {
+    label: "Two skills scored · Writing and Speaking with the AI",
+    per: {
+      L: { st: "done", level: "B2", of: 80 },
+      R: { st: "done", level: "B2", of: 93 },
+      W: { st: "scoring" },
+      S: { st: "scoring" }
+    }
+  },
+  done: {
+    label: "All four scored — B2 overall",
+    per: {
+      L: { st: "done", level: "B2", of: 80 },
+      R: { st: "done", level: "B2", of: 93 },
+      W: { st: "done", level: "B1+", of: 67 },
+      S: { st: "done", level: "B2", of: 82 }
+    }
+  },
+  locked: { label: "Unused in contest build", per: {}, locked: true }
+};
+
+const ORDER = ["fresh", "progress", "scoring", "done"];
+
+// A session can be sat more than once. Retaking is free in the contest build, so an
+// attempt is a real record: the hero picks one and every score on the screen
+// follows it. Newest first — index 0 is the latest, the one Statistics uses.
+const ATTEMPTS = [
+  { id: 2, label: "Attempt 2", date: "12 Mar", overall: "B2", per: STATES.done.per },
+  { id: 1, label: "Attempt 1", date: "20 Feb", overall: "B1+", per: {
+      L: { st: "done", level: "B1+", of: 71 },
+      R: { st: "done", level: "B1+", of: 80 },
+      W: { st: "done", level: "B1", of: 60 },
+      S: { st: "done", level: "B1+", of: 69 }
+    } }
+];
+const CHIP_LABELS = { fresh: "Not started", progress: "In progress", scoring: "AI scoring", done: "Completed", locked: "Locked" };
+
+const FLAGS = [
+  { key: "skillRedone", label: "One skill retaken on its own", def: false, screenLabel: "Completed",
+    on: "Listening was sat again after Attempt 2 at its own price. Its card carries the newer score, and the hero flags that the usable level is no longer a single sitting — a per-skill retake never creates a session attempt.",
+    off: "Every score on the latest attempt comes from the same sitting, so the usable level stands on its own." },
+  { key: "watermark", label: "Session numeral in the hero", def: true, screenLabel: "Not started",
+    on: "The month number sits behind the hero at 190px, 5% white.",
+    off: "Hero runs without the numeral — plainer, more room for the title." }
+];
+
+// Where each action actually goes. A first sitting is priced and charged by §9
+// Practice configuration; a confirmed retake is charged in the sheet and hands
+// straight to the engine, so the user never meets two price screens in a row.
+const ENGINE = { L: "ListeningTest.dc.html", R: "ReadingTest.dc.html", W: "WritingTest.dc.html", S: "SpeakingTest.dc.html" };
+const CFG = { L: "listening", R: "reading", W: "writing", S: "speaking" };
+
+class Component extends DCLogic {
+  state = { view: null, flags: {}, scrolled: false, attempt: 0, gate: null, charging: false, spent: 0, exam: null };
+
+  // At the top the chrome is invisible — the hero owns the whole block. The dark
+  // glass band and the small title only appear once the hero starts leaving.
+  scrollRef = el => {
+    if (!el || this._el === el) return;
+    this._el = el;
+    el.addEventListener("scroll", () => {
+      const on = el.scrollTop > 20;
+      if (on !== this.state.scrolled) this.setState({ scrolled: on });
+    }, { passive: true });
+  };
+
+  cur() { return this.state.view || this.props.state || "progress"; }
+  // Read live, never from a render closure: a handler created on the previous
+  // render must not act on a stale attempt index (an older attempt is a record).
+  isReadOnly() { return this.cur() === "done" && ATTEMPTS.length > 1 && this.state.attempt > 0; }
+  flag(k) {
+    const f = this.state.flags[k];
+    if (f !== undefined) return f;
+    if (this.props[k] !== undefined && this.props[k] !== null) return this.props[k];
+    return FLAGS.filter(x => x.key === k)[0].def;
+  }
+
+  renderVals() {
+    const view = this.cur();
+    const cfg = STATES[view];
+    const locked = !!cfg.locked;
+    const low = this.flag("lowBalance");
+    // Deductions are live and silent: the chrome pill is the only receipt.
+    const balance = (low ? 2 : 24) - this.state.spent;
+
+    // Attempt selection only exists once a session has been sat more than once.
+    const attList = view === "done" ? ATTEMPTS : [];
+    const hasAttempts = attList.length > 1;
+    const attIdx = hasAttempts ? Math.min(this.state.attempt, attList.length - 1) : 0;
+    const att = attList[attIdx] || null;
+    let per = att ? att.per : cfg.per;
+
+    // A per-skill retake overwrites that skill's score but does NOT create a
+    // session attempt: only a full 4-skill sitting produces a comparable
+    // overall band. So the card shows the newer score while the attempt's
+    // overall stays as it was sat, flagged in the hero as no longer single.
+    const redone = view === "done" && attIdx === 0 && this.flag("skillRedone")
+      ? { key: "L", name: "Listening", level: "C1", of: 89, date: "24 Mar" }
+      : null;
+    if (redone) per = Object.assign({}, per, {
+      L: Object.assign({}, per.L, { level: redone.level, of: redone.of, redone: true })
+    });
+    // The review link always names the attempt on screen, latest included.
+    const attQ = att ? "?attempt=" + att.id : "";
+    // Viewing an older attempt is a read: nothing on the screen is actionable,
+    // because a retake always applies to the session as it stands now.
+    const readOnly = attIdx > 0;
+
+    const exam = this.state.exam || this.props.exam || "TEF Canada";
+    const scale = SCALES[exam] || SCALES["TEF Canada"];
+    // NCLC first, CEFR second, always labelled as an estimate (no points shown).
+    const NCLC_OF = { "B1": 5, "B1+": 6, "B2": 8, "C1": 9 };
+    const cefr = l => l.replace("+", "");
+    const est = l => "NCLC " + NCLC_OF[l] + " (" + cefr(l) + " · Estimation)";
+
+    const rows = SKILLS.map(s => {
+      const p = per[s.key] || {};
+      const st = locked ? "locked" : (p.st || "ready");
+      const short = false && low && st === "ready" && s.cost > balance;
+
+      let chip = null;
+      if (st === "ready") chip = short
+        ? { text: "Free", ground: "#F0FDF4", ring: "#BBF7D0", ink: "#15803D" }
+        : { text: "Free", ground: "#F0FDF4", ring: "#BBF7D0", ink: "#15803D" };
+      else if (st === "running") chip = { text: "Resume", icon: "IconPlay", ground: "#2E1A3B", ring: "#2E1A3B", ink: "#FFFFFF" };
+      else if (st === "scoring") chip = { text: "Scoring", icon: "IconSparkles", ground: "#FFFBEB", ring: "#EDD99A", ink: "#966010" };
+      else if (st === "locked") chip = { text: "Locked", icon: "IconLock", ground: "#FFFBEB", ring: "#EDD99A", ink: "#966010" };
+
+      const ground = st === "running" ? "#F6F0F5" : st === "scoring" ? "#FFFBEB" : "#FFFFFF";
+      const ring = st === "running" ? "#DBCED9" : st === "scoring" ? "#EDD99A" : "#EFE3EC";
+      const lift = st === "done" ? ",0 2px 10px -4px rgba(60,30,55,.18)" : ",0 1px 2px rgba(0,0,0,.04)";
+
+      return {
+        key: s.key, name: s.name, french: s.french, icon: s.icon,
+        meta: s.items + " · " + s.mins + " min" + (p.redone ? " · retaken on its own" : ""),
+        hasScore: st === "done",
+        level: p.level ? "NCLC " + NCLC_OF[p.level] : "", raw: p.level ? cefr(p.level) + " · Estimation" : "",
+        hasChip: st !== "done",
+        chipCoin: !!(chip && chip.coin),
+        chipIconShown: !!(chip && chip.icon),
+        chipIcon: (chip && chip.icon) || "IconCheck",
+        chipText: chip ? chip.text : "",
+        chipStyle: chip
+          ? "display:flex;align-items:center;gap:5px;padding:5px 11px 5px " + (chip.coin ? "8px" : "10px") +
+            ";border-radius:100px;flex-shrink:0;background:" + chip.ground + ";box-shadow:inset 0 0 0 1px " + chip.ring + ";color:" + chip.ink +
+            (st === "scoring" ? ";animation:mdPulse 1.8s ease-in-out infinite" : "")
+          : "display:none",
+        cardStyle: "display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:20px;transition:transform .18s ease,box-shadow .18s ease;cursor:" + (readOnly || locked ? "default" : "pointer") + ";background:" +
+          ground + ";box-shadow:inset 0 0 0 1px " + ring + lift + (st === "locked" ? ";opacity:.72" : ""),
+        tileStyle: "width:48px;height:48px;border-radius:15px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#fff;background:linear-gradient(145deg," +
+          s.color + " 0%," + s.deep + " 100%);box-shadow:0 6px 14px -6px " + s.color + "99",
+        nameStyle: "font-size:15px;font-weight:700;line-height:20px;letter-spacing:-.2px;color:#111827",
+        // The key is separate content, open from the start — every skill has this
+        // row whatever its state, and it always points at M17. Same rule as M3b:
+        // the row is never repurposed into a review link, because past attempts
+        // are read in M13 Test History, not from a detail screen.
+        hasKey: true,
+        keyTap: e => {
+          if (e && e.stopPropagation) e.stopPropagation();
+          __go("AnswerKey.dc.html?skill=" + s.key + (locked ? "&state=locked" : ""));
+        },
+        keyIcon: st === "locked" ? "IconLock" : s.ai ? "IconSparkles" : "IconSolidRoundedFileCheck",
+        keyLabel: st === "locked"
+          ? "Answer key"
+          : (s.ai ? "Model answer & criteria" : "Answer key"),
+        keyRowStyle: "display:flex;align-items:center;gap:8px;padding-top:11px;cursor:pointer;color:" +
+          (st === "locked" ? "#857789" : "#5E4E69") +
+          ";border-top:1px solid " + (st === "scoring" ? "#F3E6C8" : st === "running" ? "#E9E0E7" : "#F5EEF3"),
+        // Discarding a started skill is destructive AND paid: the first charge
+        // bought that sitting, so a fresh one costs the skill's price again.
+        overCostShort: String(s.cost),
+        overTap: e => { if (e && e.stopPropagation) e.stopPropagation(); this.setState({ gate: { kind: "over", skill: s.key } }); },
+        // Tapping a card always means "sit this skill". A first sitting goes to §9
+        // with no confirm; resuming opens the engine; a scored one raises the Gate,
+        // because the new score replaces the old one. An older attempt is a record.
+        tap: () => {
+          if (this.isReadOnly() || locked) return;
+          if (st === "done") { this.setState({ gate: { kind: "retakeSkill", skill: s.key } }); return; }
+          if (window.MockSession) MockSession.start(s.key);
+          if (st === "running") { __go(ENGINE[s.key]); return; }
+          if (st === "ready") __go(short ? "Shop.dc.html" : "PracticeConfig.dc.html?skill=" + CFG[s.key] + "&mode=mock");
+        },
+        hasBar: st === "running",
+        barStyle: "height:100%;width:" + (p.pct || 0) + "%;border-radius:100px;background:linear-gradient(90deg," + s.color + "," + s.deep + ")",
+        barLabel: p.line || "",
+        barLabelStyle: "flex:1;min-width:0;font-size:11.5px;font-weight:600;line-height:16px;color:" + s.deep
+      };
+    });
+
+    // The Gate resolves against the state on screen, so switching review state or
+     // attempt while it is open closes it rather than confirming something stale.
+    const g = this.state.gate;
+    let over = null;
+    if (g && !this.isReadOnly() && !locked) {
+      if (g.kind === "over") over = SKILLS.filter(s => s.key === g.skill && (per[s.key] || {}).st === "running")
+        .map(s => ({ kind: "over", skill: s.key, name: s.name, cost: s.cost, answered: (per[s.key] || {}).answered }))[0] || null;
+      else if (g.kind === "retakeSkill") over = SKILLS.filter(s => s.key === g.skill && (per[s.key] || {}).st === "done")
+        .map(s => ({ kind: "retakeSkill", skill: s.key, name: s.name, cost: s.cost, level: (per[s.key] || {}).level || "", of: (per[s.key] || {}).of || 0, items: s.items, mins: s.mins }))[0] || null;
+      else if (g.kind === "retakeSession" && view === "done") over = { kind: "retakeSession", skill: "L", name: "March 2025", cost: 18 };
+    }
+
+    const overShort = !!over && balance < over.cost;
+    const RETAKE_WARN = "The questions are identical to your previous attempt, so the new score is not comparable to a first sitting.";
+
+    // Donut — one 90° sector per skill, gapped with the hero ground
+    const GAP = "#181310";
+    const segs = [];
+    SKILLS.forEach((s, i) => {
+      const p = per[s.key] || {};
+      const st = locked ? "locked" : (p.st || "ready");
+      const c = st === "done" ? s.color
+        : st === "running" ? s.color + "80"
+        : st === "scoring" ? "#E0B457"
+        : "rgba(255,255,255,.14)";
+      segs.push(GAP + " " + (i * 90) + "deg " + (i * 90 + 2.5) + "deg");
+      segs.push(c + " " + (i * 90 + 2.5) + "deg " + ((i + 1) * 90) + "deg");
+    });
+
+    const scored = SKILLS.filter(s => (per[s.key] || {}).st === "done").length;
+    const allDone = scored === 4;
+
+    let ready = {
+      fresh: { t: "Nothing started yet", l: "Take the skills in any order. Everything is free." },
+      progress: { t: "Reading is open right now", l: "Listening is scored. Writing and Speaking are still untouched." },
+      scoring: { t: "Writing and Speaking are with the AI", l: "About 5 minutes. You will get a notification when the level lands." },
+      done: { t: "B2 overall", l: "Every skill scored. Sitting it again gives a fresh, comparable band." },
+      locked: { t: "Not available", l: "Every session is free in the contest build." }
+    }[view];
+
+    // The overall is the band the exam reports — each skill keeps its own points
+    // on its own scale (CO 360 · CE 300 · EE 450 · EO 450), and those are never
+    // summed into a single total, because the exam does not publish one.
+    if (view === "done" && att) ready = {
+      t: att.overall + " overall",
+      l: attIdx === 0
+        ? "Every skill scored. Sitting it again gives a fresh, comparable band."
+        : att.label + " · taken " + att.date + ". Statistics always uses your latest attempt."
+    };
+
+    // Sticky CTA follows M12b: one dark pill in every state, secondary line under it.
+    let cta;
+    if (view === "fresh") cta = low
+      ? { label: "Start", icon: "IconPlay", cost: "", note: "" }
+      : { label: "Start Listening", icon: "IconPlay", cost: "", note: "Free · one skill at a time." };
+    else if (view === "progress") cta = { label: "Resume Reading", icon: "IconPlay", note: "Question 22 of 40 · 24 min left" };
+    // All four skills are taken, so nothing is actionable: the pill is parked and
+    // the secondary line carries the read — M16's own `scoring` variant, which
+    // shows the two banked skills. Same shape as `done`: parked/primary + review.
+    else if (view === "scoring") cta = { label: "Waiting on AI scoring", icon: "IconSparkles", off: true,
+      note: "Review scored sections", noteAction: true };
+    // All four scored is the only state that unlocks a session retake — it is
+    // the primary action here, because reading a past sitting belongs to M13.
+    // Retake is primary; review is the secondary line and always opens the
+    // attempt currently selected in the hero. M13 stays the place to browse
+    // history — this only opens the one sitting on screen.
+    else if (view === "done") cta = false
+      ? { label: "Retake this session", icon: "IconOutlineRoundedTransactionHistory", cost: "",
+          note: "Review answers" + (att ? " · " + att.label : ""), noteAction: true }
+      : { label: "Retake this session", icon: "IconOutlineRoundedTransactionHistory", cost: "",
+          note: "Review answers" + (att ? " · " + att.label : ""), noteAction: true };
+    else cta = { label: "Start", icon: "IconPlay", note: "" };
+
+    return {
+      scrollRef: this.scrollRef,
+      chromeStyle: "position:absolute;left:0;right:0;top:0;height:114px;z-index:8;transition:background .25s ease,box-shadow .25s ease,backdrop-filter .25s ease;" +
+        (this.state.scrolled
+          ? "background:linear-gradient(180deg,rgba(30,18,38,.94) 0%,rgba(30,18,38,.8) 100%);box-shadow:0 1px 0 rgba(255,255,255,.08),0 10px 24px -18px rgba(0,0,0,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)"
+          : "background:transparent"),
+      chromeTitleStyle: "flex:1;font-size:15px;font-weight:600;letter-spacing:-.1px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .22s ease,transform .22s ease;color:rgba(255,255,255,.85);" +
+        (this.state.scrolled ? "opacity:1;transform:none" : "opacity:0;transform:translateY(4px)"),
+
+      hasMixed: !!redone,
+      mixedNote: redone
+        ? redone.name + " was retaken on its own (" + redone.date + " · " + est(redone.level) + "), so this band is not one single sitting. Retake all four to get a comparable overall."
+        : "",
+
+      overOpen: !!over,
+      overTitle: !over ? ""
+        : over.kind === "over" ? "Start " + over.name + " over?"
+        : over.kind === "retakeSkill" ? "Sit " + over.name + " again?"
+        : "Retake " + over.name + "?",
+      overBody: !over ? ""
+        : over.kind === "over"
+          ? "Your " + (over.answered || 0) + " answers on this section are discarded and cannot be recovered. " + over.name + " goes back to Mock exam setup before it starts again."
+        : over.kind === "retakeSkill"
+          ? "This is a fresh attempt on the same section, and the new score replaces " + est(over.level) + " in Statistics and Skill Detail. Attempt " + (attList.length || 1) + " stays readable in Test History."
+          : "All four skills reopen as a new attempt, and the new attempt becomes the score your profile and readiness read. " + (att ? att.label : "Attempt 2") + " stays readable in Test History.",
+      overMetaShown: !!over && over.kind !== "over",
+      overMeta: !over ? ""
+        : over.kind === "retakeSkill" ? over.items + " · " + over.mins + " min"
+        : over.kind === "retakeSession" ? "80 questions + 4 tâches · 2h 55m · 4 skills"
+        : "",
+      overWarnShown: !!over && over.kind !== "over",
+      overWarn: over && over.kind !== "over" ? RETAKE_WARN : "",
+      overCost: !over ? ""
+        : overShort
+          ? ""
+        : over.kind === "over"
+          ? "Your answers so far for this skill are discarded. You can resume instead."
+        : over.kind === "retakeSkill"
+          ? "Your earlier score for this skill stays in History."
+          : "Your answers from the earlier attempt stay in History.",
+      overCostStyle: "display:flex;align-items:flex-start;gap:9px;padding:12px 13px;border-radius:16px;" +
+        (overShort
+          ? "background:#FEF2F2;box-shadow:inset 0 0 0 1px #FBD5D5;color:#B91C1C"
+          : "background:#FFFBEB;box-shadow:inset 0 0 0 1px #EDD99A;color:#966010"),
+      overGoLabel: this.state.charging ? "Starting…"
+        : !over ? ""
+        : over.kind === "over" ? "Start over"
+        : over.kind === "retakeSkill" ? "Start attempt " + ((attList.length || 2) + 1)
+        : "Retake this session",
+      overGoIcon: overShort ? "IconOutlineRoundedTransactionHistory" : "IconPlay",
+      overSecondary: !over ? "" : over.kind === "over" ? "Keep going" : over.kind === "retakeSkill" ? "Keep my score" : "Not now",
+      overCharging: this.state.charging,
+      overIdle: !this.state.charging,
+      // Charge, then hand off. A paid retake goes straight into the engine; a
+      // discarded sitting starts from scratch, so it goes back through Mock exam
+      // setup where the fresh sitting is configured and confirmed.
+      overGo: () => {
+        if (!over || this.state.charging) return;
+        if (overShort) { __go("Shop.dc.html"); return; }
+        this.setState({ charging: true });
+        setTimeout(() => {
+          this.setState({ charging: false, gate: null, spent: this.state.spent + over.cost });
+          __go(over.kind === "over"
+            ? "PracticeConfig.dc.html?skill=" + CFG[over.skill] + "&mode=mock&restart=1"
+            : ENGINE[over.skill]);
+        }, 820);
+      },
+      overClose: () => this.setState({ gate: null, charging: false }),
+
+      title: "March 2025",
+      subtitle: exam + " · full simulation · exam conditions",
+      heroKicker: "Session 03 · 2025",
+      heroNumber: this.flag("watermark") ? "03" : "",
+      isPro: view === "locked",
+      isLocked: locked,
+      balance: balance,
+      stateLabel: cfg.label,
+      skillsHint: locked ? "Locked" : readOnly ? att.label + " · read only" : "Tap one to open",
+      costValueStyle: "font-size:14px;font-weight:700;line-height:18px;color:" + (low ? "#F0A0A0" : "#F9BD48"),
+
+      donutStyle: "width:78px;height:78px;border-radius:9999px;flex-shrink:0;display:flex;justify-content:center;align-items:center;background:conic-gradient(from -90deg," +
+        segs.join(",") + ");box-shadow:0 0 0 1px rgba(255,255,255,.08)",
+      donutValue: allDone ? (att ? att.overall : "B2") : scored + "/4",
+      donutValueStyle: "font-size:18px;font-weight:700;line-height:22px;letter-spacing:-.4px;text-align:center;color:#fff",
+      donutCaption: allDone ? "OVERALL" : "SCORED",
+      readyTitle: ready.t,
+      readyLine: ready.l,
+
+      skills: rows,
+      struct: SKILLS.map(s => ({
+        french: s.french,
+        items: s.items.split(" · ")[0],
+        mins: s.mins + " min",
+        segStyle: "flex:" + s.mins + ";border-radius:100px;background:linear-gradient(180deg," + s.color + "," + s.deep + ")",
+        dotStyle: "width:9px;height:9px;border-radius:9999px;flex-shrink:0;background:" + s.color
+      })),
+
+      hasAttempts: hasAttempts,
+      attempts: attList.map((a, i) => ({
+        label: a.label + " · " + a.date,
+        latest: i === 0,
+        // Changing the attempt closes any open confirm: it was raised against
+        // the previous selection and must not carry over to this one.
+        pick: () => this.setState({ attempt: i, gate: null, charging: false }),
+        chipStyle: "display:flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:100px;cursor:pointer;user-select:none;flex-shrink:0;" +
+          (i === attIdx
+            ? "background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);color:#fff"
+            : "background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);color:rgba(255,255,255,.55)")
+      })),
+
+      ctaLabel: cta.label,
+      ctaIcon: cta.icon,
+      ctaLabelStyle: "font-size:15px;font-weight:600;line-height:1;color:inherit",
+      ctaNote: cta.note,
+      ctaNoteStyle: "font-size:12.5px;font-weight:500;line-height:17px;text-align:center;text-wrap:pretty;color:" + (cta.warn ? "#B91C1C" : "#6E5F78"),
+      noteIsAction: !!cta.noteAction,
+      noteIsPlain: !cta.noteAction,
+      noteCost: cta.noteCost || "",
+      noteTap: () => { __go("TestReview.dc.html" + attQ); },
+      noteActionStyle: "display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:100px;cursor:pointer;user-select:none;background:#fff;box-shadow:inset 0 0 0 1px #DBCED9;color:#5E4E69",
+      ctaHasCost: !!cta.cost,
+      ctaCost: cta.cost || "",
+      ctaCostStyle: "display:flex;align-items:center;gap:5px;height:26px;padding:0 10px 0 7px;border-radius:100px;flex-shrink:0;background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);color:#F9BD48",
+      ctaStyle: "position:relative;pointer-events:auto;display:flex;justify-content:center;align-items:center;gap:9px;height:52px;padding:0 18px;border-radius:100px;user-select:none;" +
+        (cta.off
+          ? "cursor:default;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px #DBCED9;color:#857789"
+          : "cursor:pointer;background:#6A2A5F;box-shadow:0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1);color:" + (cta.gold ? "#F9BD48" : "#FFFFFF")),
+      // Fresh and progress go straight through — the pill already shows the price
+      // and §9 owns the charge. Only the completed state raises the Gate, because
+      // a session retake replaces the attempt the profile reads.
+      ctaTap: () => {
+        if (locked) { __go("Shop.dc.html"); return; }
+        if (view === "fresh") { __go(low ? "Shop.dc.html" : "PracticeConfig.dc.html?skill=listening&mode=mock"); return; }
+        if (view === "progress") { __go(ENGINE.R); return; }
+        if (view === "done" && !this.isReadOnly()) {
+          if (balance < 18) { __go("Shop.dc.html"); return; }
+          this.setState({ gate: { kind: "retakeSession" } });
+        }
+      },
+
+      exams: Object.keys(SCALES).map(k => ({
+        label: k,
+        go: () => this.setState({ exam: k, over: null }),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:6px 12px;cursor:pointer;user-select:none;" +
+          (k === exam ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      })),
+      examScaleLine: "NCLC per skill, labelled Estimation · usable level = weakest skill",
+
+      states: ORDER.map(k => ({
+        label: CHIP_LABELS[k],
+        go: () => this.setState({ view: k, attempt: 0, over: null }),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (k === view ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      })),
+
+      flags: FLAGS.map(f => {
+        const on = this.flag(f.key);
+        const toggle = () => this.setState(s => ({ flags: Object.assign({}, s.flags, { [f.key]: !on }) }));
+        return {
+          label: f.label, screenLabel: f.screenLabel, onText: f.on, offText: f.off, toggle: toggle,
+          goScreen: () => this.setState({ view: "fresh" }),
+          rowStyle: "display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:" +
+            (on ? "rgba(255,255,255,.78)" : "rgba(255,255,255,.42)") + ";box-shadow:inset 0 0 0 1px " + (on ? "#D9CCD6" : "#D8CBD5"),
+          trackStyle: "width:38px;height:22px;border-radius:100px;flex-shrink:0;padding:2px;cursor:pointer;display:flex;justify-content:" +
+            (on ? "flex-end" : "flex-start") + ";background:" + (on ? "#2E1A3B" : "#D9CCD6"),
+          knobStyle: "width:18px;height:18px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#2E1A3B" : "#EFE3EC") + ";color:" + (on ? "#fff" : "#857789"),
+          offTagStyle: "font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:5px;flex-shrink:0;background:" +
+            (on ? "#EFE3EC" : "#2E1A3B") + ";color:" + (on ? "#857789" : "#fff"),
+          onTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#2E1A3B" : "#857789"),
+          offTextStyle: "font-size:11.5px;font-weight:400;line-height:16px;text-wrap:pretty;color:" + (on ? "#857789" : "#2E1A3B")
+        };
+      })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

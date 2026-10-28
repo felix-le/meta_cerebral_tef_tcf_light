@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; background: #ECE4EA; }
+  a { color: #6A2A5F; text-decoration: none; }
+  a:hover { color: #4A1D42; }
+  @keyframes mtFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes mtPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  .mt-scroll::-webkit-scrollbar { width: 0; }
+  .mt-scroll { scrollbar-width: none; }
+  .mt-rail::-webkit-scrollbar { height: 0; width: 0; }
+  .mt-rail { scrollbar-width: none; -ms-overflow-style: none; cursor: grab; scroll-padding-left: 20px; scroll-padding-right: 20px; }
+  .mt-rail:active { cursor: grabbing; }
+</style>
+<script src="./fig-icon.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#ECE4EA"/><rect x="22" y="26" width="26" height="48" rx="6" fill="#6A2A5F"/><rect x="54" y="26" width="26" height="48" rx="6" fill="#9CA3AF"/></svg></template>
+<script src="./demo-mode.js"></script>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 24px 56px;background:#ECE4EA">
+
+  <div style="display:flex;align-items:center;gap:14px;width:393px">
+    <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Contest · Mock Test (guest, free)</span>
+      <span style="font-size:13px;font-weight:500;color:#5E4E69">{{ stateLabel }}</span>
+    </div>
+    <a href="Home.dc.html" style="font-size:12px;font-weight:600;color:#5E4E69;border:1px solid #D9CCD6;border-radius:100px;padding:7px 14px;background:rgba(255,255,255,.5)" style-hover="background:#fff;color:#2E1A3B">← Home</a>
+  </div>
+
+  <div data-screen-label="Mock test tab" style="position:relative;width:393px;height:852px;overflow:hidden;background:#fff;box-shadow:0 30px 70px -20px rgba(60,30,55,.4),0 2px 8px rgba(0,0,0,.08);flex-shrink:0">
+
+    <!-- Same two-blob ground as Home — both are tab roots -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#F8F3F7 0%,#FFFFFF 100%)">
+      <div style="position:absolute;left:-136px;top:-178px;width:392px;height:417.522px;opacity:.15;border-radius:9999px;background:#F9BD48;filter:blur(70px)"></div>
+      <div style="position:absolute;left:235.8px;top:511.19px;width:196.5px;height:426px;opacity:.15;border-radius:9999px;background:#6A2A5F;filter:blur(70px)"></div>
+    </div>
+
+    <!-- Status bar -->
+    <div style="position:absolute;left:0;top:0;width:393px;height:62px;display:flex;align-items:center;padding:21px 16px 19px;z-index:5">
+      <div style="flex:1;display:flex;justify-content:center">
+        <span style="font-family:'SF Pro',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:#000">9:41</span>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:7px">
+        <svg width="19.2" height="12.226" viewBox="0 0 19 13" fill="#000"><rect x="0" y="8.5" width="3" height="4" rx="1"></rect><rect x="5.4" y="6" width="3" height="6.5" rx="1"></rect><rect x="10.8" y="3" width="3" height="9.5" rx="1"></rect><rect x="16.2" y="0" width="3" height="12.5" rx="1"></rect></svg>
+        <svg width="17.142" height="12.328" viewBox="0 0 17 13" fill="#000"><path d="M8.57 12.33 5.9 9.34a4.02 4.02 0 0 1 5.34 0l-2.67 2.99Zm5.02-5.62a8.16 8.16 0 0 0-10.04 0L1.2 4.45a11.6 11.6 0 0 1 14.74 0l-2.35 2.26Z"></path></svg>
+        <div style="position:relative;width:27.328px;height:13px">
+          <div style="position:absolute;left:0;top:0;width:25px;height:13px;opacity:.35;border-radius:4.3px;box-shadow:inset 0 0 0 1px #000"></div>
+          <div style="position:absolute;left:26px;top:4.781px;width:1.328px;height:4.075px;opacity:.4;border-radius:0 2px 2px 0;background:#000"></div>
+          <div style="position:absolute;left:2px;top:2px;width:21px;height:9px;border-radius:2.5px;background:#000"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App bar — tab root, so no back chevron -->
+    <div style="position:absolute;left:0;right:0;top:62px;height:52px;display:flex;align-items:center;gap:10px;padding:0 16px 0 20px;z-index:6">
+      <span style="flex:1;font-size:22px;font-weight:700;letter-spacing:-.4px;color:#111827">Mock tests</span>
+      
+    </div>
+
+    <!-- Context row: the exam was chosen at onboarding, so there is no exam filter here -->
+    <div style="position:absolute;left:0;right:0;top:114px;height:48px;display:flex;align-items:center;gap:10px;padding:0 20px;border-bottom:1px solid #EFE3EC;z-index:5;background:rgba(255,255,255,.7);backdrop-filter:blur(8px)">
+      <span style="flex:1;font-size:12px;font-weight:500;line-height:16px;color:#5E4E69;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ examLine }}</span>
+      <div onClick="{{ toggleSort }}" style="display:flex;align-items:center;gap:4px;height:32px;padding:0 10px;border-radius:100px;cursor:pointer;user-select:none;color:#5E4E69;box-shadow:inset 0 0 0 1px #DBCED9;background:#fff;flex-shrink:0" style-hover="box-shadow:inset 0 0 0 1px #D9CCD6">
+        <span style="font-size:12px;font-weight:600;line-height:1;color:inherit">{{ sortLabel }}</span>
+        <fig-icon name="IconChevronDown" size="14"></fig-icon>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="mt-scroll" style="position:absolute;left:0;top:162px;right:0;bottom:0;overflow-y:auto">
+      <div style="display:flex;flex-direction:column;gap:24px;padding:16px 0 118px;animation:mtFade .3s ease both">
+
+        <!-- Resume band — most recent unfinished session only -->
+        <sc-if value="{{ hasResume }}" hint-placeholder-val="{{ true }}">
+          <div style="margin:0 20px;padding:14px;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1px #EFE3EC,0 2px 8px -2px rgba(60,30,55,.14);display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="{{ resumeIconStyle }}">
+                <fig-icon name="{{ resumeIcon }}" size="18"></fig-icon>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#857789">Pick up where you left off</span>
+                <span style="font-size:15px;font-weight:700;line-height:20px;letter-spacing:-.2px;color:#111827">{{ resumeTitle }}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;min-width:0">
+                <span style="font-size:12px;font-weight:500;line-height:16px;color:#5E4E69">{{ resumeLine }}</span>
+                <div style="display:flex;gap:3px">
+                  <sc-for list="{{ resumeSegs }}" as="s" hint-placeholder-count="4">
+                    <div style="{{ s.style }}"></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;height:40px;padding:0 18px;border-radius:100px;background:#6A2A5F;color:#fff;cursor:pointer;flex-shrink:0" style-hover="background:#333">
+                <span style="font-size:14px;font-weight:600;line-height:1;color:inherit">Resume</span>
+                <fig-icon name="IconArrowRight" size="16"></fig-icon>
+              </div>
+            </div>
+            <sc-if value="{{ hasOtherOpen }}">
+              <div style="display:flex;align-items:center;gap:6px;padding-top:10px;border-top:1px solid #F5EEF3;color:#857789">
+                <fig-icon name="IconPause" size="13"></fig-icon>
+                <span style="font-size:11px;font-weight:500;line-height:15px;color:#5E4E69">{{ otherOpenLine }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- Year rails -->
+        <sc-for list="{{ years }}" as="y" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:baseline;gap:8px;padding:0 20px">
+              <span style="font-size:16px;font-weight:700;line-height:22px;letter-spacing:-.2px;color:#111827">{{ y.label }}</span>
+              <span style="font-size:11px;font-weight:500;line-height:15px;color:#6E5F78">{{ y.count }}</span>
+            </div>
+            <div class="mt-rail" style="display:flex;gap:12px;overflow-x:auto;padding:8px 20px 22px;scroll-snap-type:x proximity">
+              <sc-for list="{{ y.cards }}" as="c" hint-placeholder-count="3">
+                <div onClick="{{ c.open }}" style="{{ c.cardStyle }}">
+                  <sc-if value="{{ c.showPro }}">
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <span style="display:flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:.5px;padding:3px 7px;border-radius:100px;background:#F9BD48;color:#3F2A05">PRO</span>
+                    </div>
+                  </sc-if>
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <span style="{{ c.monthStyle }}">{{ c.month }}</span>
+                    <span style="{{ c.metaStyle }}">{{ c.meta }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;margin-top:auto">
+                    <div style="display:flex;gap:3px">
+                      <sc-for list="{{ c.segs }}" as="s" hint-placeholder-count="4">
+                        <div style="{{ s.style }}"></div>
+                      </sc-for>
+                    </div>
+                    <span style="{{ c.progressStyle }}">{{ c.progressLabel }}</span>
+                  </div>
+                  <div style="{{ c.footerStyle }}">
+                    <sc-if value="{{ c.hasLevel }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:baseline;gap:6px">
+                        <span style="font-size:24px;font-weight:700;line-height:26px;letter-spacing:-.6px;color:#111827">{{ c.level }}</span>
+                        <span style="font-size:11px;font-weight:500;line-height:15px;color:#5E4E69">{{ c.score }}</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ c.hasChip }}" hint-placeholder-val="{{ true }}">
+                      <div style="{{ c.chipStyle }}">
+                        <sc-if value="{{ c.chipCoin }}" hint-placeholder-val="{{ true }}">
+                        </sc-if>
+                        <sc-if value="{{ c.chipHasIcon }}" hint-placeholder-val="{{ false }}">
+                          <fig-icon name="{{ c.chipIcon }}" size="13"></fig-icon>
+                        </sc-if>
+                        <span style="font-size:11px;font-weight:600;line-height:15px;color:inherit;white-space:nowrap">{{ c.chipText }}</span>
+                      </div>
+                    </sc-if>
+                    <div style="flex:1"></div>
+                    <fig-icon name="IconChevronRight" size="18"></fig-icon>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+
+        <!-- Empty -->
+        <sc-if value="{{ isEmpty }}">
+          <div style="margin:24px 20px 0;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+            <div style="width:64px;height:64px;border-radius:9999px;display:flex;justify-content:center;align-items:center;background:#F8F3F7;box-shadow:inset 0 0 0 1px #EFE3EC;color:#857789">
+              <fig-icon name="IconOutlineRoundedAiDocument" size="26"></fig-icon>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:17px;font-weight:700;line-height:22px;color:#111827">No mock tests yet</span>
+              <span style="font-size:13px;font-weight:400;line-height:19px;color:#5E4E69;text-wrap:pretty">New sessions are published every month. We will notify you when the next one lands.</span>
+            </div>
+            <a href="Home.dc.html" style="font-size:13px;font-weight:600;color:#6A2A5F">Practise from Home instead</a>
+          </div>
+        </sc-if>
+
+        
+      </div>
+    </div>
+
+    <!-- Bottom nav -->
+    <div style="position:absolute;left:0;right:0;bottom:0;height:104px;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.32) 100%);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.5) 38%,#000 72%);-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.5) 38%,#000 72%)"></div>
+    <div style="position:absolute;left:14px;right:14px;bottom:24px;height:62px;border-radius:100px;display:flex;align-items:center;padding:6px;gap:2px;z-index:4;background:rgba(248,243,247,.82);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.6),0 10px 30px -6px rgba(60,30,55,.28),0 2px 6px rgba(60,30,55,.1)">
+      <a href="Home.dc.html" style="text-decoration:none;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;height:50px;border-radius:100px;color:#776D75;font-weight:600">
+          <fig-icon name="IconOutlineRoundedHome" size="24"></fig-icon>
+          <span style="font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1;color:inherit">Home</span>
+        </a>
+        <a href="#" style="text-decoration:none;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;height:50px;border-radius:100px;color:#6A2A5F;font-weight:700;background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 1px 3px rgba(60,30,55,.12)">
+          <fig-icon name="IconOutlineRoundedAiDocument" size="24"></fig-icon>
+          <span style="font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1;color:inherit">Mock Test</span>
+        </a>
+        <a href="TestHistory.dc.html" style="text-decoration:none;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;height:50px;border-radius:100px;color:#776D75;font-weight:600">
+          <fig-icon name="IconOutlineRoundedTransactionHistory" size="24"></fig-icon>
+          <span style="font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1;color:inherit">History</span>
+        </a>
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;userState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;fresh&quot;,&quot;active&quot;],&quot;default&quot;:&quot;active&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;manyInProgress&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;lowBalance&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;noTests&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+// Contest canvas: script navigation becomes an artboard link (the canvas only follows <a href>).
+// Screens that are not on the canvas fall back to the closest one that is.
+function __go(h) {
+  h = String(h || "");
+  var ENG = { listening: "ListeningTest", reading: "ReadingTest", speaking: "SpeakingTest", writing: "WritingTest", l: "ListeningTest", r: "ReadingTest", s: "SpeakingTest", w: "WritingTest" };
+  var ON = ["DetailedAnalysis", "Home", "ListeningTest", "MockTest", "MockTestDetail", "Onboarding", "ReadingTest", "SpeakingTest", "TestHistory", "TestReview", "WritingTest"];
+  var m = h.match(/^([A-Za-z]+)\.dc\.html/);
+  var name = m ? m[1] : "";
+  if (name === "PracticeConfig") { var k = (h.match(/skill=([A-Za-z]+)/) || [])[1]; name = (k && ENG[k.toLowerCase()]) || "Home"; }
+  else if (name === "AnswerKey") name = "TestReview";
+  else if (ON.indexOf(name) < 0) name = "Home";
+  var a = document.createElement("a");
+  a.href = name + ".dc.html"; a.style.display = "none";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+const SKILLS = [
+  { key: "L", name: "Listening", color: "#4A7FE5", icon: "IconBulkHeadphone" },
+  { key: "R", name: "Reading", color: "#1A9E94", icon: "IconBulkBook" },
+  { key: "S", name: "Speaking", color: "#8B62E0", icon: "IconBulkMic" },
+  { key: "W", name: "Writing", color: "#D4860F", icon: "IconBulkWrite" }
+];
+
+// Same table as Home: href = a built screen, null = pill only.
+const NAV = [
+  { key: "home", label: "Home", icon: "IconOutlineRoundedHome", href: "Home.dc.html" },
+  { key: "test", label: "Mock Test", icon: "IconOutlineRoundedAiDocument", href: null },
+  { key: "history", label: "History", icon: "IconOutlineRoundedTransactionHistory", href: "TestHistory.dc.html" }
+];
+
+// The exam was chosen at onboarding (M1 step 2/3), so the catalogue is already
+// one exam — no TEF/TCF filter on this screen.
+const EXAM = "TEF Canada";
+
+const MOCKS = [
+  { id: "m2504", year: "2025", month: "April", items: 84, mins: 175, cost: 18, pro: false },
+  { id: "m2503", year: "2025", month: "March", items: 84, mins: 175, cost: 18, pro: false },
+  { id: "m2502", year: "2025", month: "February", items: 84, mins: 175, cost: 18, pro: false },
+  { id: "m2501", year: "2025", month: "January", items: 84, mins: 175, cost: 18, pro: false },
+  { id: "m2411", year: "2024", month: "November", items: 84, mins: 175, cost: 18, pro: false },
+  { id: "m2409", year: "2024", month: "September", items: 84, mins: 175, cost: 18, pro: false },
+  { id: "m2406", year: "2024", month: "June", items: 84, mins: 175, cost: 18, pro: false }
+];
+
+// scored = skills with a score · pending = with the AI · active = mid-test (resume target)
+const PROGRESS = {
+  fresh: {},
+  active: {
+    m2502: { scored: ["L", "R"], pending: ["S", "W"] },
+    m2501: { scored: ["L"], active: "R", activeLine: "Reading · question 14 of 39", when: "2 hours ago" },
+    // TEF publishes no composite total, so a completed session reads as a band
+    // (§5y) — per-skill points live on the detail screen, on each skill's scale.
+    m2411: { scored: ["L", "R", "S", "W"], level: "7", score: "NCLC · usable level (est.)" },
+    m2409: { scored: ["L", "R", "S", "W"], level: "6", score: "NCLC · usable level (est.)" }
+  },
+  pro: {
+    m2504: { scored: [], active: "L", activeLine: "Listening · section B", when: "20 minutes ago" },
+    m2502: { scored: ["L", "R", "S", "W"], level: "9", score: "NCLC · usable level (est.)" },
+    m2411: { scored: ["L", "R", "S", "W"], level: "7", score: "NCLC · usable level (est.)" }
+  }
+};
+
+// A second unfinished session, for the "more than one in progress" case.
+const EXTRA_OPEN = { scored: ["L", "R"], active: "S", activeLine: "Speaking · task 1 of 2", when: "3 days ago" };
+
+const BALANCE = { fresh: 30, active: 24, pro: 96 };
+const ORDER = ["fresh", "active", "pro"];
+const STATE_LABELS = {
+  fresh: "Free · nothing taken yet",
+  active: "Free · one session in progress, two scored",
+  pro: "Newest session in progress"
+};
+
+const FLAGS = [
+  { key: "manyInProgress", label: "Several sessions unfinished", def: false, screenLabel: "Two in progress",
+    on: "June 2024 is unfinished too — the band still resumes the most recent one and names the rest below it.",
+    off: "One unfinished session; the band has no second line." },
+  { key: "lowBalance", label: "Unused in contest build", def: false, screenLabel: "Cost blocked",
+    on: "No effect: every session is free.",
+    off: "Every session is free." },
+  { key: "noTests", label: "No sessions published", def: false, screenLabel: "Empty state",
+    on: "The rails are gone and the tab falls back to its empty state.",
+    off: "Seven sessions listed across 2025 and 2024." }
+];
+
+class Component extends DCLogic {
+  state = { user: null, newest: true };
+
+  componentDidMount() {
+    this.readFlagQuery();
+    // Pointer drag on the year rails — a mouse cannot swipe, so the rails would
+    // read as broken in the prototype without this.
+    this._down = e => {
+      if (e.pointerType === "touch") return;      // native touch scroll handles it
+      const rail = e.target.closest && e.target.closest(".mt-rail");
+      if (!rail) return;
+      // Snap fights the drag frame by frame — turn it off until release, then let
+      // it settle the card into place (same recipe as Home's rail).
+      rail.style.scrollSnapType = "none";
+      rail.style.cursor = "grabbing";
+      this._drag = { rail: rail, x: e.clientX, left: rail.scrollLeft, moved: 0 };
+    };
+    this._move = e => {
+      const d = this._drag;
+      if (!d) return;
+      const dx = e.clientX - d.x;
+      if (Math.abs(dx) > 3) d.moved = 1;
+      d.rail.scrollLeft = d.left - dx;
+    };
+    this._up = () => {
+      const d = this._drag;
+      if (!d) return;
+      d.rail.style.cursor = "grab";
+      d.rail.style.scrollSnapType = "x proximity";
+      this._moved = d.moved;
+      this._drag = null;
+    };
+    // A drag that ends on a card must not read as a tap on that card.
+    this._click = e => { if (this._moved) { this._moved = 0; e.preventDefault(); e.stopPropagation(); } };
+    this._nodrag = e => { if (e.target.closest && e.target.closest(".mt-rail")) e.preventDefault(); };
+    this._drag = null;
+    document.addEventListener("pointerdown", this._down);
+    document.addEventListener("pointermove", this._move);
+    document.addEventListener("pointerup", this._up);
+    document.addEventListener("pointercancel", this._up);
+    document.addEventListener("click", this._click, true);
+    document.addEventListener("dragstart", this._nodrag);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("pointerdown", this._down);
+    document.removeEventListener("pointermove", this._move);
+    document.removeEventListener("pointerup", this._up);
+    document.removeEventListener("pointercancel", this._up);
+    document.removeEventListener("click", this._click, true);
+    document.removeEventListener("dragstart", this._nodrag);
+  }
+
+  get user() { return this.state.user ?? (this.props.userState || "active"); }
+
+  opt(key, def) {
+    const o = this._flags || {};
+    if (key in o) return o[key];
+    const p = this.props || {};
+    return (key in p && p[key] != null) ? p[key] : def;
+  }
+  flagOn(f) { return !!this.opt(f.key, f.def); }
+  toggleFlag(f) {
+    this._flags = Object.assign({}, this._flags);
+    this._flags[f.key] = !this.flagOn(f);
+    this.forceUpdate();
+  }
+  readFlagQuery() {
+    const q = new URLSearchParams(location.search);
+    const over = {};
+    FLAGS.forEach(f => { if (q.has(f.key)) over[f.key] = q.get(f.key) !== "0" && q.get(f.key) !== "false"; });
+    if (Object.keys(over).length) this._flags = over;
+  }
+
+  read(m) {
+    const u = this.user;
+    const base = (PROGRESS[u] || {})[m.id] || null;
+    const p = (this.opt("manyInProgress", false) && m.id === "m2406") ? EXTRA_OPEN : base;
+    const locked = m.pro && u !== "pro";
+    const scored = (p && p.scored) || [];
+    const pending = (p && p.pending) || [];
+    const active = p && p.active;
+    const state = locked ? "locked"
+      : pending.length ? "scoring"
+      : active ? "running"
+      : scored.length === 4 ? "done"
+      : "fresh";
+    return { m, p, state, scored, pending, active, level: p && p.level, score: p && p.score };
+  }
+
+  segs(r, small) {
+    const h = small ? "4px" : "5px";
+    return SKILLS.map(s => {
+      let bg = "#E9E0E7";
+      if (r.scored.indexOf(s.key) > -1) bg = s.color;
+      else if (r.pending.indexOf(s.key) > -1) bg = "#E0B457";
+      else if (r.active === s.key) bg = "rgba(249,189,72,.55)";
+      if (r.state === "locked") bg = "rgba(255,255,255,.18)";
+      return { style: "flex:1;height:" + h + ";border-radius:100px;background:" + bg +
+        (r.pending.indexOf(s.key) > -1 && r.state !== "locked" ? ";animation:mtPulse 1.6s ease-in-out infinite" : "") };
+    });
+  }
+
+  mapCard(r) {
+    const m = r.m, st = r.state;
+    const balance = this.opt("lowBalance", false) ? 4 : BALANCE[this.user];
+    const short = balance < m.cost;
+
+    const ground = st === "locked" ? "#2E1A3B"
+      : st === "scoring" ? "#FFFBEB"
+      : st === "running" ? "#F6F0F5"
+      : "#FFFFFF";
+    const ring = st === "locked" ? "rgba(255,255,255,.1)"
+      : st === "scoring" ? "#EDD99A"
+      : st === "running" ? "#DBCED9"
+      : "#EFE3EC";
+    const dark = st === "locked";
+
+    let progressLabel, progressInk = "#5E4E69";
+    if (st === "locked") { progressLabel = "Not available"; progressInk = "rgba(255,255,255,.6)"; }
+    else if (st === "done") { progressLabel = "All 4 skills scored"; progressInk = "#15803D"; }
+    else if (st === "scoring") { progressLabel = r.scored.length + " of 4 scored · AI running"; progressInk = "#966010"; }
+    else if (st === "running") { progressLabel = r.scored.length + " of 4 skills done"; }
+    else progressLabel = "Not started";
+
+    let chip = null;
+    if (st === "fresh") chip = short
+      ? { text: "Free", ground: "#F0FDF4", ring: "#BBF7D0", ink: "#15803D" }
+      : { text: "Free", ground: "#F0FDF4", ring: "#BBF7D0", ink: "#15803D" };
+    else if (st === "running") chip = { text: "Resume", icon: "IconPlay", ground: "#2E1A3B", ring: "#2E1A3B", ink: "#FFFFFF" };
+    else if (st === "scoring") chip = { text: "Score pending", icon: "IconSparkles", ground: "#FFFFFF", ring: "#EDD99A", ink: "#966010" };
+    else if (st === "locked") chip = { text: "Locked", icon: "IconLock", ground: "rgba(255,255,255,.1)", ring: "rgba(255,255,255,.16)", ink: "#F9BD48" };
+
+    return {
+      tag: st === "fresh" ? "Not started" : st === "running" ? "In progress" : st === "scoring" ? "Scoring" : st === "done" ? "Completed" : "Not available",
+      month: m.month,
+      meta: m.items + " items · " + Math.floor(m.mins / 60) + "h" + (m.mins % 60 ? " " + (m.mins % 60) + "m" : ""),
+      showPro: m.pro,
+      segs: this.segs(r),
+      progressLabel: progressLabel,
+      hasLevel: st === "done",
+      level: r.level,
+      score: r.score,
+      hasChip: !!chip,
+      chipText: chip && chip.text,
+      chipCoin: !!(chip && chip.coin),
+      chipHasIcon: !!(chip && chip.icon),
+      chipIcon: (chip && chip.icon) || "IconCheck",
+      // Every card opens the same detail screen (M3a) — one file, five states.
+      open: () => { __go("MockTestDetail.dc.html"); },
+      cardStyle: "width:168px;flex-shrink:0;scroll-snap-align:start;display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:18px;cursor:pointer;background:" +
+        ground + ";box-shadow:inset 0 0 0 1px " + ring + (st === "done" ? ",0 2px 8px -3px rgba(60,30,55,.16)" : dark ? ",0 8px 20px -10px rgba(0,0,0,.45)" : ""),
+      tagStyle: "font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:100px;" +
+        (dark ? "background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)"
+          : st === "done" ? "background:#F0FDF4;color:#15803D;box-shadow:inset 0 0 0 1px #BBF7D0"
+          : st === "scoring" ? "background:#FFFFFF;color:#966010;box-shadow:inset 0 0 0 1px #EDD99A"
+          : st === "running" ? "background:#FFFFFF;color:#C24A22;box-shadow:inset 0 0 0 1px #F3C8B6"
+          : "background:#F8F3F7;color:#857789;box-shadow:inset 0 0 0 1px #EFE3EC"),
+      monthStyle: "font-size:20px;font-weight:700;line-height:24px;letter-spacing:-.4px;color:" + (dark ? "#FFFFFF" : "#111827"),
+      metaStyle: "font-size:11px;font-weight:500;line-height:15px;color:" + (dark ? "rgba(255,255,255,.5)" : "#6E5F78"),
+      progressStyle: "font-size:11px;font-weight:600;line-height:15px;color:" + progressInk,
+      footerStyle: "display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid " +
+        (dark ? "rgba(255,255,255,.1)" : "#F5EEF3") + ";color:" + (dark ? "rgba(255,255,255,.45)" : "#9CA3AF"),
+      chipStyle: chip
+        ? "display:flex;align-items:center;gap:5px;padding:4px 10px 4px " + (chip.coin ? "8px" : "10px") + ";border-radius:100px;background:" + chip.ground +
+          ";box-shadow:inset 0 0 0 1px " + chip.ring + ";color:" + chip.ink
+        : ""
+    };
+  }
+
+  renderVals() {
+    const u = this.user;
+    const empty = this.opt("noTests", false);
+    const rows = empty ? [] : MOCKS.map(m => this.read(m));
+    const ordered = this.state.newest ? rows : rows.slice().reverse();
+    const years = [];
+    ordered.forEach(r => {
+      let y = years.filter(x => x.label === r.m.year)[0];
+      if (!y) { y = { label: r.m.year, rows: [] }; years.push(y); }
+      y.rows.push(r);
+    });
+
+    // Newest unfinished session leads; the rest are named, not stacked.
+    const open = rows.filter(r => r.state === "running");
+    const resume = open[0];
+    const others = open.slice(1);
+    const rs = resume && SKILLS.filter(s => s.key === resume.active)[0];
+
+    return {
+      stateLabel: STATE_LABELS[u],
+      balance: "",
+      examLine: MOCKS.length + " sessions for " + EXAM,
+      sortLabel: this.state.newest ? "Newest" : "Oldest",
+      toggleSort: () => this.setState({ newest: !this.state.newest }),
+      showNote: !empty,
+
+      hasResume: !!resume,
+      resumeTitle: resume ? resume.m.month + " " + resume.m.year + " · " + EXAM : "",
+      resumeLine: resume ? (resume.p.activeLine || "") : "",
+      resumeIcon: rs ? rs.icon : "IconPlay",
+      resumeIconStyle: "width:38px;height:38px;border-radius:12px;display:flex;justify-content:center;align-items:center;flex-shrink:0;" +
+        (rs ? "background:" + rs.color + "14;box-shadow:inset 0 0 0 1px " + rs.color + "33;color:" + rs.color : ""),
+      resumeSegs: resume ? this.segs(resume, true) : [],
+      hasOtherOpen: others.length > 0,
+      otherOpenLine: others.length
+        ? "Also unfinished: " + others.map(r => r.m.month + " " + r.m.year).join(", ") + " — resume from its card below"
+        : "",
+
+      isEmpty: rows.length === 0,
+
+      years: years.map(y => ({
+        label: y.label,
+        count: y.rows.length === 1 ? "1 session" : y.rows.length + " sessions",
+        cards: y.rows.map(r => this.mapCard(r))
+      })),
+
+      nav: NAV.map(n => ({
+        label: n.label, icon: n.icon,
+        pick: () => { if (n.href) __go(n.href); },
+        itemStyle: "flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;cursor:pointer;height:50px;border-radius:100px;transition:background .18s ease,color .18s ease;" +
+          (n.key === "test" ? "background:#fff;color:#2E1A3B;box-shadow:0 1px 3px rgba(60,30,55,.12)" : "color:#857789")
+      })),
+
+      states: ORDER.map(k => ({
+        label: k,
+        go: () => this.setState({ user: k }),
+        chipStyle: "font-size:12px;font-weight:600;border-radius:100px;padding:7px 14px;cursor:pointer;user-select:none;" +
+          (k === u ? "background:#6A2A5F;color:#fff;border:1px solid #2E1A3B" : "background:rgba(255,255,255,.5);color:#5E4E69;border:1px solid #D9CCD6")
+      })),
+
+      flags: FLAGS.map(f => {
+        const fon = this.flagOn(f);
+        const tag = "font-size:9px;font-weight:700;letter-spacing:.5px;line-height:15px;padding:0 5px;border-radius:4px;flex-shrink:0;width:26px;text-align:center;";
+        const txt = "font-size:11px;font-weight:400;line-height:15px;text-wrap:pretty;flex:1;min-width:0;";
+        return {
+          label: f.label,
+          screenLabel: f.screenLabel,
+          goScreen: () => { this._flags = Object.assign({}, this._flags); this._flags[f.key] = true; this.forceUpdate(); },
+          onText: f.on,
+          offText: f.off,
+          toggle: () => this.toggleFlag(f),
+          rowStyle: "display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;" +
+            (fon ? "background:#fff;box-shadow:inset 0 0 0 1px #F9BD48,0 1px 3px rgba(60,30,55,.08)" : "background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px #D1C4CF"),
+          trackStyle: "width:34px;height:20px;border-radius:100px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;padding:2px;box-sizing:border-box;cursor:pointer;transition:background .15s;" +
+            (fon ? "background:#F9BD48;justify-content:flex-end" : "background:#D9CCD6;justify-content:flex-start"),
+          knobStyle: "width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)",
+          onTagStyle: tag + (fon ? "background:#F9BD48;color:#fff" : "background:rgba(214,200,211,.5);color:#857789"),
+          offTagStyle: tag + (fon ? "background:rgba(214,200,211,.5);color:#857789" : "background:#3E2D4A;color:#fff"),
+          onTextStyle: txt + (fon ? "color:#2E1A3B;font-weight:500" : "color:#857789"),
+          offTextStyle: txt + (fon ? "color:#857789" : "color:#2E1A3B;font-weight:500")
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

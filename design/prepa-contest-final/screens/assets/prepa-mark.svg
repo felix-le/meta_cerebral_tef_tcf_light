@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Prépa app icon">
+  <rect width="1024" height="1024" rx="230" fill="#6A2A5F"/>
+  <g transform="translate(-128 -206) scale(1.7)">
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M252 340C252 305 281 276 316 276H415C480 276 525 320 525 378C525 436 480 478 415 478H372C338 478 314 490 314 506C314 540 286 568 252 568Z M314 470L357 425H412C440 425 460 400 460 373C460 345 440 323 412 323H356C333 323 314 342 314 366Z"/>
+    <circle cx="392" cy="374" r="20" fill="#F9BD48"/>
+  </g>
+</svg>
