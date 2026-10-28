@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "voix-plume/feedback-model-output/1.0",
+  "title": "Scorer output (Muse Spark structured output)",
+  "description": "FINAL (approved 2026-10-27). What the scorer model returns for one TEF Canada Writing or Speaking answer. The model gives levels only; the app derives the NCLC and the /450 range from config (docs/contest/rubric.md section 2). Comments are in English; quotes, corrections and rewrites are in French, copied from or applied to the learner's text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "skill", "section", "criteria", "overall", "corrections", "betterPhrasing", "strengths", "nextSteps"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "skill": { "enum": ["writing", "speaking"] },
+    "section": { "enum": ["A", "B"] },
+    "criteria": {
+      "description": "One entry per criterion of this skill and section (rubric.md section 3). Writing: situation, organisation, clarity, development, lexicon, syntax, spelling. Speaking A: questioning, initiative, exchange, lexicon, grammar, register. Speaking B (contest build, scored on the whole conversation with the AI partner): presentation, argumentation, initiative, exchange, lexicon, grammar, register.",
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "assessed", "comment"],
+        "properties": {
+          "id": {
+            "enum": ["situation", "organisation", "clarity", "development", "lexicon", "syntax", "spelling",
+                     "questioning", "initiative", "presentation", "argumentation", "exchange", "grammar", "register"]
+          },
+          "assessed": { "type": "boolean", "description": "false when the criterion cannot be observed (fallback: initiative and exchange in a single recording without the AI partner); then level is omitted and comment says why." },
+          "level": { "$ref": "#/$defs/cefr" },
+          "comment": { "type": "string", "maxLength": 300, "description": "English, one or two sentences, specific to this text." },
+          "evidence": {
+            "type": "array",
+            "maxItems": 3,
+            "items": { "type": "string", "maxLength": 200, "description": "Exact quote from the learner's text (French)." }
+          }
+        },
+        "if": { "properties": { "assessed": { "const": true } } },
+        "then": { "required": ["level", "evidence"] }
+      }
+    },
+    "overall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "half"],
+      "properties": {
+        "level": { "$ref": "#/$defs/cefr", "description": "Holistic level. Must lie between the lowest and highest level of the criteria with assessed = true (checked by the app; notAssessed criteria are left out)." },
+        "half": { "enum": ["lower", "upper", "none"], "description": "lower/upper only for B1, B2, C1 (two NCLC bands); none for A1, A2, C2." }
+      }
+    },
+    "corrections": {
+      "type": "array",
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["original", "corrected", "type", "explanation"],
+        "properties": {
+          "original": { "type": "string", "maxLength": 200, "description": "Exact span from the learner's text." },
+          "corrected": { "type": "string", "maxLength": 200 },
+          "type": { "enum": ["grammar", "vocabulary", "spelling", "punctuation", "register"] },
+          "explanation": { "type": "string", "maxLength": 200, "description": "English, one line." }
+        }
+      }
+    },
+    "betterPhrasing": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["original", "suggestion", "why"],
+        "properties": {
+          "original": { "type": "string", "maxLength": 300 },
+          "suggestion": { "type": "string", "maxLength": 300 },
+          "why": { "type": "string", "maxLength": 200 }
+        }
+      }
+    },
+    "strengths": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "type": "string", "maxLength": 200 } },
+    "nextSteps": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "type": "string", "maxLength": 200 } }
+  },
+  "$defs": {
+    "cefr": { "enum": ["A1", "A2", "B1", "B2", "C1", "C2"] }
+  },
+  "examples": [
+    {
+      "schemaVersion": "1.0",
+      "skill": "writing",
+      "section": "B",
+      "criteria": [
+        { "id": "situation", "assessed": true, "level": "B2", "comment": "A clear letter to the newspaper that takes a position and keeps it.", "evidence": ["Je suis tout à fait opposé à cette mesure"] },
+        { "id": "organisation", "assessed": true, "level": "B1", "comment": "Paragraphs are there, but the arguments follow each other without links.", "evidence": ["Ensuite, les transports."] },
+        { "id": "clarity", "assessed": true, "level": "B2", "comment": "Easy to follow.", "evidence": ["Cette décision pénalise les familles"] },
+        { "id": "development", "assessed": true, "level": "B1", "comment": "Three arguments, but only the first has an example.", "evidence": ["Par exemple, ma voisine doit prendre deux bus"] },
+        { "id": "lexicon", "assessed": true, "level": "B1", "comment": "Enough for the topic; 'chose' and 'problème' come back often.", "evidence": ["c'est un gros problème"] },
+        { "id": "syntax", "assessed": true, "level": "B1", "comment": "Complex sentences are tried; the subjunctive after 'il faut que' is missed.", "evidence": ["il faut que nous prenons une décision"] },
+        { "id": "spelling", "assessed": true, "level": "B2", "comment": "Few errors, mostly agreements.", "evidence": ["les décisions prisent"] }
+      ],
+      "overall": { "level": "B1", "half": "upper" },
+      "corrections": [
+        { "original": "les décisions prisent", "corrected": "les décisions prises", "type": "spelling", "explanation": "Past participle agrees with 'décisions' (feminine plural)." },
+        { "original": "il faut que nous prenons", "corrected": "il faut que nous prenions", "type": "grammar", "explanation": "'Il faut que' takes the subjunctive." }
+      ],
+      "betterPhrasing": [
+        { "original": "c'est un gros problème", "suggestion": "cela pose un réel problème", "why": "More precise and better suited to a formal letter." },
+        { "original": "Ensuite, les transports.", "suggestion": "Par ailleurs, cette mesure aggraverait la situation des transports.", "why": "A full sentence linked to the previous argument." }
+      ],
+      "strengths": ["A clear position from the first line."],
+      "nextSteps": ["Give each argument an example.", "Link arguments with 'par ailleurs', 'de plus', 'en revanche'."]
+    }
+  ]
+}
