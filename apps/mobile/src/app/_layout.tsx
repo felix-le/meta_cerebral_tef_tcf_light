@@ -26,7 +26,9 @@ export default function RootLayout() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="onboarding" />
+      <Stack.Screen name="splash" />
+      <Stack.Screen name="animation" />
+      <Stack.Screen name="entry" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="test/[skill]" />
       <Stack.Screen name="result" />

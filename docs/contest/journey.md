@@ -60,3 +60,10 @@
 - Product change: new `apps/mobile` Expo app (TypeScript, expo-router): onboarding (Welcome / Start practising), 3-tab nav (Home · Mock Test · History), Home with 4 skill tiles (Speaking plum, Writing gold, skill colours as accent dots only), shortened 4-skill mock flow (Listening/Reading 2 demo questions each with full-version note; Writing B with 200-word floor warning; Speaking B with editable transcript, "Examinateur IA (démo)" label and demo disclaimer), result screen showing NCLC range + "Estimation" (never an exact score), on-device History, always-open Detailed Analysis. English UI, French exam content, "Prépa" display name, "AI partner" hero copy. Template demo files deleted; no login, TPC, Pro, leaderboard, streak, or TCF data anywhere.
 - Verification: `tsc --noEmit` clean; banned-token sweep (tpc/isPro/TCF_TASKS//699/AI examiner) empty; `expo export --platform web` compiled all 15 route bundles with no errors (live Metro smoke test was blocked by a port clash with another local project and sandbox localhost limits — server itself starts clean).
 - Redirect: `docs/contest/scope-decisions-2026-10-28.md` (decisions 2, 5, 8, 9, 10).
+
+## 2026-10-28 — Onboarding restyled to design; Animation screen added
+
+- Milestone: onboarding now follows `design/prepa-contest-final/screens/Onboarding.dc.html`; new Animation screen between Splash and Entry.
+- Product change: flow is Splash (1800ms/tap) → Animation (~2.3s, tap skips) → Entry (renamed from welcome route) → Home. Real vector logos rendered to PNG (logo 236px, mark 120px); mist gradient + feathered gold/plum blobs; Entry keeps design copy, plum pill button and "Examinateur IA (demo)" label. Animation uses only built-in Animated: logo bounce 0.7→1, gold dot pop, 2 expanding rings, 5 twinkling stars, gentle float, then auto-advance with tap guard.
+- Verification: `tsc --noEmit` clean; web export compiled splash/animation/entry/home/mock/history/test/result/analysis with no errors. Device rendering (shadow lift, blob richness) confirmed only by owner screenshots, not by builder.
+- Redirect: owner direction 2026-10-28 (design file is visual authority; per-screen approval).
