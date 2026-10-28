@@ -1,4 +1,4 @@
-# TEF & TCF Canada — Speaking & Writing Practice (Light)
+# TEF & TCF Canada — Speaking & Writing Practice
 
 A lightweight Expo mobile app (iOS + Android) to practise the two productive skills of the
 **TEF Canada** and **TCF Canada** French exams: **Speaking** (Expression orale) and
@@ -31,9 +31,9 @@ Production UI is French.
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
-| Mobile | Expo (TypeScript, expo-router) |
+| Layer       | Choice                                |
+| ----------- | ------------------------------------- |
+| Mobile      | Expo (TypeScript, expo-router)        |
 | AI feedback | Meta AI models via the Meta Model API |
 
 ---
