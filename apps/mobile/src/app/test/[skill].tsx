@@ -18,17 +18,16 @@ import {
   LISTENING_RULES,
   type ListeningDoc,
   type ListeningQuestion,
-  PARTNER_DISCLAIMER,
-  PARTNER_LABEL,
   READING_CHART,
   READING_DOCS,
   READING_GROUP,
   READING_QUESTIONS,
   READING_RULES,
   SHORTENED_NOTE,
-  SPEAKING_B_CONSIGNE,
-  SPEAKING_B_DOCUMENT,
-  SPEAKING_MAX_TURNS,
+  SPEAKING_CRITERIA,
+  SPEAKING_NOTE,
+  SPEAKING_RULES,
+  SPEAKING_TASKS,
   WRITING_ACCENTS,
   WRITING_CRITERIA,
   WRITING_DEMO_SECS,
@@ -165,7 +164,6 @@ export default function Test() {
   const rdoneRef = useRef(false);
   const rfinishRef = useRef(() => {});
   const [exitVisible, setExitVisible] = useState(false);
-  const [text, setText] = useState('');
   // Writing strict mock: consignes -> write -> review -> write(2) ->
   // review -> submit -> pending (the AI scores while speaking starts).
   // Per-tâche intros are skipped in mock mode, straight into the field.
@@ -186,6 +184,30 @@ export default function Test() {
   const [wauto, setWauto] = useState(false);
   const wdoneRef = useRef(false);
   const wfinishRef = useRef((_auto: boolean) => {});
+  // Speaking stub mock: consignes -> intro -> prep -> record -> review ->
+  // intro(2) -> prep -> record -> review -> submit -> pending (session end).
+  // No session clock and no real recording: prep counts down (skippable),
+  // record counts up to the task limit and stops itself, durations measured.
+  const [sstage, setSstage] = useState<
+    'consignes' | 'intro' | 'prep' | 'record' | 'review' | 'submit' | 'pending'
+  >(() =>
+    skill === 'speaking' &&
+    (stageParam === 'intro' ||
+      stageParam === 'prep' ||
+      stageParam === 'record' ||
+      stageParam === 'review' ||
+      stageParam === 'submit' ||
+      stageParam === 'pending')
+      ? stageParam
+      : 'consignes',
+  );
+  const [stask, setStask] = useState(() => (skill === 'speaking' && liParam === '1' ? 1 : 0));
+  const [prepLeft, setPrepLeft] = useState(
+    () => SPEAKING_TASKS[skill === 'speaking' && liParam === '1' ? 1 : 0].prep,
+  );
+  const [rec, setRec] = useState(0);
+  const [sdur, setSdur] = useState<number[]>([]);
+  const sdoneRef = useRef(false);
   // Listening strict mock: consignes screen, then per question
   // signal -> consigne (first of document) -> document -> question -> pause.
   // No per-answer verdict in mock mode.
@@ -456,30 +478,41 @@ export default function Test() {
                 : 'Répondez maintenant — la question passe toute seule';
   const waveTime = phase === 'pause' ? `${fmtClock(10 - pauseLeft)} / 0:10` : fmtClock(qElapsed);
 
-  const submitText = async () => {
-    const stub = SPEAKING_B_STUB;
-    await saveResult({
-      id: String(Date.now()),
-      date: new Date().toISOString().slice(0, 10),
-      skill: s,
-      section: 'B',
-      level: stub.overall.level as Cefr,
-      half: stub.overall.half,
-    });
-    router.push({ pathname: '/result', params: { skill: s } });
+  // Speaking stub end: saved once, then the session result screen (the
+  // dedicated session review does not exist yet; /result stands in).
+  const finishSpeaking = async () => {
+    if (sdoneRef.current) {
+      return;
+    }
+    sdoneRef.current = true;
+    setSstage('pending');
+    try {
+      const stub = SPEAKING_B_STUB;
+      await saveResult({
+        id: String(Date.now()),
+        date: new Date().toISOString().slice(0, 10),
+        skill: 'speaking',
+        section: 'B',
+        level: stub.overall.level as Cefr,
+        half: stub.overall.half,
+      });
+    } catch {}
   };
 
   const dark =
     (s === 'listening' && (stage === 'consignes' || stage === 'complete')) ||
     (s === 'reading' && (rstage === 'consignes' || rstage === 'complete')) ||
-    (s === 'writing' && (wstage === 'consignes' || wstage === 'pending'));
+    (s === 'writing' && (wstage === 'consignes' || wstage === 'pending')) ||
+    (s === 'speaking' && (sstage === 'consignes' || sstage === 'intro' || sstage === 'record' || sstage === 'pending'));
   const showTimer =
     (s === 'listening' && stage === 'question') ||
     (s === 'reading' && (rstage === 'passage' || rstage === 'question' || rstage === 'break')) ||
     (s === 'writing' && (wstage === 'write' || wstage === 'review' || wstage === 'submit'));
   const clockSecs = s === 'reading' ? rsecs : s === 'writing' ? wsecs : secs;
   const wChromeTall = s === 'writing' && wstage !== 'consignes' && wstage !== 'pending';
-  const topPad = dark ? insets.top + 64 : insets.top + 52 + (isChoice || wChromeTall ? 52 : 12) + 8;
+  const sChromeTall =
+    s === 'speaking' && (sstage === 'prep' || sstage === 'review' || sstage === 'submit');
+  const topPad = dark ? insets.top + 64 : insets.top + 52 + (isChoice || wChromeTall || sChromeTall ? 52 : 12) + 8;
 
   // Saved exactly once: doneRef also guards the 1s timer against repeats.
   // The result screen shows first; history save is best-effort after it,
@@ -632,6 +665,61 @@ export default function Test() {
     }
   }, [skill, wsecs, wstage]);
 
+  // Speaking stub timers: prep counts down and the recording starts on its
+  // own at zero; record counts up and stops itself at the task limit.
+  useEffect(() => {
+    if (skill !== 'speaking' || sstage !== 'prep') {
+      return;
+    }
+    const t = setInterval(() => {
+      setPrepLeft((v) => (v <= 1 ? 0 : v - 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [skill, sstage]);
+  useEffect(() => {
+    if (skill === 'speaking' && sstage === 'prep' && prepLeft === 0) {
+      setRec(0);
+      setSstage('record');
+    }
+  }, [skill, sstage, prepLeft]);
+  useEffect(() => {
+    if (skill !== 'speaking' || sstage !== 'record') {
+      return;
+    }
+    const t = setInterval(() => {
+      setRec((v) => (v + 1 >= SPEAKING_TASKS[stask].max ? SPEAKING_TASKS[stask].max : v + 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [skill, sstage, stask]);
+
+  // Speaking stub helpers: current task, live examiner cue, measured stop.
+  const staskData = SPEAKING_TASKS[stask];
+  const sStopped = sstage === 'record' && rec >= staskData.max;
+  const cueIdx = (() => {
+    let k = 0;
+    staskData.turns.forEach((tn, i) => {
+      if (tn.at <= rec) {
+        k = i;
+      }
+    });
+    return k;
+  })();
+  const cue = staskData.turns[cueIdx];
+  const nextCue = staskData.turns[cueIdx + 1];
+  const stopTake = () => {
+    if (rec < 3) {
+      return;
+    }
+    setSdur((d) => {
+      const next = [...d];
+      next[stask] = rec;
+      return next;
+    });
+    setSstage('review');
+  };
+  const sProgPct =
+    sstage === 'submit' ? 100 : sstage === 'review' ? (stask === 0 ? 50 : 90) : stask === 0 ? 20 : 62;
+
   // Writing helpers: current task, its word count, accent insertion at the
   // cursor (falls back to appending when no selection is known yet).
   const wtaskData = WRITING_TASKS[wtask];
@@ -741,7 +829,17 @@ export default function Test() {
           pointerEvents="none"
         />
       )}
-      {dark && s !== 'reading' && <View style={styles.darkFill} />}
+      {dark && s === 'speaking' && (
+        <LinearGradient
+          colors={['#2A1A3E', '#1E1226', '#100D0A']}
+          locations={[0, 0.55, 1]}
+          start={{ x: 0.2, y: 0 }}
+          end={{ x: 0.8, y: 1 }}
+          style={styles.bg}
+          pointerEvents="none"
+        />
+      )}
+      {dark && s !== 'reading' && s !== 'speaking' && <View style={styles.darkFill} />}
       <Image source={require('../../../assets/brand/blob-gold.png')} style={styles.goldBlob} resizeMode="stretch" />
       <Image source={require('../../../assets/brand/blob-plum.png')} style={styles.plumBlob} resizeMode="stretch" />
       <ScrollView
@@ -1427,25 +1525,261 @@ export default function Test() {
           </>
         )}
 
-        {s === 'speaking' && (
+        {s === 'speaking' && sstage === 'consignes' && (
           <>
-            <Text style={styles.taskTitle}>{SPEAKING_B_CONSIGNE}</Text>
+            <View style={styles.consignesHead}>
+              <Text style={styles.consignesKicker}>TEF Canada · épreuve 4 sur 4</Text>
+              <Text style={styles.consignesTitle}>Expression orale</Text>
+              <Text style={styles.consignesSub}>2 parties · face à un examinateur</Text>
+              <Text style={styles.demoNote}>
+                Démo : préparation et prise en temps réel, sans coupure de session. La préparation peut être
+                sautée.
+              </Text>
+            </View>
+            <View style={styles.rulesCard}>
+              <Text style={styles.rRulesKicker}>CONSIGNES</Text>
+              {SPEAKING_RULES.map((r, i) => (
+                <View key={i} style={styles.ruleRow}>
+                  <View style={styles.ruleNum}>
+                    <Text style={styles.ruleNumText}>{i + 1}</Text>
+                  </View>
+                  <Text style={styles.ruleText}>{r}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.consigneNote}>{SPEAKING_NOTE}</Text>
+          </>
+        )}
+
+        {s === 'speaking' && sstage === 'intro' && (
+          <>
+            <View style={styles.spHead}>
+              <Text style={styles.spKicker}>{staskData.kicker}</Text>
+              <Text style={styles.spTitle}>{staskData.title}</Text>
+            </View>
+            <View style={styles.spCard}>
+              <Text style={styles.spCardKicker}>CONSIGNE</Text>
+              <Text style={styles.spCardText}>{staskData.consigne}</Text>
+            </View>
+            <View style={styles.spCard}>
+              <Text style={styles.spDocKicker}>{staskData.docLabel}</Text>
+              <Text style={styles.spDocText}>{staskData.doc}</Text>
+            </View>
+            <View style={styles.spMeta}>
+              <View style={styles.spMetaRow}>
+                <Text style={styles.spMetaLabel}>Préparation · découverte du sujet</Text>
+                <Text style={styles.spMetaValue}>{fmtClock(staskData.prep)}</Text>
+              </View>
+              <View style={styles.spMetaRow}>
+                <Text style={styles.spMetaLabel}>Temps de parole</Text>
+                <Text style={styles.spMetaValue}>{staskData.maxLabel} max</Text>
+              </View>
+              <View style={styles.spMetaRow}>
+                <Text style={styles.spMetaLabel}>Format</Text>
+                <Text style={styles.spMetaValue}>{staskData.format}</Text>
+              </View>
+              <View style={styles.spMetaRowLast}>
+                <Text style={styles.spMetaLabel}>Réenregistrement</Text>
+                <Text style={styles.spMetaValue}>Non autorisé</Text>
+              </View>
+            </View>
+          </>
+        )}
+
+        {s === 'speaking' && sstage === 'prep' && (
+          <>
+            <View style={styles.prepCard}>
+              <View style={styles.prepRing}>
+                <Text style={styles.prepClock}>{fmtClock(prepLeft)}</Text>
+                <Text style={styles.prepRest}>RESTANT</Text>
+              </View>
+              <View style={styles.prepHead}>
+                <Text style={styles.prepName}>Préparation</Text>
+                <Text style={styles.prepNote}>
+                  {prepLeft > 0
+                    ? "Lisez la consigne et préparez vos questions. L'enregistrement démarre automatiquement à 0:00."
+                    : 'La préparation est terminée — le microphone s’ouvre maintenant.'}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.wTitle}>{staskData.title}</Text>
+            <Text style={styles.prepConsigne}>{staskData.consigne}</Text>
             <View style={styles.passageCard}>
-              <Text style={styles.passage}>{SPEAKING_B_DOCUMENT}</Text>
+              <Text style={styles.passageKicker}>{staskData.docLabel}</Text>
+              <Text style={styles.passage}>{staskData.doc}</Text>
             </View>
-            <View style={styles.partnerRow}>
-              <AppIcon name="IconSparkles" size={14} color={Brand.plum} />
-              <Text style={styles.partnerLabel}>{PARTNER_LABEL}</Text>
+          </>
+        )}
+
+        {s === 'speaking' && sstage === 'record' && (
+          <>
+            <Text style={styles.spKicker}>{staskData.kicker}</Text>
+            <Text style={styles.spShort}>{staskData.short}</Text>
+            <View
+              style={[
+                styles.turnCard,
+                cue.who === 'ex' ? styles.turnCardEx : styles.turnCardYou,
+              ]}>
+              <View style={styles.turnHead}>
+                <Text style={styles.turnKicker}>{cue.who === 'ex' ? 'L’EXAMINATEUR' : 'À VOUS'}</Text>
+                <Text style={styles.turnNext}>
+                  {nextCue
+                    ? `Prochaine réplique dans ${fmtClock(nextCue.at - rec)}`
+                    : 'Dernière réplique — concluez l’échange'}
+                </Text>
+              </View>
+              <Text style={styles.turnText}>{cue.text}</Text>
             </View>
-            <Text style={styles.note}>{PARTNER_DISCLAIMER}</Text>
-            <TextInput
-              style={styles.input}
-              multiline
-              value={text}
-              onChangeText={setText}
-              placeholder="Your transcript appears here — you can correct it…"
-            />
-            <Text style={styles.note}>Demo: up to {SPEAKING_MAX_TURNS} turns, then scoring.</Text>
+            <View style={styles.recCard}>
+              <Text style={styles.recClock}>{fmtClock(rec)}</Text>
+              <Text style={styles.recState}>{sStopped ? 'ARRÊT À LA LIMITE' : 'ENREGISTREMENT'}</Text>
+              <Waveform active={!sStopped} color="#8B62E0" />
+              <View style={styles.wordTrack}>
+                <LinearGradient
+                  colors={['#8B62E0', '#2E1A3B']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.wordFill, { width: `${Math.min(100, (rec / staskData.max) * 100)}%` }]}
+                />
+              </View>
+              <View style={styles.recMeta}>
+                <Text style={styles.recLeft}>
+                  {sStopped ? 'Durée maximale atteinte' : `${fmtClock(staskData.max - rec)} restant`}
+                </Text>
+                <Text style={styles.recLeft}>max {staskData.maxLabel}</Text>
+              </View>
+            </View>
+            <View style={styles.stopWrap}>
+              <Pressable
+                style={[styles.stopBtn, rec < 3 && styles.stopBtnOff]}
+                onPress={stopTake}
+                disabled={rec < 3}
+                accessibilityRole="button"
+                accessibilityLabel="Arrêter et enregistrer">
+                <View style={styles.stopSquare} />
+              </Pressable>
+              <Text style={styles.recHint}>
+                {sStopped
+                  ? "L'enregistrement a été sauvegardé automatiquement à la limite. Rien n'est perdu."
+                  : 'Touchez le carré pour arrêter. L’enregistrement est sauvegardé dès l’arrêt.'}
+              </Text>
+            </View>
+            <Text style={styles.stubNote}>
+              Démo : aucun son n’est enregistré — le minuteur simule la prise.
+            </Text>
+          </>
+        )}
+
+        {s === 'speaking' && sstage === 'review' && (
+          <>
+            <View style={styles.reviewHead}>
+              <View style={styles.reviewPills}>
+                <Text style={styles.sKickerPill}>{staskData.kicker}</Text>
+                <View style={styles.savedChip}>
+                  <View style={styles.mcheck}>
+                    <View style={[styles.mcheckBar, styles.mcheckShort]} />
+                    <View style={[styles.mcheckBar, styles.mcheckLong]} />
+                  </View>
+                  <Text style={styles.savedLabel}>Enregistré</Text>
+                </View>
+              </View>
+              <Text style={styles.wTitle}>
+                Tâche {stask + 1} enregistrée · {fmtClock(sdur[stask] ?? rec)}
+              </Text>
+            </View>
+            <View style={styles.reviewRows}>
+              <View style={styles.reviewRow}>
+                <Text style={styles.reviewLabel}>Durée</Text>
+                <Text style={styles.reviewValue}>{fmtClock(sdur[stask] ?? rec)}</Text>
+              </View>
+              <View style={styles.reviewRow}>
+                <Text style={styles.reviewLabel}>Maximum</Text>
+                <Text style={styles.reviewValue}>{staskData.maxLabel}</Text>
+              </View>
+              <View style={styles.reviewRowLast}>
+                <Text style={styles.reviewLabel}>Section</Text>
+                <Text style={styles.reviewValue}>{staskData.kicker.split(' · ')[1]}</Text>
+              </View>
+            </View>
+            <Text style={styles.reviewNote}>
+              Cet enregistrement est définitif. Un test blanc n’autorise qu’une prise par tâche, exactement
+              comme à l’examen.
+            </Text>
+          </>
+        )}
+
+        {s === 'speaking' && sstage === 'submit' && (
+          <>
+            <View style={styles.submitHead}>
+              <Text style={styles.wTitle}>Envoyer les deux enregistrements à la correction</Text>
+              <Text style={styles.submitSub}>
+                Une fois envoyés, les enregistrements ne peuvent plus être modifiés. L’IA les évalue sur quatre
+                critères et vous transmet le résultat.
+              </Text>
+            </View>
+            {SPEAKING_TASKS.map((t, i) => (
+              <View key={t.kicker} style={styles.submitRow}>
+                <View style={styles.fileIcon}>
+                  <AppIcon name="IconBulkMic" size={18} color="#966010" />
+                </View>
+                <View style={styles.submitInfo}>
+                  <Text style={styles.submitName}>
+                    Tâche {i + 1} · {t.title}
+                  </Text>
+                  <Text style={styles.submitMeta}>
+                    {t.kicker.split(' · ')[1]} · limite {t.maxLabel}
+                  </Text>
+                </View>
+                <Text style={styles.submitWords}>{fmtClock(sdur[i] ?? 0)}</Text>
+              </View>
+            ))}
+            <View style={styles.aiBox}>
+              <View style={styles.aiBoxHead}>
+                <AppIcon name="IconSparkles" size={16} color="#8A5B10" />
+                <Text style={styles.aiBoxTitle}>La correction par l’IA prend 1 à 5 minutes</Text>
+              </View>
+              <Text style={styles.aiBoxBody}>
+                Vous pouvez fermer l’application. La tentative apparaît dans l’historique avec le statut «
+                correction IA » et une notification vous prévient dès que le score arrive.
+              </Text>
+              <View style={styles.critChips}>
+                {SPEAKING_CRITERIA.map((c) => (
+                  <Text key={c} style={styles.critChip}>
+                    {c}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
+
+        {s === 'speaking' && sstage === 'pending' && (
+          <>
+            <View style={styles.aiWrap}>
+              <View style={styles.aiRing}>
+                <AppIcon name="IconSparkles" size={44} color={Brand.gold} />
+              </View>
+              <Text style={styles.aiLabel}>CORRECTION</Text>
+              <Text style={styles.aiTitle}>Les deux tâches sont chez l’IA</Text>
+              <Text style={styles.aiSub}>
+                Environ 5 minutes. Vous n’êtes pas obligé de rester ici : nous vous prévenons dès que le score
+                est prêt.
+              </Text>
+            </View>
+            <View style={styles.pendRows}>
+              <View style={styles.pendRow}>
+                <Text style={styles.pendLabel}>Envoyé</Text>
+                <Text style={styles.pendValue}>2 tâches · manuellement</Text>
+              </View>
+              <View style={styles.pendRow}>
+                <Text style={styles.pendLabel}>Statut dans l’historique</Text>
+                <Text style={styles.pendValue}>Correction IA</Text>
+              </View>
+              <View style={styles.pendRowLast}>
+                <Text style={styles.pendLabel}>Attente estimée</Text>
+                <Text style={styles.pendValue}>Environ 5 minutes</Text>
+              </View>
+            </View>
           </>
         )}
       </ScrollView>
@@ -1497,8 +1831,20 @@ export default function Test() {
                     ? `Tâche ${wtask + 1} sur 2`
                     : s === 'writing' && (wstage === 'write' || wstage === 'pending')
                       ? ''
-                      : `${SKILL_LABEL[s]} · Demo`}
+                      : s === 'speaking' && sstage === 'submit'
+                        ? 'Envoi · 2 tâches'
+                        : s === 'speaking' && sstage === 'pending'
+                          ? ''
+                          : s === 'speaking' && sstage !== 'consignes'
+                            ? `Tâche ${stask + 1} sur 2`
+                            : `${SKILL_LABEL[s]} · Demo`}
           </Text>
+          {s === 'speaking' && sstage === 'record' && (
+            <View style={styles.recDot}>
+              <View style={styles.recDotInner} />
+              <Text style={styles.recDotLabel}>REC</Text>
+            </View>
+          )}
           {s === 'writing' && wstage === 'write' && (
             <View style={styles.wordChip}>
               <Text style={styles.wordChipText}>
@@ -1582,6 +1928,24 @@ export default function Test() {
                   ? 'Enregistré'
                   : 'Expression écrite · 10 min'}
             </Text>
+          </View>
+        )}
+        {s === 'speaking' && (sstage === 'prep' || sstage === 'review' || sstage === 'submit') && (
+          <View style={styles.progress}>
+            <View style={styles.track}>
+              <LinearGradient
+                colors={[accent.color, accent.deep]}
+                style={[styles.fill, { width: `${sProgPct}%` }]}
+              />
+            </View>
+            <View style={styles.progressRow}>
+              <Text style={styles.progressLabel}>
+                {sstage === 'submit' ? 'Deux tâches enregistrées' : `Tâche ${stask + 1} sur 2`}
+              </Text>
+              <Text style={styles.progressGroup}>
+                {sstage === 'submit' ? 'Prêt à envoyer' : sstage === 'review' ? 'Enregistré' : 'Expression orale'}
+              </Text>
+            </View>
           </View>
         )}
       </View>
@@ -1770,7 +2134,100 @@ export default function Test() {
           note={`L'IA corrige cette épreuve pendant que vous continuez. Passage à l'oral dans ${fmtClock(handSecs)}.`}
         />
       )}
-      {s === 'speaking' && <StickyCta label="Submit" onPress={submitText} />}
+      {s === 'speaking' && sstage === 'consignes' && (
+        <StickyCta
+          tone="dark"
+          label="Commencer l'épreuve"
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => setSstage('intro')}
+          note="L'examinateur est prêt — la section A commence par une minute de découverte du document."
+        />
+      )}
+      {s === 'speaking' && sstage === 'intro' && (
+        <StickyCta
+          tone="dark"
+          label="Commencer la préparation"
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => {
+            setPrepLeft(staskData.prep);
+            setSstage('prep');
+          }}
+          note={`Le chronomètre démarre à l'écran suivant. ${fmtClock(staskData.prep)} de préparation, puis l'enregistrement démarre tout seul.`}
+        />
+      )}
+      {s === 'speaking' && sstage === 'prep' && (
+        <StickyCta
+          bg="#2E1A3B"
+          label="Je suis prêt · enregistrer"
+          icon={<AppIcon name="IconBulkMic" size={17} color="#fff" />}
+          onPress={() => {
+            setRec(0);
+            setSstage('record');
+          }}
+          note="L'enregistrement démarre tout seul à la fin de la préparation."
+        />
+      )}
+      {s === 'speaking' && sstage === 'record' && (
+        <StickyCta
+          tone="dark"
+          label={sStopped ? 'Enregistrer et continuer' : 'Arrêter et enregistrer'}
+          icon={
+            sStopped ? (
+              <CheckIcon color="#fff" />
+            ) : (
+              <View style={styles.ctaSquare} />
+            )
+          }
+          onPress={stopTake}
+          disabled={rec < 3}
+          note={
+            sStopped
+              ? `Temps écoulé — l'enregistrement s'est arrêté à ${staskData.maxLabel}.`
+              : rec < 3
+                ? 'Parlez quelques secondes avant de pouvoir arrêter.'
+                : "Touchez le carré pour arrêter. L'enregistrement est sauvegardé dès l'arrêt."
+          }
+        />
+      )}
+      {s === 'speaking' && sstage === 'review' && (
+        <StickyCta
+          bg="#2E1A3B"
+          label={stask === 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => {
+            if (stask === 1) {
+              setSstage('submit');
+            } else {
+              setStask(1);
+              setRec(0);
+              setSstage('intro');
+            }
+          }}
+          note={
+            stask === 1
+              ? "Rien n'a encore été envoyé à l'IA."
+              : `Tâche 2 · ${SPEAKING_TASKS[1].maxLabel} — ${SPEAKING_TASKS[1].title.toLowerCase()}.`
+          }
+        />
+      )}
+      {s === 'speaking' && sstage === 'submit' && (
+        <StickyCta
+          bg="#2E1A3B"
+          label="Envoyer à la correction"
+          icon={<AppIcon name="IconOutlineRoundedAiDocument" size={17} color="#fff" />}
+          onPress={() => void finishSpeaking()}
+          note="Action irréversible — les enregistrements sont définitifs après envoi."
+        />
+      )}
+      {s === 'speaking' && sstage === 'pending' && (
+        <StickyCta
+          tone="dark"
+          label="Voir le résultat de la session"
+          icon={<AppIcon name="IconOutlineRoundedAiDocument" size={17} color="#fff" />}
+          onPress={() => router.push({ pathname: '/result', params: { skill: 'speaking' } })}
+          note="Les quatre épreuves sont terminées — les scores sont publiés ensemble."
+        />
+      )}
 
       {s === 'reading' && navOpen && (
         <View style={styles.sheetWrap} pointerEvents="box-none">
@@ -1939,13 +2396,15 @@ export default function Test() {
       <ExitSheet
         visible={exitVisible}
         title={
-          s === 'listening' || s === 'reading' || s === 'writing' ? (
-            s === 'writing' && wstage !== 'consignes' && wstage !== 'pending'
-              ? 'Quitter cette tâche ?'
-              : "Quitter l'épreuve ?"
-          ) : (
-            'Leave this test?'
-          )
+          s === 'speaking' && sstage === 'record'
+            ? 'Arrêter et perdre cet enregistrement ?'
+            : s === 'speaking'
+              ? "Quitter avant d'enregistrer ?"
+              : s === 'listening' || s === 'reading' || s === 'writing'
+                ? s === 'writing' && wstage !== 'consignes' && wstage !== 'pending'
+                  ? 'Quitter cette tâche ?'
+                  : "Quitter l'épreuve ?"
+                : 'Leave this test?'
         }
         body={
           s === 'reading'
@@ -1954,16 +2413,36 @@ export default function Test() {
               ? 'Vos réponses à cette démo seront perdues.'
               : s === 'writing'
                 ? `La tâche ${wtask + 1} compte ${wcount} mots. Le brouillon n’est pas encore envoyé : il sera perdu si vous quittez.`
-                : 'Your answers on this demo will be lost.'
+                : s === 'speaking' && sstage === 'record'
+                  ? `Vous êtes à ${fmtClock(rec)} de la tâche ${stask + 1}. Quitter maintenant supprime cet enregistrement : aucune prise partielle n’est conservée.`
+                  : s === 'speaking'
+                    ? `Rien n’a encore été enregistré pour la tâche ${stask + 1}. La tentative est enregistrée comme inachevée et la préparation recommence à votre retour.`
+                    : 'Your answers on this demo will be lost.'
         }
         keepLabel={
-          s === 'writing' && wstage !== 'consignes' && wstage !== 'pending'
-            ? 'Rester et continuer à rédiger'
-            : s === 'listening' || s === 'reading'
-              ? "Continuer l'épreuve"
-              : 'Keep going'
+          s === 'speaking' && sstage === 'record'
+            ? "Poursuivre l'enregistrement"
+            : s === 'speaking'
+              ? 'Rester et préparer'
+              : s === 'writing' && wstage !== 'consignes' && wstage !== 'pending'
+                ? 'Rester et continuer à rédiger'
+                : s === 'listening' || s === 'reading'
+                  ? "Continuer l'épreuve"
+                  : 'Keep going'
         }
-        leaveLabel={s === 'reading' ? 'Enregistrer et quitter' : s === 'listening' ? 'Quitter sans enregistrer' : s === 'writing' ? 'Quitter sans enregistrer' : 'Leave'}
+        leaveLabel={
+          s === 'reading'
+            ? 'Enregistrer et quitter'
+            : s === 'listening'
+              ? 'Quitter sans enregistrer'
+              : s === 'writing'
+                ? 'Quitter sans enregistrer'
+                : s === 'speaking' && sstage === 'record'
+                  ? 'Supprimer et quitter'
+                  : s === 'speaking'
+                    ? 'Enregistrer et quitter'
+                    : 'Leave'
+        }
         keepBg={s === 'reading' ? '#2E1A3B' : undefined}
         leaveInk={s === 'reading' ? '#B4451F' : undefined}
         rows={
@@ -1984,9 +2463,16 @@ export default function Test() {
                     { label: 'Rédaction', value: `Tâche ${wtask + 1} · ${wcount} mots` },
                     { label: 'Temps restant', value: fmtClock(wsecs) },
                   ]
-                : undefined
+                : s === 'speaking' && sstage !== 'record'
+                  ? [
+                      { label: 'Enregistré', value: `${sdur.length} tâche${sdur.length === 1 ? '' : 's'} sur 2` },
+                      { label: 'Tâche en cours', value: `Tâche ${stask + 1} · ${staskData.title}` },
+                    ]
+                  : undefined
         }
-        note={s === 'listening' || s === 'reading' ? 'La reprise est gratuite.' : undefined}
+        note={
+          s === 'listening' || s === 'reading' || s === 'speaking' ? 'La reprise est gratuite.' : undefined
+        }
         onKeep={() => setExitVisible(false)}
         onLeave={() => {
           if (s === 'reading') {
@@ -2644,4 +3130,148 @@ const styles = StyleSheet.create({
   pendRowLast: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 12 },
   pendLabel: { fontFamily: FontFamily.sans, fontSize: 13, color: 'rgba(255,255,255,.6)' },
   pendValue: { fontFamily: FontFamily.sansBold, fontSize: 13, color: '#fff', textAlign: 'right', flexShrink: 1 },
+
+  // Speaking stub mock (SpeakingTest.dc.html): dark intro/record, light
+  // prep/review/submit, simulated take with live examiner cues.
+  recDot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    height: 32,
+    paddingLeft: 10,
+    paddingRight: 12,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.16)',
+    flexShrink: 0,
+  },
+  recDotInner: { width: 9, height: 9, borderRadius: 5, backgroundColor: '#F87171' },
+  recDotLabel: { fontFamily: FontFamily.sansBold, fontSize: 12, letterSpacing: 0.4, color: '#fff' },
+  ctaSquare: { width: 14, height: 14, borderRadius: 3, backgroundColor: '#fff' },
+  spHead: { gap: 8 },
+  spKicker: {
+    fontFamily: FontFamily.sansBold,
+    fontSize: 10,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,.45)',
+  },
+  spTitle: {
+    fontFamily: FontFamily.sansBold,
+    fontSize: 26,
+    lineHeight: 32,
+    letterSpacing: -0.6,
+    color: '#fff',
+  },
+  spShort: { fontFamily: FontFamily.sans, fontSize: 15, lineHeight: 21, color: 'rgba(255,255,255,.8)' },
+  spCard: {
+    gap: 10,
+    padding: 18,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.12)',
+  },
+  spCardKicker: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: '#C0A6F5' },
+  spCardText: { fontFamily: FontFamily.sans, fontSize: 15, lineHeight: 23, color: '#fff' },
+  spDocKicker: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: 'rgba(255,255,255,.45)' },
+  spDocText: { fontFamily: FontFamily.sans, fontSize: 14, lineHeight: 20, color: 'rgba(255,255,255,.82)' },
+  spMeta: {
+    paddingHorizontal: 18,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.1)',
+  },
+  spMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,.08)',
+  },
+  spMetaRowLast: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
+  spMetaLabel: { flex: 1, fontFamily: FontFamily.sans, fontSize: 13, lineHeight: 17, color: 'rgba(255,255,255,.6)' },
+  spMetaValue: { fontFamily: FontFamily.sansBold, fontSize: 13, lineHeight: 18, color: '#fff', textAlign: 'right', flexShrink: 1 },
+  prepCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    padding: 16,
+    borderRadius: 22,
+    backgroundColor: '#F3EEFC',
+    borderWidth: 1,
+    borderColor: '#DCCCF7',
+  },
+  prepRing: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 4,
+    borderColor: '#8B62E0',
+    flexShrink: 0,
+  },
+  prepClock: { fontFamily: FontFamily.sansBold, fontSize: 18, lineHeight: 20, color: '#5535A8', fontVariant: ['tabular-nums'] },
+  prepRest: { fontFamily: FontFamily.sansBold, fontSize: 8, letterSpacing: 0.7, color: '#8B62E0' },
+  prepHead: { flex: 1, gap: 4 },
+  prepName: { fontFamily: FontFamily.sansBold, fontSize: 15, lineHeight: 20, color: '#3D1F73' },
+  prepNote: { fontFamily: FontFamily.sans, fontSize: 13, lineHeight: 18, color: '#5E4E69' },
+  prepConsigne: { fontFamily: FontFamily.sans, fontSize: 15, lineHeight: 23, color: '#374151' },
+  turnCard: { gap: 6, padding: 16, borderRadius: 20, borderWidth: 1 },
+  turnCardYou: { backgroundColor: 'rgba(255,255,255,.05)', borderColor: 'rgba(255,255,255,.1)' },
+  turnCardEx: { backgroundColor: 'rgba(139,98,224,.16)', borderColor: 'rgba(220,204,247,.4)' },
+  turnHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  turnKicker: { flex: 1, fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: '#fff' },
+  turnNext: { fontFamily: FontFamily.sans, fontSize: 11, color: 'rgba(255,255,255,.5)', fontVariant: ['tabular-nums'] },
+  turnText: { fontFamily: FontFamily.sans, fontSize: 15, lineHeight: 21, color: '#fff' },
+  recCard: {
+    gap: 16,
+    padding: 22,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.1)',
+    alignItems: 'center',
+  },
+  recClock: { fontFamily: FontFamily.sansBold, fontSize: 44, lineHeight: 48, color: '#fff', fontVariant: ['tabular-nums'] },
+  recState: { fontFamily: FontFamily.sansBold, fontSize: 11, letterSpacing: 0.5, color: '#C0A6F5' },
+  recMeta: { flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch' },
+  recLeft: { fontFamily: FontFamily.sans, fontSize: 11, color: 'rgba(255,255,255,.45)', fontVariant: ['tabular-nums'] },
+  stopWrap: { alignItems: 'center', gap: 12, paddingTop: 6 },
+  stopBtn: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  stopBtnOff: { opacity: 0.4 },
+  stopSquare: { width: 28, height: 28, borderRadius: 8, backgroundColor: '#DC2626' },
+  recHint: {
+    fontFamily: FontFamily.sans,
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+    color: 'rgba(255,255,255,.55)',
+    maxWidth: 270,
+  },
+  stubNote: { fontFamily: FontFamily.sans, fontSize: 12, lineHeight: 17, textAlign: 'center', color: 'rgba(255,255,255,.4)' },
+  sKickerPill: {
+    fontFamily: FontFamily.sansBold,
+    fontSize: 10,
+    letterSpacing: 0.4,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    overflow: 'hidden',
+    backgroundColor: '#F3EEFC',
+    color: '#5535A8',
+  },
 });

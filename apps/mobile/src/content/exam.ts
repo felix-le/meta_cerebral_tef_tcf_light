@@ -474,10 +474,85 @@ export const WRITING_CRITERIA = [
 
 export const WRITING_DEMO_SECS = 600;
 
-export const SPEAKING_B_CONSIGNE = 'Expression orale — Tâche B';
-export const SPEAKING_B_DOCUMENT =
-  'Annonce : « Venez découvrir notre nouveau parc municipal ! Espaces verts, pistes cyclables, aires de jeux pour enfants et concerts gratuits chaque dimanche. Entrée libre. » Présentez ce document à votre ami(e) puis essayez de le/la convaincre de vous y accompagner ce week-end.';
+export interface SpeakingTurn {
+  at: number;
+  who: 'you' | 'ex';
+  text: string;
+}
+
+export interface SpeakingTask {
+  kicker: string;
+  title: string;
+  consigne: string;
+  short: string;
+  docLabel: string;
+  doc: string;
+  prep: number;
+  max: number;
+  maxLabel: string;
+  format: string;
+  turns: SpeakingTurn[];
+}
+
+// Speaking demo (TEF Canada, 2 sections). Examiner cues mirror
+// SpeakingTest.dc.html; durations below are measured live, never seeded.
+export const SPEAKING_TASKS: SpeakingTask[] = [
+  {
+    kicker: 'Tâche 1 · section A',
+    title: 'Obtenir des informations',
+    consigne:
+      "Vous avez vu cette annonce dans un journal local. Vous téléphonez à l'atelier pour obtenir plus d'informations. Posez une dizaine de questions à votre interlocuteur.",
+    short: "Vous téléphonez à l'atelier pour obtenir des informations. Posez une dizaine de questions.",
+    docLabel: 'ANNONCE',
+    doc: 'Atelier Le Panier — cours de cuisine française. Petits groupes de six personnes, quatre samedis de suite. Inscription avant le 30 mars.',
+    prep: 60,
+    max: 300,
+    maxLabel: '5:00',
+    format: "Jeu de rôle formel avec l'examinateur",
+    turns: [
+      { at: 0, who: 'you', text: "Bonjour, je vous appelle au sujet de votre atelier de cuisine." },
+      { at: 14, who: 'ex', text: "Bonjour ! Oui, l'atelier Le Panier. Que voulez-vous savoir ?" },
+      { at: 42, who: 'you', text: 'Posez vos questions : dates, prix, niveau, matériel, nombre de places…' },
+      { at: 96, who: 'ex', text: 'Les quatre samedis, de 10 h à 13 h. Le matériel est fourni.' },
+      { at: 150, who: 'you', text: 'Relancez : demandez une précision sur ce qu’il vient de dire.' },
+      { at: 214, who: 'ex', text: 'Il reste deux places. Souhaitez-vous que je vous inscrive ?' },
+    ],
+  },
+  {
+    kicker: 'Tâche 2 · section B',
+    title: 'Présenter et convaincre',
+    consigne:
+      "Votre entreprise envisage de passer à la semaine de quatre jours. Vous êtes favorable au projet. Présentez la situation à un collègue hésitant et convainquez-le de signer la proposition.",
+    short: 'Présentez la situation à un collègue hésitant et convainquez-le de signer la proposition.',
+    docLabel: 'DOCUMENT',
+    doc: '« La semaine de quatre jours : moins d’heures, autant de travail ? » — note interne, mars 2025.',
+    prep: 60,
+    max: 600,
+    maxLabel: '10:00',
+    format: "Jeu de rôle informel avec l'examinateur",
+    turns: [
+      { at: 0, who: 'you', text: 'Présentez le document à votre collègue : de quoi il s’agit, et ce que vous en pensez.' },
+      { at: 40, who: 'ex', text: "Quatre jours, d'accord, mais on va devoir tout finir en moins de temps, non ?" },
+      { at: 120, who: 'you', text: 'Répondez à son objection, puis donnez un argument concret.' },
+      { at: 240, who: 'ex', text: 'Et les clients ? Ils appellent le vendredi, eux.' },
+      { at: 360, who: 'you', text: 'Proposez une solution et invitez-le à signer la proposition.' },
+      { at: 480, who: 'ex', text: "Bon… si l'essai ne dure que trois mois, je veux bien y réfléchir." },
+    ],
+  },
+];
+
+export const SPEAKING_RULES = [
+  'Deux sections, 15 minutes en tout. La section A dure 5 minutes, la section B 10 minutes.',
+  "Chaque section commence par une minute de découverte du sujet. La prise de notes n'est pas autorisée.",
+  "Un examinateur vous fait face et joue le rôle de votre interlocuteur. Vous l'entendez : rien n'est écrit, ni ici ni le jour de l'examen.",
+  "Tout est enregistré une seule fois. Il n'y a pas de seconde prise le jour de l'examen.",
+];
+
+export const SPEAKING_NOTE =
+  "Le retour de l'IA ne concerne que l'entraînement. Le jour de l'examen, deux examinateurs notent l'enregistrement.";
+
+export const SPEAKING_CRITERIA = ['Présentation des faits', 'Argumentation', 'Interaction', 'Lexique'];
+
 export const PARTNER_LABEL = 'Examinateur IA (démo)';
 export const PARTNER_DISCLAIMER =
   'Ce partenaire est une démonstration d’intelligence artificielle, pas un vrai examinateur.';
-export const SPEAKING_MAX_TURNS = 3;
