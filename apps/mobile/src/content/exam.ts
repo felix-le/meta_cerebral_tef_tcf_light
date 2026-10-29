@@ -397,10 +397,82 @@ export const READING_CHART: ReadingChart = {
   answer: 2,
 };
 
-export const WRITING_B_CONSIGNE = 'Expression écrite — Tâche B';
-export const WRITING_B_SUBJECT =
-  'Vous écrivez au courrier des lecteurs d’un journal pour donner votre point de vue sur les transports en commun dans votre ville : faut-il les rendre gratuits ? Donnez au moins trois arguments et justifiez votre position. (200 mots minimum, 35 minutes)';
-export const WRITING_B_FLOOR = 200;
+export interface WritingTask {
+  kicker: string;
+  title: string;
+  consigne: string;
+  short: string;
+  docLabel: string;
+  doc: string;
+  min: number;
+  placeholder: string;
+}
+
+// Writing demo: both TEF tasks (A: fait divers 80 words, B: courrier des
+// lecteurs 200 words). Content mirrors WritingTest.dc.html; drafts start
+// empty on the phone so the candidate actually writes.
+export const WRITING_TASKS: WritingTask[] = [
+  {
+    kicker: 'Tâche 1 · section A',
+    title: 'Terminer un fait divers',
+    consigne:
+      "Vous êtes journaliste. Voici le début d'un fait divers paru dans la presse locale. Rédigez la suite de l'article en quatre-vingts mots au minimum, en gardant le même ton.",
+    short: 'Rédigez la suite de ce fait divers en gardant le ton de la presse locale. 80 mots minimum.',
+    docLabel: "DÉBUT DE L'ARTICLE",
+    doc: '« Mardi matin, les habitants du quartier Saint-Roch ont découvert que la fontaine de la place avait retrouvé son eau, trente ans après avoir été fermée. Personne ne savait encore qui… »',
+    min: 80,
+    placeholder: "Continuez l'article…",
+  },
+  {
+    kicker: 'Tâche 2 · section B',
+    title: 'Exprimer et défendre un point de vue',
+    consigne:
+      "Votre ville envisage d'interdire les voitures dans le centre historique le week-end. Vous écrivez au courrier des lecteurs du journal local pour donner votre avis et le justifier en deux cents mots au minimum.",
+    short: 'Écrivez au courrier des lecteurs pour donner votre avis sur la fermeture du centre aux voitures. 200 mots minimum.',
+    docLabel: 'COURRIER DES LECTEURS',
+    doc: '« Centre-ville sans voiture le week-end : la mairie consulte les habitants jusqu’au 15 avril » — Le Journal de la Ville, mars 2025.',
+    min: 200,
+    placeholder: 'Madame, Monsieur,',
+  },
+];
+
+export const WRITING_RULES = [
+  'Deux textes, 10 minutes en tout pour cette démo. Vous répartissez le temps comme vous voulez : rien n’est imposé par texte.',
+  'Tâche A : terminer un fait divers, 80 mots minimum. Tâche B : défendre un point de vue, 200 mots minimum.',
+  "Un clavier d'accents est disponible à l'écran. Le champ est en texte brut : l'orthographe et la grammaire sont évaluées, la mise en page non.",
+  'Les deux textes sont envoyés ensemble. À la fin du temps imparti, ils partent tels quels.',
+];
+
+export const WRITING_NOTE =
+  'Le compteur de mots et l’alerte de minimum sont propres à l’application. L’examen annonce un minimum mais rien ne confirme qu’il compte les mots ou bloque un texte trop court.';
+
+export const WRITING_ACCENTS = [
+  'é',
+  'è',
+  'ê',
+  'ë',
+  'à',
+  'â',
+  'î',
+  'ï',
+  'ô',
+  'ù',
+  'û',
+  'ü',
+  'ç',
+  'œ',
+  '«',
+  '»',
+];
+
+export const WRITING_CRITERIA = [
+  'Respect de la situation',
+  'Organisation du texte',
+  'Lexique',
+  'Syntaxe',
+];
+
+export const WRITING_DEMO_SECS = 600;
 
 export const SPEAKING_B_CONSIGNE = 'Expression orale — Tâche B';
 export const SPEAKING_B_DOCUMENT =
