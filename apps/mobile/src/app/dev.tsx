@@ -64,11 +64,17 @@ const ROWS: { section: string; items: { label: string; run: () => void }[] }[] =
     ],
   },
   {
-    section: 'Other skills (stubs)',
-    items: (['speaking'] as const).map((skill) => ({
-      label: skill,
-      run: () => router.push({ pathname: '/test/[skill]', params: { skill } }),
-    })),
+    section: 'Speaking',
+    items: [
+      { label: 'Consignes', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking' } }) },
+      { label: 'Tâche 1 · intro', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'intro', li: '0' } }) },
+      { label: 'Tâche 1 · prep', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'prep', li: '0' } }) },
+      { label: 'Tâche 1 · record', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'record', li: '0' } }) },
+      { label: 'Tâche 1 · review', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'review', li: '0' } }) },
+      { label: 'Tâche 2 · intro', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'intro', li: '1' } }) },
+      { label: 'Submit · recap', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'submit' } }) },
+      { label: 'Pending · with the AI', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'pending' } }) },
+    ],
   },
 ];
 
