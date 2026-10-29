@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { Brand, FontFamily, SKILL_LABEL } from '@/constants/theme';
 import { listResults, MockResult } from '@/storage/history';
 import { TabScreenFade } from '@/components/TabScreenFade';
@@ -23,14 +23,19 @@ export default function History() {
         <Text style={styles.empty}>No results yet. Finish a test to see it here.</Text>
       ) : (
         results.map((r) => (
-          <View key={r.id} style={styles.card}>
+          <Pressable
+            key={r.id}
+            style={styles.card}
+            accessibilityRole="button"
+            accessibilityLabel={`Review ${SKILL_LABEL[r.skill]} from ${r.date}`}
+            onPress={() => router.push({ pathname: '/result', params: { session: r.session ?? r.id } })}>
             <Text style={styles.cardTitle}>
               {SKILL_LABEL[r.skill]} · Section {r.section}
             </Text>
             <Text style={styles.cardDetail}>
               {r.level ? `NCLC · ${r.level}` : `${r.correct} / ${r.total} correct`} · {r.date}
             </Text>
-          </View>
+          </Pressable>
         ))
       )}
     </ScrollView>
