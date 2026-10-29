@@ -12,6 +12,7 @@ export function StickyCta({
   note,
   icon,
   tone,
+  bg,
 }: {
   label: string;
   onPress: () => void;
@@ -20,6 +21,8 @@ export function StickyCta({
   icon?: ReactNode;
   /** Dark screens (consignes, complete) need the dark fade band. */
   tone?: 'light' | 'dark';
+  /** Optional button background override (default plum). */
+  bg?: string;
 }) {
   const dark = tone === 'dark';
   return (
@@ -35,7 +38,7 @@ export function StickyCta({
         pointerEvents="none"
       />
       <Pressable
-        style={[styles.cta, disabled && styles.disabled]}
+        style={[styles.cta, bg ? { backgroundColor: bg } : null, disabled && styles.disabled]}
         onPress={onPress}
         disabled={disabled}
         accessibilityRole="button"

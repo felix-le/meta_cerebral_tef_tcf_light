@@ -4,7 +4,7 @@ import * as Speech from 'expo-speech';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Circle } from 'react-native-svg';
+import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
 import { Brand, FontFamily, SkillAccent, SKILL_DEEP, SKILL_DARK, SKILL_LABEL, type Skill } from '@/constants/theme';
 import { AppIcon } from '@/components/AppIcon';
@@ -20,9 +20,11 @@ import {
   type ListeningQuestion,
   PARTNER_DISCLAIMER,
   PARTNER_LABEL,
-  READING_CONSIGNE,
-  READING_PASSAGE,
-  READING_SAMPLE,
+  READING_CHART,
+  READING_DOCS,
+  READING_GROUP,
+  READING_QUESTIONS,
+  READING_RULES,
   SHORTENED_NOTE,
   SPEAKING_B_CONSIGNE,
   SPEAKING_B_DOCUMENT,
@@ -34,6 +36,9 @@ import {
 
 const SKILLS: Skill[] = ['listening', 'reading', 'writing', 'speaking'];
 const LETTERS = ['A', 'B', 'C', 'D'];
+
+/** Bars plot height inside the demo chart card (values + ticks sit outside). */
+const CHART_BAR_H = 110;
 
 const DOC_IMAGES: Record<string, number> = {
   station: require('../../../assets/listening/q-train-station.jpeg'),
@@ -87,6 +92,15 @@ function XIcon({ color }: { color: string }) {
   );
 }
 
+function CheckIcon({ color }: { color: string }) {
+  return (
+    <View style={styles.check}>
+      <View style={[styles.checkBar, styles.checkShort, { backgroundColor: color }]} />
+      <View style={[styles.checkBar, styles.checkLong, { backgroundColor: color }]} />
+    </View>
+  );
+}
+
 export default function Test() {
   const { skill, stage: stageParam, li: liParam, phase: phaseParam, picked: pickedParam } = useLocalSearchParams<{
     skill: string;
@@ -98,28 +112,55 @@ export default function Test() {
   // Dev gallery deep links (no params in the real flow: defaults below).
   // stage=consignes|question|complete, li=0..8, phase=signal|consigne|doc|ask|pause,
   // picked=all-correct|mixed|all-wrong (complete only).
+  const demoSet = skill === 'reading' ? READING_QUESTIONS : FLAT.map((f) => f.q);
+  const demoLen = demoSet.length;
   const initPicked = (): Record<string, number> => {
-    if (stageParam !== 'complete') {
+    if (stageParam !== 'complete' && !(stageParam === 'break' && skill === 'reading')) {
       return {};
     }
     const out: Record<string, number> = {};
-    FLAT.forEach((item, i) => {
+    demoSet.forEach((item, i) => {
       if (pickedParam === 'all-wrong') {
-        out[item.q.id] = (item.q.answer + 1) % 4;
+        out[item.id] = (item.answer + 1) % 4;
       } else if (pickedParam === 'mixed') {
-        if (i === FLAT.length - 1) {
+        if (i === demoLen - 1) {
           return;
         }
-        out[item.q.id] = i % 2 === 0 ? item.q.answer : (item.q.answer + 1) % 4;
+        out[item.id] = i % 2 === 0 ? item.answer : (item.answer + 1) % 4;
       } else {
-        out[item.q.id] = item.q.answer;
+        out[item.id] = item.answer;
       }
     });
     return out;
   };
   const insets = useSafeAreaInsets();
   const [picked, setPicked] = useState<Record<string, number>>(initPicked);
-  const [qIndex, setQIndex] = useState(0);
+  const [qIndex, setQIndex] = useState(() => {
+    if (skill !== 'reading') {
+      return 0;
+    }
+    const n = Number(liParam);
+    return Number.isInteger(n) && n >= 0 && n < READING_QUESTIONS.length ? n : 0;
+  });
+  // Reading demo stages: consignes -> passage -> question -> break -> complete.
+  const [rstage, setRstage] = useState<'consignes' | 'passage' | 'question' | 'break' | 'complete'>(() =>
+    stageParam === 'passage' ||
+    stageParam === 'question' ||
+    stageParam === 'break' ||
+    stageParam === 'complete'
+      ? stageParam
+      : 'consignes',
+  );
+  const [rsecs, setRsecs] = useState(() => (stageParam === 'complete' && skill === 'reading' ? 446 : 600));
+
+  const [rdoc, setRdoc] = useState(0);
+  const [textOpen, setTextOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  // Handoff countdown: 15 s on each skill-end screen, then auto-advance.
+  const [handSecs, setHandSecs] = useState(15);
+  const rdoneRef = useRef(false);
+  const rfinishRef = useRef(() => {});
   const [exitVisible, setExitVisible] = useState(false);
   const [text, setText] = useState('');
   // Listening strict mock: consignes screen, then per question
@@ -139,10 +180,6 @@ export default function Test() {
     stageParam === 'question' || stageParam === 'complete' ? stageParam : 'consignes',
   );
   const [playing, setPlaying] = useState(false);
-  const [final, setFinal] = useState(() => {
-    const p = initPicked();
-    return { correct: FLAT.filter((item) => p[item.q.id] === item.q.answer).length, total: FLAT.length };
-  });
   const [secs, setSecs] = useState(600);
   // Flat position over the 9 questions; 5-beat phase machine.
   const [li, setLi] = useState(initLi);
@@ -362,7 +399,7 @@ export default function Test() {
   const s = skill as Skill;
   const isChoice = s === 'listening' || s === 'reading';
   const accent = { color: SkillAccent[s], deep: SKILL_DEEP[s], ink: SKILL_DARK[s] };
-  const questions = READING_SAMPLE;
+  const questions = READING_QUESTIONS;
   const current = questions[Math.min(qIndex, questions.length - 1)];
   const answered = picked[current.id] !== undefined;
   const cur = FLAT[Math.min(li, FLAT.length - 1)];
@@ -396,19 +433,6 @@ export default function Test() {
                 : 'Répondez maintenant — la question passe toute seule';
   const waveTime = phase === 'pause' ? `${fmtClock(10 - pauseLeft)} / 0:10` : fmtClock(qElapsed);
 
-  const submitChoice = async () => {
-    const correct = questions.filter((q) => picked[q.id] === q.answer).length;
-    await saveResult({
-      id: String(Date.now()),
-      date: new Date().toISOString().slice(0, 10),
-      skill: s,
-      section: 'B',
-      correct,
-      total: questions.length,
-    });
-    router.push({ pathname: '/result', params: { skill: s, correct: String(correct), total: String(questions.length) } });
-  };
-
   const submitText = async () => {
     const stub = s === 'speaking' ? SPEAKING_B_STUB : WRITING_B_STUB;
     await saveResult({
@@ -422,7 +446,13 @@ export default function Test() {
     router.push({ pathname: '/result', params: { skill: s } });
   };
 
-  const dark = s === 'listening' && (stage === 'consignes' || stage === 'complete');
+  const dark =
+    (s === 'listening' && (stage === 'consignes' || stage === 'complete')) ||
+    (s === 'reading' && (rstage === 'consignes' || rstage === 'complete'));
+  const showTimer =
+    (s === 'listening' && stage === 'question') ||
+    (s === 'reading' && (rstage === 'passage' || rstage === 'question' || rstage === 'break'));
+  const clockSecs = s === 'reading' ? rsecs : secs;
   const topPad = dark ? insets.top + 64 : insets.top + 52 + (isChoice ? 52 : 12) + 8;
 
   // Saved exactly once: doneRef also guards the 1s timer against repeats.
@@ -434,7 +464,6 @@ export default function Test() {
     }
     doneRef.current = true;
     const correct = FLAT.filter((item) => picked[item.q.id] === item.q.answer).length;
-    setFinal({ correct, total: FLAT.length });
     stopAudio();
     setStage('complete');
     try {
@@ -459,6 +488,117 @@ export default function Test() {
     }
   };
 
+  // Reading demo: 2 questions, 5 minutes, saved once. The result screen
+  // shows first; history save is best-effort after it.
+  const finishReading = async () => {
+    if (rdoneRef.current) {
+      return;
+    }
+    rdoneRef.current = true;
+    const correct = READING_QUESTIONS.filter((q) => picked[q.id] === q.answer).length;
+    setRstage('break');
+    try {
+      await saveResult({
+        id: String(Date.now()),
+        date: new Date().toISOString().slice(0, 10),
+        skill: 'reading',
+        section: 'B',
+        correct,
+        total: READING_QUESTIONS.length,
+      });
+    } catch {}
+  };
+  rfinishRef.current = () => {
+    void finishReading();
+  };
+
+  // Handoff auto-advance: entering either end screen restarts the 15 s
+  // countdown; at zero it moves to the next skill on its own.
+  useEffect(() => {
+    const done =
+      (skill === 'listening' && stage === 'complete') ||
+      (skill === 'reading' && rstage === 'complete');
+    if (!done) {
+      return;
+    }
+    setHandSecs(15);
+    const t = setInterval(() => {
+      setHandSecs((v) => (v <= 1 ? 0 : v - 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [skill, stage, rstage]);
+  useEffect(() => {
+    if (handSecs !== 0) {
+      return;
+    }
+    if (skill === 'listening' && stage === 'complete') {
+      router.replace({ pathname: '/test/[skill]', params: { skill: 'reading' } });
+    } else if (skill === 'reading' && rstage === 'complete') {
+      router.replace({ pathname: '/test/[skill]', params: { skill: 'writing' } });
+    }
+  }, [handSecs, skill, stage, rstage]);
+
+  // Demo budget: 5 minutes, ticking once the passage opens (never from
+  // consignes). The countdown only counts; finishing lives outside the
+  // updater so it always fires.
+  useEffect(() => {
+    if (skill !== 'reading' || (rstage !== 'passage' && rstage !== 'question')) {
+      return;
+    }
+    const t = setInterval(() => {
+      setRsecs((v) => (v <= 1 ? 0 : v - 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [skill, rstage]);
+  useEffect(() => {
+    if (skill === 'reading' && rsecs === 0 && (rstage === 'passage' || rstage === 'question')) {
+      rfinishRef.current();
+    }
+  }, [skill, rsecs, rstage]);
+
+  const wordsOf = (paras: string[]) => paras.join(' ').split(/\s+/).filter(Boolean).length;
+  // Document number (1-3) for the exit sheet: text questions show their own
+  // document, standalone items show the latest document opened so far.
+  const rdocNum = (qi: number) => {
+    let n = 1;
+    READING_QUESTIONS.forEach((q, i) => {
+      if (i <= qi && q.docId) {
+        n = READING_DOCS.findIndex((d) => d.id === q.docId) + 1;
+      }
+    });
+    return n;
+  };
+  const curDoc = (() => {
+    const q = READING_QUESTIONS[qIndex];
+    const id = q?.docId;
+    return READING_DOCS.find((d) => d.id === id) ?? READING_DOCS[rdoc];
+  })();
+  const curPassGroup =
+    READING_QUESTIONS.find((q) => q.docId === READING_DOCS[rdoc].id)?.group ?? '';
+  const readingWords = wordsOf(curDoc.text);
+  const rAnswered = READING_QUESTIONS.filter((q) => picked[q.id] !== undefined).length;
+  const rCorrect = READING_QUESTIONS.filter((q) => picked[q.id] === q.answer).length;
+  const rAdvance = () => {
+    if (qIndex + 1 >= READING_QUESTIONS.length) {
+      return;
+    }
+    const next = READING_QUESTIONS[qIndex + 1];
+    if (next.docId) {
+      setRdoc(READING_DOCS.findIndex((d) => d.id === next.docId));
+      setRstage('passage');
+    } else {
+      setQIndex(qIndex + 1);
+    }
+  };
+  const rBack = () => {
+    const q = READING_QUESTIONS[qIndex];
+    if (q.docId) {
+      setRdoc(READING_DOCS.findIndex((d) => d.id === q.docId));
+      setRstage('passage');
+    } else if (qIndex > 0) {
+      setQIndex(qIndex - 1);
+    }
+  };
   // The answer stays changeable until the pause ends: the last pick wins.
   const pickListening = (qid: string, i: number) => {
     if (phase !== 'pause') {
@@ -467,35 +607,23 @@ export default function Test() {
     setPicked((p) => ({ ...p, [qid]: i }));
   };
 
-  const recommencer = () => {
-    stopAudio();
-    setPicked({});
-    setLi(0);
-    setPhase('signal');
-    setPauseLeft(10);
-    setSecs(600);
-    doneRef.current = false;
-    setFinal({ correct: 0, total: FLAT.length });
-    setStage('consignes');
-  };
-
   // Demo budget: 10 minutes, ticking only once the first document opens
-  // (never from consignes). At zero the demo auto-finishes (rule 4).
+  // (never from consignes). The countdown only counts; finishing lives
+  // outside the updater so it always fires.
   useEffect(() => {
     if (skill !== 'listening' || stage !== 'question') {
       return;
     }
     const t = setInterval(() => {
-      setSecs((v) => {
-        if (v <= 1) {
-          finishRef.current();
-          return 0;
-        }
-        return v - 1;
-      });
+      setSecs((v) => (v <= 1 ? 0 : v - 1));
     }, 1000);
     return () => clearInterval(t);
   }, [s, stage]);
+  useEffect(() => {
+    if (skill === 'listening' && secs === 0 && stage === 'question') {
+      finishRef.current();
+    }
+  }, [skill, secs, stage]);
 
   if (!SKILLS.includes(skill as Skill)) {
     return (
@@ -509,7 +637,17 @@ export default function Test() {
     <View style={styles.root}>
       <StatusBar style={dark ? 'light' : 'dark'} />
       <LinearGradient colors={['#F8F3F7', '#FFFFFF']} style={styles.bg} />
-      {dark && <View style={styles.darkFill} />}
+      {dark && s === 'reading' && (
+        <LinearGradient
+          colors={['#1A211F', '#1E1226', '#100D0A']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.35, y: 0 }}
+          end={{ x: 0.65, y: 1 }}
+          style={styles.bg}
+          pointerEvents="none"
+        />
+      )}
+      {dark && s !== 'reading' && <View style={styles.darkFill} />}
       <Image source={require('../../../assets/brand/blob-gold.png')} style={styles.goldBlob} resizeMode="stretch" />
       <Image source={require('../../../assets/brand/blob-plum.png')} style={styles.plumBlob} resizeMode="stretch" />
       <ScrollView
@@ -519,39 +657,230 @@ export default function Test() {
           { paddingTop: topPad, paddingBottom: 150 },
         ]}
         showsVerticalScrollIndicator={false}>
-        {s === 'reading' && (
+        {s === 'reading' && rstage === 'consignes' && (
           <>
-            {qIndex === 0 && <Text style={styles.note}>{READING_CONSIGNE}</Text>}
-            <View style={styles.passageCard}>
-              <Text style={[styles.passageKicker, { color: accent.ink }]}>Document</Text>
-              <Text style={styles.passage}>{READING_PASSAGE}</Text>
+            <View style={styles.consignesHead}>
+              <Text style={styles.consignesKicker}>TEF Canada · épreuve 2 sur 4</Text>
+              <Text style={styles.consignesTitle}>Compréhension écrite</Text>
+              <Text style={styles.consignesSub}>6 questions · 10 minutes · cinq groupes de documents</Text>
+              <Text style={styles.demoNote}>{SHORTENED_NOTE}</Text>
             </View>
-            <View style={styles.qHead}>
-              <Text style={[styles.qKicker, { backgroundColor: accent.color + '1F', color: accent.ink }]}>
-                Question {qIndex + 1} of {questions.length}
+            <View style={styles.rulesCard}>
+              <Text style={styles.rRulesKicker}>CONSIGNES</Text>
+              {READING_RULES.map((r, i) => (
+                <View key={i} style={styles.ruleRow}>
+                  <View style={styles.ruleNum}>
+                    <Text style={styles.ruleNumText}>{i + 1}</Text>
+                  </View>
+                  <Text style={styles.ruleText}>{r}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={styles.warnBox}>
+              <Text style={styles.warnText}>
+                Aucune pause n’est autorisée une fois la session lancée : les épreuves sur ordinateur s’enchaînent.
               </Text>
             </View>
-            <Text style={styles.qText}>{current.prompt}</Text>
+          </>
+        )}
+
+        {s === 'reading' && rstage === 'passage' && (
+          <>
+            <View style={styles.passTop}>
+              <Text style={styles.passPill} numberOfLines={1}>
+                {`${curPassGroup} · document ${rdoc + 1} sur ${READING_DOCS.length}`}
+              </Text>
+              <Text style={styles.passWords}>{wordsOf(READING_DOCS[rdoc].text)} mots</Text>
+            </View>
+            <Text style={styles.passTitle}>{READING_DOCS[rdoc].title}</Text>
+            <Text style={styles.passSource}>{READING_DOCS[rdoc].source}</Text>
+            <View style={styles.passDiv} />
+            {READING_DOCS[rdoc].text.map((para, i) => (
+              <Text key={i} style={styles.passPara}>
+                {para}
+              </Text>
+            ))}
+          </>
+        )}
+
+        {s === 'reading' && rstage === 'question' && (
+          <>
+            <View style={styles.qHead}>
+              <Text style={[styles.qKicker, { backgroundColor: accent.color + '1F', color: accent.ink }]}>
+                {current.type === 'chart'
+                  ? `${current.group} · item 1 sur 1`
+                  : `${current.group} · question ${qIndex + 1} sur ${questions.length}`}
+              </Text>
+              {current.type === 'chart' && <Text style={styles.graphTag}>Graphique</Text>}
+            </View>
+            <Text style={current.type === 'chart' ? styles.chartQuestion : styles.qText}>{current.prompt}</Text>
+            {(current.type === 'sentence-gap' || current.type === 'text-gap') && (
+              <View style={styles.gapBox}>
+                <Text style={styles.gapKicker}>
+                  {current.type === 'sentence-gap' ? 'PHRASE À COMPLÉTER' : 'TEXTE À COMPLÉTER'}
+                </Text>
+                <Text style={styles.gapSentence}>
+                  {current.before}{' '}
+                  <Text style={styles.gapSlot}>
+                    {picked[current.id] !== undefined ? current.options[picked[current.id]] : '…'}
+                  </Text>
+                  {(current.after ?? '').match(/^[.,;:!?]/) ? '' : ' '}
+                  {current.after}
+                </Text>
+              </View>
+            )}
+            {current.type === 'chart' && (
+              <View style={styles.chartCard}>
+                <Text style={styles.chartLabel}>{READING_CHART.label}</Text>
+                <Text style={styles.chartTitle}>{READING_CHART.title}</Text>
+                <Text style={styles.chartSource}>{READING_CHART.source}</Text>
+                <View style={styles.chartVals}>
+                  {READING_CHART.bars.map((b) => (
+                    <Text key={b.year} style={styles.chartVal}>
+                      {b.v} %
+                    </Text>
+                  ))}
+                </View>
+                <View style={styles.chartBars}>
+                  <View
+                    style={[
+                      styles.chartRule,
+                      { bottom: (READING_CHART.rule / READING_CHART.max) * CHART_BAR_H },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.chartRuleLabel,
+                      { bottom: (READING_CHART.rule / READING_CHART.max) * CHART_BAR_H - 5 },
+                    ]}>
+                    {READING_CHART.rule} %
+                  </Text>
+                  {READING_CHART.bars.map((b) => (
+                    <LinearGradient
+                      key={b.year}
+                      colors={[accent.color, accent.deep]}
+                      style={[styles.chartBar, { height: Math.max(4, (b.v / READING_CHART.max) * CHART_BAR_H) }]}
+                    />
+                  ))}
+                </View>
+                <View style={styles.chartTicks}>
+                  {READING_CHART.bars.map((b) => (
+                    <Text key={b.year} style={styles.chartTick}>
+                      {b.year}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            )}
             {current.options.map((opt, i) => {
               const sel = picked[current.id] === i;
+              const gap = current.type === 'sentence-gap' || current.type === 'text-gap';
               return (
                 <Pressable
                   key={opt}
                   style={[
                     styles.option,
-                    sel && { borderColor: accent.color, borderWidth: 2, backgroundColor: accent.color + '14' },
+                    sel && { borderColor: '#2E1A3B', borderWidth: 2, backgroundColor: '#FBF7FA' },
                   ]}
                   onPress={() => setPicked((p) => ({ ...p, [current.id]: i }))}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: sel }}
                   accessibilityLabel={`${LETTERS[i]}: ${opt}`}>
-                  <View style={[styles.badge, { backgroundColor: sel ? accent.color : accent.color + '1F' }]}>
-                    <Text style={[styles.badgeText, { color: sel ? '#fff' : accent.ink }]}>{LETTERS[i]}</Text>
+                  <View style={[styles.badge, { backgroundColor: sel ? '#2E1A3B' : '#F3EDF2' }]}>
+                    <Text style={[styles.badgeText, { color: sel ? '#fff' : '#5E4E69' }]}>{LETTERS[i]}</Text>
                   </View>
-                  <Text style={styles.optionText}>{opt}</Text>
+                  <Text style={[styles.optionText, styles.rOptText, gap && styles.gapOptText]}>{opt}</Text>
                 </Pressable>
               );
             })}
+          </>
+        )}
+
+        {s === 'reading' && rstage === 'break' && (
+          <>
+            <View style={styles.bCheckWrap}>
+              <CheckIcon color="#0F6B65" />
+            </View>
+            <Text style={styles.bTitle}>
+              {READING_QUESTIONS[READING_QUESTIONS.length - 1].group} terminé
+            </Text>
+            <Text style={styles.bBody}>
+              Vous avez répondu aux {READING_QUESTIONS.length} questions de la démo. Le détail par question
+              sera disponible dans la revue en fin de séance.
+            </Text>
+            <View style={styles.bStats}>
+              <View style={styles.bStat}>
+                <Text style={styles.bStatVal}>
+                  {READING_QUESTIONS[READING_QUESTIONS.length - 1].answer ===
+                  picked[READING_QUESTIONS[READING_QUESTIONS.length - 1].id]
+                    ? '1 / 1'
+                    : '0 / 1'}
+                </Text>
+                <Text style={styles.bStatCap}>CE GROUPE</Text>
+              </View>
+              <View style={styles.bStatDiv} />
+              <View style={styles.bStat}>
+                <Text style={styles.bStatVal}>
+                  {rCorrect} / {READING_QUESTIONS.length}
+                </Text>
+                <Text style={styles.bStatCap}>TOTAL ÉPREUVE</Text>
+              </View>
+              <View style={styles.bStatDiv} />
+              <View style={styles.bStat}>
+                <Text style={styles.bStatVal}>{fmtClock(rsecs)}</Text>
+                <Text style={styles.bStatCap}>TEMPS RESTANT</Text>
+              </View>
+            </View>
+          </>
+        )}
+
+        {s === 'reading' && rstage === 'complete' && (
+          <>
+            <View style={styles.rail}>
+              {SKILLS.map((k) => (
+                <View
+                  key={k}
+                  style={[
+                    styles.railDot,
+                    {
+                      backgroundColor:
+                        k === 'listening' || k === 'reading'
+                          ? '#4ADE80'
+                          : k === 'writing'
+                            ? '#F9BD48'
+                            : 'rgba(255,255,255,.16)',
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+            <Text style={styles.doneKicker}>TEF Canada · session in progress</Text>
+            <Text style={styles.doneTitle}>Reading complete</Text>
+            <Text style={styles.handBody}>
+              No breaks are allowed between tests. Written expression starts on its own — stay at your screen.
+            </Text>
+            <View style={styles.handCard}>
+              <View style={styles.handText}>
+                <Text style={styles.handKicker}>NEXT TEST</Text>
+                <Text style={styles.handName}>Writing</Text>
+                <Text style={styles.handSub}>Written expression · demo</Text>
+              </View>
+              <Text style={styles.handCount}>{fmtClock(handSecs)}</Text>
+            </View>
+            <View style={styles.warnBox}>
+              <Text style={styles.warnText}>
+                No results are shown before the end of the session — like the real exam.
+              </Text>
+            </View>
+            <View style={styles.doneBtns}>
+              <Pressable
+                style={styles.nextBtn}
+                onPress={() => router.replace({ pathname: '/test/[skill]', params: { skill: 'writing' } })}
+                accessibilityRole="button"
+                accessibilityLabel="Start now">
+                <Text style={styles.nextLabel}>Start now</Text>
+              </Pressable>
+            </View>
           </>
         )}
 
@@ -724,37 +1053,22 @@ export default function Test() {
             </View>
             <Text style={styles.doneKicker}>TEF Canada · session in progress</Text>
             <Text style={styles.doneTitle}>Listening complete</Text>
-            <View style={styles.ringWrap}>
-              <Svg width={150} height={150}>
-                <Circle cx={75} cy={75} r={66} stroke="rgba(255,255,255,.14)" strokeWidth={10} fill="none" />
-                {final.correct > 0 && (
-                  <Circle
-                    cx={75}
-                    cy={75}
-                    r={66}
-                    stroke="#F9BD48"
-                    strokeWidth={10}
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 66 * (final.correct / final.total)} ${2 * Math.PI * 66}`}
-                    rotation="-90"
-                    origin="75, 75"
-                  />
-                )}
-              </Svg>
-              <View style={styles.ringCenter}>
-                <Text style={styles.ringValue}>
-                  {final.correct}/{final.total}
-                </Text>
-                <Text style={styles.ringCaption}>CORRECT</Text>
-              </View>
-            </View>
+            <Text style={styles.handBody}>
+              No breaks are allowed between tests. Reading comprehension (10 minutes) starts on its own — stay
+              at your screen.
+            </Text>
             <View style={styles.handCard}>
               <View style={styles.handText}>
                 <Text style={styles.handKicker}>NEXT TEST</Text>
                 <Text style={styles.handName}>Reading</Text>
-                <Text style={styles.handSub}>Reading comprehension · demo</Text>
+                <Text style={styles.handSub}>10 minutes · Reading comprehension</Text>
               </View>
+              <Text style={styles.handCount}>{fmtClock(handSecs)}</Text>
+            </View>
+            <View style={styles.warnBox}>
+              <Text style={styles.warnText}>
+                No results are shown before the end of the session — like the real exam.
+              </Text>
             </View>
             <View style={styles.doneBtns}>
               <Pressable
@@ -763,22 +1077,6 @@ export default function Test() {
                 accessibilityRole="button"
                 accessibilityLabel="Start now">
                 <Text style={styles.nextLabel}>Start now</Text>
-              </Pressable>
-            </View>
-            <View style={styles.doneBtns}>
-              <Pressable
-                style={styles.ghostBtn}
-                onPress={() => router.back()}
-                accessibilityRole="button"
-                accessibilityLabel="Back">
-                <Text style={styles.ghostLabel}>Back</Text>
-              </Pressable>
-              <Pressable
-                style={styles.ghostBtn}
-                onPress={recommencer}
-                accessibilityRole="button"
-                accessibilityLabel="Restart">
-                <Text style={styles.ghostLabel}>Restart</Text>
               </Pressable>
             </View>
           </>
@@ -860,18 +1158,38 @@ export default function Test() {
             <XIcon color={dark ? '#fff' : '#111827'} />
           </Pressable>
           <Text style={[styles.chromeTitle, dark && styles.chromeTitleDark]} numberOfLines={1}>
-            {SKILL_LABEL[s]} · Demo
+            {s === 'reading' && rstage === 'break'
+              ? `${READING_QUESTIONS[READING_QUESTIONS.length - 1].group} · terminé`
+              : s === 'reading' && (rstage === 'passage' || rstage === 'question')
+                ? `Question ${(rstage === 'passage' ? [0, 4, 5][rdoc] : qIndex) + 1} sur 6`
+                : `${SKILL_LABEL[s]} · Demo`}
           </Text>
-          {s === 'listening' && stage === 'question' && (
-            <View style={[styles.timer, dark ? styles.timerDark : styles.timerLight, secs < 60 && styles.timerUrgent]}>
+          {showTimer && s === 'reading' && (
+            <View style={[styles.rTimer, clockSecs < 300 && styles.rTimerUrgent]}>
+              <Text style={[styles.rTimerText, clockSecs < 300 && styles.rTimerUrgentText]}>
+                {fmtClock(clockSecs)}
+              </Text>
+            </View>
+          )}
+          {showTimer && s !== 'reading' && (
+            <View
+              style={[
+                styles.timer,
+                dark ? styles.timerDark : styles.timerLight,
+                clockSecs < 60 && styles.timerUrgent,
+              ]}>
               <Text
-                style={[styles.timerText, dark && styles.timerTextDark, secs < 60 && styles.timerUrgentText]}>
-                {fmtClock(secs)}
+                style={[
+                  styles.timerText,
+                  dark && styles.timerTextDark,
+                  clockSecs < 60 && styles.timerUrgentText,
+                ]}>
+                {fmtClock(clockSecs)}
               </Text>
             </View>
           )}
         </View>
-        {isChoice && !dark && (
+        {isChoice && !dark && (s !== 'reading' || rstage === 'question') && (
           <View style={styles.progress}>
             <View style={styles.track}>
               <LinearGradient
@@ -888,29 +1206,133 @@ export default function Test() {
                 ]}
               />
             </View>
-            <View style={styles.progressRow}>
-              <Text style={styles.progressLabel}>
-                Question {s === 'listening' ? li + 1 : qIndex + 1} sur{' '}
-                {s === 'listening' ? FLAT.length : questions.length}
-              </Text>
-              {s === 'listening' && <Text style={styles.progressGroup}>{cur.doc.group}</Text>}
-            </View>
+            {s === 'reading' ? (
+              <View style={styles.progressRow}>
+                <Pressable
+                  onPress={() => setNavOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open navigator">
+                  <Text style={[styles.progressLabel, styles.progressLink]}>
+                    Question {qIndex + 1} sur {questions.length}
+                  </Text>
+                </Pressable>
+                <Text style={styles.progressGroup}>{READING_GROUP}</Text>
+              </View>
+            ) : (
+              <View style={styles.progressRow}>
+                <Text style={styles.progressLabel}>
+                  Question {li + 1} sur {FLAT.length}
+                </Text>
+                <Text style={styles.progressGroup}>{cur.doc.group}</Text>
+              </View>
+            )}
           </View>
         )}
       </View>
 
-      {s === 'reading' &&
-        (qIndex === 0 ? (
-          <StickyCta
-            label="Next"
-            icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
-            onPress={() => setQIndex(1)}
-            disabled={!answered}
-            note={SHORTENED_NOTE}
+      {s === 'reading' && rstage === 'consignes' && (
+        <StickyCta
+          tone="dark"
+          label="Commencer l'épreuve"
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => setRstage('passage')}
+        />
+      )}
+      {s === 'reading' && rstage === 'passage' && (
+        <StickyCta
+          bg="#2E1A3B"
+          label="Répondre aux questions"
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => {
+            const first = READING_QUESTIONS.findIndex((q) => q.docId === READING_DOCS[rdoc].id);
+            setQIndex(first >= 0 ? first : 0);
+            setRstage('question');
+          }}
+          note="1 question sur ce texte · vous pouvez le rouvrir à tout moment"
+        />
+      )}
+      {s === 'reading' && rstage === 'break' && (
+        <StickyCta
+          bg="#2E1A3B"
+          label="Passer au groupe suivant"
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => setRstage('complete')}
+          note={`${rAnswered} questions sur ${READING_QUESTIONS.length} répondues · ${Math.ceil(rsecs / 60)} min restantes`}
+        />
+      )}
+      {s === 'reading' && rstage === 'question' && (
+        <View style={[styles.footBar, { paddingBottom: insets.bottom + 16 }]} pointerEvents="box-none">
+          <LinearGradient
+            colors={['rgba(255,255,255,0)', 'rgba(255,255,255,.72)', 'rgba(255,255,255,.96)', '#fff']}
+            locations={[0, 0.42, 0.78, 1]}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
           />
-        ) : (
-          <StickyCta label="Submit" onPress={submitChoice} disabled={!answered} note={SHORTENED_NOTE} />
-        ))}
+          <View pointerEvents="box-none" style={styles.rFootCol}>
+            <Pressable
+              style={styles.skipPill}
+              onPress={() => {
+                if (qIndex + 1 >= questions.length) {
+                  setConfirmOpen(true);
+                } else {
+                  rAdvance();
+                }
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Je ne sais pas">
+              <Text style={styles.skipLabel}>Je ne sais pas</Text>
+            </Pressable>
+            {current.type === 'text-mcq' && (
+              <Pressable
+                style={[styles.textBar, { backgroundColor: accent.color + '1F', borderColor: accent.color + '40' }]}
+                onPress={() => setTextOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Revoir le document">
+                <AppIcon name="IconBulkBook" size={16} color={accent.ink} />
+                <Text style={[styles.textBarLabel, { color: accent.ink }]} numberOfLines={1}>
+                  {curDoc.title}
+                </Text>
+                <Text style={styles.textBarHint}>{readingWords} mots</Text>
+              </Pressable>
+            )}
+            <View style={styles.rCtaRow} pointerEvents="box-none">
+              <Pressable
+                style={styles.rBackBtn}
+                onPress={() => setRstage('passage')}
+                accessibilityRole="button"
+                accessibilityLabel="Back">
+                <View style={{ transform: [{ rotate: '180deg' }] }}>
+                  <AppIcon name="IconArrowRight" size={18} color="#111827" />
+                </View>
+              </Pressable>
+              <Pressable
+                style={[styles.rCta, !answered && styles.rCtaDisabled]}
+                disabled={!answered}
+                onPress={() => {
+                  if (qIndex + 1 >= questions.length) {
+                    setConfirmOpen(true);
+                  } else {
+                    rAdvance();
+                  }
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={qIndex + 1 >= questions.length ? "Terminer l'épreuve" : 'Question suivante'}>
+                <Text style={[styles.rCtaLabel, !answered && styles.rCtaLabelDisabled]}>
+                  {qIndex + 1 >= questions.length ? "Terminer l'épreuve" : 'Question suivante'}
+                </Text>
+                <AppIcon name="IconArrowRight" size={17} color={answered ? '#fff' : '#9CA3AF'} />
+              </Pressable>
+            </View>
+            <Text style={styles.rCtaNote}>
+              {qIndex + 1 >= questions.length
+                ? 'Une fois validé, plus aucune modification n’est possible.'
+                : answered
+                  ? `Question ${qIndex + 1} sur ${questions.length} · vos réponses restent modifiables jusqu'à la validation`
+                  : 'Choisissez une réponse pour continuer.'}
+            </Text>
+          </View>
+        </View>
+      )}
       {s === 'listening' && stage === 'consignes' && (
         <StickyCta
           tone="dark"
@@ -934,16 +1356,184 @@ export default function Test() {
       )}
       {s === 'speaking' && <StickyCta label="Submit" onPress={submitText} />}
 
+      {s === 'reading' && navOpen && (
+        <View style={styles.sheetWrap} pointerEvents="box-none">
+          <BlurView intensity={14} tint="dark" style={StyleSheet.absoluteFill} />
+          <Pressable
+            style={styles.sheetBgTap}
+            onPress={() => setNavOpen(false)}
+            accessibilityLabel="Close navigator"
+          />
+          <View style={styles.sheet}>
+            <View style={styles.grab} />
+            <View style={styles.navHead}>
+              <Text style={styles.sheetTitle}>Les 6 questions</Text>
+              <Text style={styles.sheetBody}>
+                {rAnswered} répondues · {READING_QUESTIONS.length - rAnswered} encore vides. Touchez un numéro
+                pour y aller directement.
+              </Text>
+            </View>
+            <View style={styles.navGrid}>
+              {READING_QUESTIONS.map((q, i) => {
+                const done = picked[q.id] !== undefined;
+                return (
+                  <Pressable
+                    key={q.id}
+                    style={[
+                      styles.navCell,
+                      i === qIndex
+                        ? { backgroundColor: accent.color }
+                        : done
+                          ? styles.navDone
+                          : styles.navTodo,
+                    ]}
+                    onPress={() => {
+                      setQIndex(i);
+                      setNavOpen(false);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Question ${i + 1}`}>
+                    <Text
+                      style={[
+                        styles.navNum,
+                        { color: i === qIndex ? '#fff' : done ? '#5E4E69' : '#9C8F9A' },
+                      ]}>
+                      {i + 1}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <View style={styles.navLegend}>
+              {[
+                { label: 'En cours', bg: accent.color, ring: accent.color },
+                { label: 'Répondue', bg: '#F5EEF3', ring: '#EFE3EC' },
+                { label: 'Vide', bg: '#fff', ring: '#E8DFE6' },
+              ].map((l) => (
+                <View key={l.label} style={styles.navLegendItem}>
+                  <View style={[styles.navDot, { backgroundColor: l.bg, borderColor: l.ring }]} />
+                  <Text style={styles.navLegendLabel}>{l.label}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={styles.navBtns}>
+              {(() => {
+                const first = READING_QUESTIONS.findIndex((q) => picked[q.id] === undefined);
+                return first >= 0 ? (
+                  <Pressable
+                    style={styles.sheetPrimary}
+                    onPress={() => {
+                      setQIndex(first);
+                      setNavOpen(false);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Aller à la première question vide ${first + 1}`}>
+                    <Text style={styles.sheetPrimaryLabel}>
+                      Aller à la première question vide · {first + 1}
+                    </Text>
+                  </Pressable>
+                ) : null;
+              })()}
+              <Pressable
+                style={styles.sheetClose}
+                onPress={() => setNavOpen(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Retour à l'épreuve">
+                <Text style={styles.sheetCloseLabel}>Retour à l’épreuve</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {s === 'reading' && confirmOpen && (
+        <View style={styles.sheetWrap} pointerEvents="box-none">
+          <BlurView intensity={14} tint="dark" style={StyleSheet.absoluteFill} />
+          <Pressable
+            style={styles.sheetBgTap}
+            onPress={() => setConfirmOpen(false)}
+            accessibilityLabel="Close confirmation"
+          />
+          <View style={styles.sheet}>
+            <View style={styles.grab} />
+            <Text style={styles.sheetTitle}>Terminer l’épreuve ?</Text>
+            <Text style={styles.sheetBody}>
+              {rAnswered} réponses sur {READING_QUESTIONS.length} ·{' '}
+              {READING_QUESTIONS.length - rAnswered} encore vides. Une fois validé, plus aucune modification
+              n’est possible.
+            </Text>
+            <Pressable
+              style={styles.sheetPrimaryNavy}
+              onPress={() => {
+                setConfirmOpen(false);
+                rfinishRef.current();
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Valider">
+              <Text style={styles.sheetPrimaryLabel}>Valider</Text>
+            </Pressable>
+            <Pressable style={styles.sheetClose} onPress={() => setConfirmOpen(false)} accessibilityRole="button">
+              <Text style={styles.sheetCloseLabel}>Retour</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {s === 'reading' && textOpen && (
+        <View style={styles.sheetWrap} pointerEvents="box-none">
+          <BlurView intensity={14} tint="dark" style={StyleSheet.absoluteFill} />
+          <Pressable
+            style={styles.sheetBgTap}
+            onPress={() => setTextOpen(false)}
+            accessibilityLabel="Close document"
+          />
+          <View style={styles.textSheet}>
+            <View style={styles.grab} />
+            <View style={styles.textHead}>
+              <View style={styles.textHeadText}>
+                <Text style={styles.textKicker} numberOfLines={1}>
+                  {(READING_QUESTIONS.find((q) => q.docId === curDoc.id)?.group ?? '').toUpperCase()}
+                </Text>
+                <Text style={styles.textTitle} numberOfLines={1}>
+                  {curDoc.title}
+                </Text>
+              </View>
+              <Pressable
+                style={styles.textX}
+                onPress={() => setTextOpen(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close">
+                <XIcon color="#5E4E69" />
+              </Pressable>
+            </View>
+            <ScrollView
+              style={styles.textScroll}
+              contentContainerStyle={styles.textBody}
+              nestedScrollEnabled>
+              {curDoc.text.map((para, i) => (
+                <Text key={i} style={styles.sheetPara}>
+                  {para}
+                </Text>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      )}
+
       <ExitSheet
         visible={exitVisible}
-        title={s === 'listening' ? "Quitter l'épreuve ?" : 'Leave this test?'}
+        title={s === 'listening' || s === 'reading' ? "Quitter l'épreuve ?" : 'Leave this test?'}
         body={
-          s === 'listening'
-            ? 'Vos réponses à cette démo seront perdues.'
-            : 'Your answers on this demo will be lost.'
+          s === 'reading'
+            ? 'Votre progression est enregistrée comme tentative inachevée. Le chronomètre continue pendant votre absence.'
+            : s === 'listening'
+              ? 'Vos réponses à cette démo seront perdues.'
+              : 'Your answers on this demo will be lost.'
         }
-        keepLabel={s === 'listening' ? "Continuer l'épreuve" : 'Keep going'}
-        leaveLabel={s === 'listening' ? 'Quitter sans enregistrer' : 'Leave'}
+        keepLabel={s === 'listening' || s === 'reading' ? "Continuer l'épreuve" : 'Keep going'}
+        leaveLabel={s === 'reading' ? 'Enregistrer et quitter' : s === 'listening' ? 'Quitter sans enregistrer' : 'Leave'}
+        keepBg={s === 'reading' ? '#2E1A3B' : undefined}
+        leaveInk={s === 'reading' ? '#B4451F' : undefined}
         rows={
           s === 'listening'
             ? [
@@ -951,11 +1541,28 @@ export default function Test() {
                 { label: 'Document', value: `${FLAT[li].docIdx + 1} sur ${LISTENING_DEMO.length}` },
                 { label: 'Temps restant', value: fmtClock(secs) },
               ]
-            : undefined
+            : s === 'reading'
+              ? [
+                  { label: 'Réponses', value: `${rAnswered} sur ${READING_QUESTIONS.length}` },
+                  { label: 'Document', value: `${rdocNum(qIndex)} sur ${READING_DOCS.length}` },
+                  { label: 'Temps restant', value: fmtClock(rsecs) },
+                ]
+              : undefined
         }
-        note={s === 'listening' ? 'La reprise est gratuite.' : undefined}
+        note={s === 'listening' || s === 'reading' ? 'La reprise est gratuite.' : undefined}
         onKeep={() => setExitVisible(false)}
         onLeave={() => {
+          if (s === 'reading') {
+            const correct = READING_QUESTIONS.filter((q) => picked[q.id] === q.answer).length;
+            void saveResult({
+              id: String(Date.now()),
+              date: new Date().toISOString().slice(0, 10),
+              skill: 'reading',
+              section: 'B',
+              correct,
+              total: READING_QUESTIONS.length,
+            }).catch(() => {});
+          }
           stopAudio();
           router.back();
         }}
@@ -983,7 +1590,7 @@ const styles = StyleSheet.create({
   passageCard: { gap: 8, padding: 16, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: '#EFE3EC' },
   passageKicker: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, textTransform: 'uppercase' },
   passage: { fontFamily: FontFamily.sans, fontSize: 15, lineHeight: 22, color: Brand.ink },
-  qHead: { flexDirection: 'row', marginTop: 4 },
+  qHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   qKicker: {
     fontFamily: FontFamily.sansBold,
     fontSize: 10,
@@ -1082,6 +1689,8 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,.45)',
     textAlign: 'center',
   },
+  handBody: { fontFamily: FontFamily.sansMedium, fontSize: 13.5, lineHeight: 20, color: 'rgba(255,255,255,.55)' },
+  handCount: { fontFamily: FontFamily.sansBold, fontSize: 28, lineHeight: 32, color: '#F9BD48', fontVariant: ['tabular-nums'] },
   handCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1099,16 +1708,6 @@ const styles = StyleSheet.create({
   nextBtn: { flex: 1, height: 52, borderRadius: 100, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   nextLabel: { fontFamily: FontFamily.sansMedium, fontSize: 15, color: '#1E1226' },
   doneBtns: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  ghostBtn: {
-    flex: 1,
-    height: 52,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ghostLabel: { fontFamily: FontFamily.sansMedium, fontSize: 15, color: '#fff' },
 
   waveRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   waveBars: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2, height: 36 },
@@ -1142,6 +1741,181 @@ const styles = StyleSheet.create({
   progress: { paddingHorizontal: 20, paddingTop: 2, gap: 6 },
   progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   progressGroup: { fontFamily: FontFamily.sansBold, fontSize: 11, color: '#2E1A3B' },
+  progressLink: { borderBottomWidth: 1, borderBottomColor: '#857789', paddingBottom: 3 },
+  passDiv: { height: 1, backgroundColor: '#EFE3EC' },
+  textBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    height: 44,
+    paddingHorizontal: 16,
+    borderRadius: 100,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  textBarLabel: { flex: 1, fontFamily: FontFamily.sansBold, fontSize: 13 },
+  textBarHint: { fontFamily: FontFamily.sans, fontSize: 11, color: '#857789' },
+  rFootCol: { gap: 10 },
+  skipPill: {
+    alignSelf: 'center',
+    height: 34,
+    paddingHorizontal: 14,
+    borderRadius: 100,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#DBCED9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  skipLabel: { fontFamily: FontFamily.sansMedium, fontSize: 12, color: '#5E4E69' },
+  rCtaRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  rBackBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 100,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#EFE3EC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rCta: {
+    flex: 1,
+    height: 52,
+    borderRadius: 100,
+    backgroundColor: '#2E1A3B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+  },
+  rCtaDisabled: { backgroundColor: '#E5E7EB' },
+  rCtaLabel: { fontFamily: FontFamily.sansMedium, fontSize: 15, color: '#fff' },
+  rCtaLabelDisabled: { color: '#9CA3AF' },
+  rCtaNote: { fontFamily: FontFamily.sansMedium, fontSize: 12.5, lineHeight: 17, color: '#6E5F78', textAlign: 'center' },
+  sheetWrap: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 20, justifyContent: 'flex-end' },
+  sheetBgTap: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+  sheet: { gap: 16, paddingVertical: 14, paddingHorizontal: 20, paddingBottom: 26, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: '#FFFDFB' },
+  textSheet: { height: '78%', paddingTop: 14, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: '#FFFDFB' },
+  textHead: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F5EEF3' },
+  textHeadText: { flex: 1, gap: 2 },
+  textKicker: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.8, color: '#857789' },
+  textTitle: { fontFamily: FontFamily.serif, fontSize: 16, lineHeight: 21, color: '#111827' },
+  textX: { width: 34, height: 34, borderRadius: 100, backgroundColor: '#F5EEF3', alignItems: 'center', justifyContent: 'center' },
+  textScroll: { flex: 1 },
+  textBody: { gap: 16, paddingVertical: 18, paddingHorizontal: 20, paddingBottom: 28 },
+  navHead: { gap: 6 },
+  navLegend: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingTop: 2 },
+  navLegendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  navDot: { width: 14, height: 14, borderRadius: 5, borderWidth: 1 },
+  navLegendLabel: { fontFamily: FontFamily.sansMedium, fontSize: 11, color: '#6E5F78' },
+  navBtns: { gap: 10, paddingTop: 2 },
+  grab: { width: 38, height: 4, borderRadius: 100, alignSelf: 'center', backgroundColor: '#E8DFE6' },
+  sheetTitle: { fontFamily: FontFamily.sansBold, fontSize: 19, lineHeight: 25, letterSpacing: -0.4, color: '#111827' },
+  sheetBody: { fontFamily: FontFamily.sans, fontSize: 12.5, lineHeight: 18, color: '#5E4E69' },
+  sheetPara: { fontFamily: FontFamily.serif, fontSize: 16.5, lineHeight: 27, color: '#1F2937' },
+  sheetPrimary: { height: 52, borderRadius: 100, backgroundColor: '#6A2A5F', alignItems: 'center', justifyContent: 'center' },
+  sheetPrimaryLabel: { fontFamily: FontFamily.sansMedium, fontSize: 15, color: '#fff' },
+  sheetPrimaryNavy: { height: 52, borderRadius: 100, backgroundColor: '#2E1A3B', alignItems: 'center', justifyContent: 'center' },
+  sheetClose: { height: 44, borderRadius: 100, alignItems: 'center', justifyContent: 'center' },
+  sheetCloseLabel: { fontFamily: FontFamily.sansMedium, fontSize: 14, color: '#5E4E69' },
+  rRulesKicker: { fontFamily: FontFamily.sansBold, fontSize: 9.5, letterSpacing: 0.9, color: '#7FD6CE' },
+  passTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  passPill: {
+    fontFamily: FontFamily.sansBold,
+    fontSize: 10.5,
+    letterSpacing: 0.4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 100,
+    backgroundColor: '#EAF7F5',
+    color: '#0F6B65',
+    overflow: 'hidden',
+  },
+  passWords: { fontFamily: FontFamily.sansMedium, fontSize: 11, color: '#857789' },
+  passTitle: { fontFamily: FontFamily.serif, fontSize: 23, lineHeight: 30, letterSpacing: -0.2, color: '#111827' },
+  passPara: { fontFamily: FontFamily.serif, fontSize: 16.5, lineHeight: 27, color: '#1F2937' },
+  bCheckWrap: {
+    alignSelf: 'center',
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+    backgroundColor: '#EAF7F5',
+    borderWidth: 2,
+    borderColor: '#1A9E94',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  check: { width: 36, height: 36 },
+  checkBar: { position: 'absolute', height: 5, borderRadius: 3 },
+  checkShort: { width: 13, left: 5, top: 19, transform: [{ rotate: '45deg' }] },
+  checkLong: { width: 25, left: 11, top: 13, transform: [{ rotate: '-45deg' }] },
+  bTitle: { fontFamily: FontFamily.sansBold, fontSize: 28, lineHeight: 34, letterSpacing: -0.5, color: '#111827', textAlign: 'center' },
+  bBody: { fontFamily: FontFamily.sansMedium, fontSize: 15, lineHeight: 22, color: '#5E4E69', textAlign: 'center' },
+  bStats: { flexDirection: 'row', paddingVertical: 18, paddingHorizontal: 4, borderRadius: 24, backgroundColor: '#fff', borderWidth: 1, borderColor: '#EFE3EC' },
+  bStat: { flex: 1, alignItems: 'center', gap: 2 },
+  bStatVal: { fontFamily: FontFamily.sansBold, fontSize: 22, lineHeight: 26, color: '#111827', fontVariant: ['tabular-nums'] },
+  bStatCap: { fontFamily: FontFamily.sansBold, fontSize: 9.5, letterSpacing: 0.7, color: '#857789' },
+  bStatDiv: { width: 1, backgroundColor: '#F5EEF3' },
+  passSource: { fontFamily: FontFamily.sansMedium, fontSize: 11.5, letterSpacing: 0.2, color: '#857789' },
+  graphTag: {
+    fontFamily: FontFamily.sansBold,
+    fontSize: 10.5,
+    letterSpacing: 0.4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 100,
+    backgroundColor: '#FFFBEB',
+    color: '#966010',
+    borderWidth: 1,
+    borderColor: '#EDD99A',
+    overflow: 'hidden',
+  },
+  chartQuestion: { fontFamily: FontFamily.sansBold, fontSize: 19, lineHeight: 25, letterSpacing: -0.3, color: '#111827' },
+  gapBox: { gap: 8, padding: 16, borderRadius: 20, backgroundColor: '#FBF7FA', borderWidth: 1, borderColor: '#EFE3EC' },
+  gapKicker: { fontFamily: FontFamily.sansBold, fontSize: 9.5, letterSpacing: 0.8, color: '#857789' },
+  gapSentence: { fontFamily: FontFamily.serif, fontSize: 16, lineHeight: 26, color: '#1F2937' },
+  gapSlot: {
+    fontSize: 16,
+    lineHeight: 26,
+    fontWeight: '600',
+    color: '#0F6B65',
+    borderBottomWidth: 2,
+    borderBottomColor: '#1A9E94',
+  },
+  gapOptText: { fontFamily: FontFamily.sansMedium, fontSize: 15, lineHeight: 20 },
+  rOptText: { fontSize: 14.5 },
+  chartCard: { gap: 12, paddingVertical: 16, paddingHorizontal: 15, paddingBottom: 14, borderRadius: 20, backgroundColor: '#FBF7FA', borderWidth: 1, borderColor: '#EFE3EC' },
+  chartLabel: { fontFamily: FontFamily.sansBold, fontSize: 9.5, letterSpacing: 0.8, color: '#857789' },
+  chartTitle: { fontFamily: FontFamily.serif, fontSize: 15.5, lineHeight: 21, color: '#111827' },
+  chartSource: { fontFamily: FontFamily.sans, fontSize: 11, lineHeight: 15, color: '#857789' },
+  chartVals: { flexDirection: 'row' },
+  chartVal: { flex: 1, textAlign: 'center', fontFamily: FontFamily.sansMedium, fontSize: 10, color: '#0F6B65' },
+  chartBars: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, height: CHART_BAR_H, borderBottomWidth: 1, borderBottomColor: '#E8DFE6' },
+  chartBar: { flex: 1, borderTopLeftRadius: 5, borderTopRightRadius: 5, borderBottomLeftRadius: 2, borderBottomRightRadius: 2 },
+  chartRule: { position: 'absolute', left: 0, right: 0, borderTopWidth: 1, borderTopColor: '#C4B3C1', borderStyle: 'dashed' },
+  chartRuleLabel: { position: 'absolute', left: 0, fontFamily: FontFamily.sansMedium, fontSize: 9.5, color: '#9C8F9A' },
+  chartTicks: { flexDirection: 'row' },
+  chartTick: { flex: 1, textAlign: 'center', fontFamily: FontFamily.sansMedium, fontSize: 9.5, color: '#9C8F9A' },
+  rTimer: {
+    height: 32,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    backgroundColor: '#F5EEF3',
+    borderWidth: 1,
+    borderColor: '#E8DFE6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rTimerUrgent: { backgroundColor: '#FEF2F2', borderColor: '#FBD5D5' },
+  rTimerText: { fontFamily: FontFamily.sansBold, fontSize: 12.5, color: '#374151', fontVariant: ['tabular-nums'] },
+  rTimerUrgentText: { color: '#B91C1C' },
+
+  navGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  navCell: { flex: 1, minWidth: 44, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  navDone: { backgroundColor: '#F5EEF3', borderWidth: 1, borderColor: '#EFE3EC' },
+  navTodo: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#E8DFE6' },
+  navNum: { fontFamily: FontFamily.sansBold, fontSize: 11, fontVariant: ['tabular-nums'] },
   track: { height: 5, borderRadius: 100, backgroundColor: '#EFE3EC', overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 100 },
   progressLabel: { fontFamily: FontFamily.sansMedium, fontSize: 10, letterSpacing: 0.3, color: '#857789' },
@@ -1224,9 +1998,6 @@ const styles = StyleSheet.create({
     color: '#5E4E69',
   },
   transQuote: { flex: 1, fontFamily: FontFamily.sans, fontSize: 12, fontStyle: 'italic', lineHeight: 18, color: '#5E4E69' },
-  ringWrap: { alignSelf: 'center', alignItems: 'center', justifyContent: 'center', marginTop: 16 },
-  ringCenter: { position: 'absolute', alignItems: 'center', gap: 2 },
-  ringValue: { fontFamily: FontFamily.sansBold, fontSize: 26, letterSpacing: -0.5, color: '#fff' },
-  ringCaption: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: 'rgba(255,255,255,.45)' },
+
   doneTitle: { fontFamily: FontFamily.sansBold, fontSize: 26, lineHeight: 32, letterSpacing: -0.6, color: '#fff', textAlign: 'center' },
 });
