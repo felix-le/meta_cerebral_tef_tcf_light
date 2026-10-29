@@ -72,6 +72,7 @@ const ROWS: { section: string; items: { label: string; run: () => void }[] }[] =
       { label: 'Review', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'review' } }) },
       { label: 'Submit · recap', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'submit' } }) },
       { label: 'Pending · with the AI', run: () => router.push({ pathname: '/test/[skill]', params: { skill: 'speaking', stage: 'pending' } }) },
+      { label: 'Session result', run: () => router.push({ pathname: '/result', params: { skill: 'speaking' } }) },
     ],
   },
 ];

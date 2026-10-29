@@ -10,6 +10,12 @@ export interface MockResult {
   half?: Half;
   correct?: number;
   total?: number;
+  /** Choice picks by question id (listening/reading review). */
+  picks?: Record<string, number>;
+  /** Submitted writing text (section B review). */
+  text?: string;
+  /** Measured take durations in seconds (speaking review). */
+  durations?: number[];
 }
 
 const KEY = 'prepa-tef-tcf/history-v1';
