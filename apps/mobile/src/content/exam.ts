@@ -229,12 +229,89 @@ export const LISTENING_DEMO: ListeningDoc[] = [
 export const READING_CONSIGNE =
   'Consigne : lisez le document puis choisissez la bonne réponse.';
 
-export const READING_PASSAGE =
-  'La médiathèque du centre-ville propose désormais un service de prêt entre bibliothèques. Les lecteurs inscrits peuvent commander un livre disponible dans une autre médiathèque du réseau et le retirer ici sous trois jours ouvrés. Ce service est gratuit pour les abonnés.';
+export const READING_GROUP = 'Documents du quotidien';
 
-export const READING_SAMPLE: ChoiceQuestion[] = [
+export const READING_RULES = [
+  '6 questions, 10 minutes, cinq groupes de documents. Le chronomètre s’affiche en haut à droite.',
+  'Vous pouvez circuler librement entre les questions et modifier vos réponses.',
+  'Le bouton « Terminer l’épreuve » n’apparaît qu’après la dernière question : une fois validé, plus aucune modification n’est possible.',
+  'Il n’y a aucun outil de marquage. Notez vous-même le numéro de l’écran si vous passez une question.',
+];
+
+export type ReadingQType = 'text-mcq' | 'sentence-gap' | 'text-gap' | 'chart';
+
+export interface ReadingDoc {
+  id: string;
+  title: string;
+  source: string;
+  text: string[];
+}
+
+export interface ReadingQuestion {
+  id: string;
+  group: string;
+  type: ReadingQType;
+  /** Text-mcq questions point at one of READING_DOCS; gap/chart carry their own card. */
+  docId?: string;
+  /** Shown question text. Gap questions use the design instruction sentence. */
+  prompt: string;
+  /** Gap sentence/text split around the slot (gap types only). */
+  before?: string;
+  after?: string;
+  options: [string, string, string, string];
+  answer: number;
+}
+
+export interface ReadingChart {
+  label: string;
+  title: string;
+  source: string;
+  bars: { year: string; v: number }[];
+  max: number;
+  rule: number;
+  question: string;
+  options: [string, string, string, string];
+  answer: number;
+}
+
+export const READING_DOCS: ReadingDoc[] = [
+  {
+    id: 'rdoc1',
+    title: 'Prêt entre bibliothèques : un nouveau service',
+    source: 'Médiathèque du centre-ville · avis aux lecteurs',
+    text: [
+      'La médiathèque du centre-ville propose désormais un service de prêt entre bibliothèques. Les lecteurs inscrits peuvent commander un livre disponible dans une autre médiathèque du réseau et le retirer ici sous trois jours ouvrés. Ce service est gratuit pour les abonnés.',
+    ],
+  },
+  {
+    id: 'rdoc2',
+    title: 'Avis aux résidents',
+    source: 'Copropriété Les Tilleuls',
+    text: [
+      'L’ascenseur du bâtiment B sera hors service du 12 au 16 mai pour des travaux de modernisation. Pendant cette période, merci d’utiliser l’escalier ou l’ascenseur du bâtiment A. La gardienne reste à votre disposition. Le syndic.',
+    ],
+  },
+  {
+    id: 'rdoc3',
+    title: 'Le retour des bureaux à la campagne',
+    source: 'Le Devoir · mars 2024 · Camille Roy',
+    text: [
+      'Il y a cinq ans, Sophie Béchard louait vingt postes de travail au centre-ville de Montréal. Aujourd’hui, son agence de traduction occupe l’ancienne quincaillerie d’un village de deux mille habitants, à deux heures de route de son ancien bureau.',
+      'Le calcul semble évident : le loyer a baissé de soixante pour cent. Ce n’est pas le loyer qui les décide, admet-elle, mais le fait de garder des salariés qui allaient partir. Trois de ses traductrices avaient annoncé leur départ pour des régions plus abordables ; l’agence a préféré les suivre.',
+      'Le mouvement reste minoritaire. Selon l’Institut de la statistique, moins de quatre pour cent des entreprises de services ont déménagé hors des grands centres depuis 2020. Mais celles qui l’ont fait déclarent un taux de rétention supérieur de onze points à la moyenne de leur secteur.',
+      'Tout n’est pas résolu pour autant. Le recrutement de profils très spécialisés devient plus lent, et les municipalités concernées manquent souvent de places en garderie et de logements locatifs — deux conditions que les nouveaux arrivants citent avant le prix du terrain.',
+      'Sophie Béchard, elle, ne prévoit pas de revenir. Elle garde toutefois un espace de réunion loué à la journée en ville, « pour les clients qui n’ont pas encore compris qu’on travaille très bien à quatre-vingts kilomètres d’eux ».',
+    ],
+  },
+];
+
+/** Demo: 6 questions, 5 groups, 4 types (no ordering, no graph-matching). */
+export const READING_QUESTIONS: ReadingQuestion[] = [
   {
     id: 'r1',
+    group: 'Documents du quotidien',
+    type: 'text-mcq',
+    docId: 'rdoc1',
     prompt: 'Ce service permet de…',
     options: [
       'acheter des livres d’occasion',
@@ -246,16 +323,79 @@ export const READING_SAMPLE: ChoiceQuestion[] = [
   },
   {
     id: 'r2',
-    prompt: 'Le retrait du livre se fait…',
+    group: 'Phrases lacunaires',
+    type: 'sentence-gap',
+    prompt: 'Choisissez le mot ou l’expression qui complète la phrase.',
+    before: 'Les entreprises qui ouvrent un bureau en région le font',
+    after: 'pour retenir leurs employés.',
+    options: ['d’abord', 'rarement', 'malgré tout', 'en principe'],
+    answer: 0,
+  },
+  {
+    id: 'r3',
+    group: 'Textes lacunaires',
+    type: 'text-gap',
+    prompt: 'Choisissez le mot ou l’expression qui complète le texte.',
+    before: 'Il pleut depuis ce matin, mais le marché du samedi a lieu comme',
+    after: '. Les commerçants ont installé leurs stands sous des barnums et les clients sont venus nombreux malgré le mauvais temps.',
+    options: ['prévu', 'annulé', 'payant', 'rarement'],
+    answer: 0,
+  },
+  {
+    id: 'r4',
+    group: 'Lecture rapide',
+    type: 'chart',
+    prompt: 'En quelle année la part du vélo dépasse-t-elle 10 % pour la première fois ?',
+    options: ['En 2015', 'En 2018', 'En 2021', 'En 2024'],
+    answer: 2,
+  },
+  {
+    id: 'r5',
+    group: 'Documents administratifs et professionnels',
+    type: 'text-mcq',
+    docId: 'rdoc2',
+    prompt: 'Pendant les travaux, les résidents doivent…',
     options: [
-      'le jour même de la commande',
-      'sous trois jours ouvrés',
-      'uniquement le samedi',
-      'après un mois d’attente',
+      'utiliser l’escalier ou l’ascenseur du bâtiment A',
+      'quitter l’immeuble avant le 12 mai',
+      'payer un supplément de charges',
+      'contacter la mairie de leur arrondissement',
+    ],
+    answer: 0,
+  },
+  {
+    id: 'r6',
+    group: 'Article de presse',
+    type: 'text-mcq',
+    docId: 'rdoc3',
+    prompt: 'Qu’est-ce qui a décidé Sophie Béchard à quitter le centre-ville ?',
+    options: [
+      'La baisse du loyer de son bureau.',
+      'Le départ annoncé de plusieurs employées.',
+      'Une demande de ses clients montréalais.',
+      'Un programme d’aide municipal.',
     ],
     answer: 1,
   },
 ];
+
+/** Design chart example, used exactly (Lecture rapide demo chart-as-document). */
+export const READING_CHART: ReadingChart = {
+  label: 'DOCUMENT · Ville de Sherbrooke',
+  title: 'Part du vélo dans les déplacements quotidiens',
+  source: 'Enquête origine-destination · 2024',
+  bars: [
+    { year: '2015', v: 6 },
+    { year: '2018', v: 9 },
+    { year: '2021', v: 14 },
+    { year: '2024', v: 23 },
+  ],
+  max: 30,
+  rule: 10,
+  question: 'En quelle année la part du vélo dépasse-t-elle 10 % pour la première fois ?',
+  options: ['En 2015', 'En 2018', 'En 2021', 'En 2024'],
+  answer: 2,
+};
 
 export const WRITING_B_CONSIGNE = 'Expression écrite — Tâche B';
 export const WRITING_B_SUBJECT =

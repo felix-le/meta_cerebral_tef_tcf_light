@@ -32,6 +32,7 @@ export const FontFamily = {
   sansMedium: 'Inter_500Medium',
   sansBold: 'Inter_700Bold',
   serifItalic: 'InstrumentSerif_400Regular_Italic',
+  serif: 'Georgia',
 } as const;
 
 export type Skill = 'listening' | 'reading' | 'speaking' | 'writing';

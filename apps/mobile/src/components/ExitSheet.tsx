@@ -13,6 +13,8 @@ export function ExitSheet({
   onLeave,
   rows,
   note,
+  keepBg,
+  leaveInk,
 }: {
   visible: boolean;
   title: string;
@@ -23,6 +25,8 @@ export function ExitSheet({
   onLeave: () => void;
   rows?: { label: string; value: string }[];
   note?: string;
+  keepBg?: string;
+  leaveInk?: string;
 }) {
   if (!visible) {
     return null;
@@ -44,11 +48,14 @@ export function ExitSheet({
             ))}
           </View>
         )}
-        <Pressable style={styles.keep} onPress={onKeep} accessibilityRole="button">
+        <Pressable
+          style={[styles.keep, keepBg ? { backgroundColor: keepBg } : null]}
+          onPress={onKeep}
+          accessibilityRole="button">
           <Text style={styles.keepLabel}>{keepLabel}</Text>
         </Pressable>
         <Pressable style={styles.leave} onPress={onLeave} accessibilityRole="button">
-          <Text style={styles.leaveLabel}>{leaveLabel}</Text>
+          <Text style={[styles.leaveLabel, leaveInk ? { color: leaveInk } : null]}>{leaveLabel}</Text>
         </Pressable>
         {note ? <Text style={styles.note}>{note}</Text> : null}
       </View>
