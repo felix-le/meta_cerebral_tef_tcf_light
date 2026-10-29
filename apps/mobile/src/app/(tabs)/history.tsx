@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Brand, FontFamily, SKILL_LABEL } from '@/constants/theme';
 import { listResults, MockResult } from '@/storage/history';
+import { TabScreenFade } from '@/components/TabScreenFade';
 
 export default function History() {
   const [results, setResults] = useState<MockResult[]>([]);
@@ -14,6 +15,7 @@ export default function History() {
   );
 
   return (
+    <TabScreenFade>
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>History</Text>
       <Text style={styles.note}>Results are kept on this device.</Text>
@@ -32,12 +34,14 @@ export default function History() {
         ))
       )}
     </ScrollView>
+    </TabScreenFade>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.mist },
-  content: { padding: 20, gap: 12 },
+  // Extra bottom space so the floating tab bar never covers the last card.
+  content: { padding: 20, paddingBottom: 110, gap: 12 },
   title: { fontFamily: FontFamily.sansBold, fontSize: 28, color: Brand.ink },
   note: { fontFamily: FontFamily.sans, fontSize: 13, color: Brand.muted },
   empty: { fontFamily: FontFamily.sans, fontSize: 15, color: Brand.muted, marginTop: 16 },

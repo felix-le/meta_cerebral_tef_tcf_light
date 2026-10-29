@@ -30,6 +30,7 @@ export default function RootLayout() {
       <Stack.Screen name="animation" />
       <Stack.Screen name="entry" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="mock/[id]" />
       <Stack.Screen name="test/[skill]" />
       <Stack.Screen name="result" />
       <Stack.Screen name="analysis" />

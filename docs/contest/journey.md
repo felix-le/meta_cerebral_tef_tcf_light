@@ -75,3 +75,11 @@
 - Verification: `tsc --noEmit` clean; `expo export --platform web` compiles all routes; device rendering confirmed only by owner screenshots.
 - Deferred (revisit if tokens remain after the app is done): sliding pill indicator that travels between tabs (needs measured tab positions); the current crossfade is the approved interim.
 - Redirect: owner direction 2026-10-29 (commit design-matching parts only; self-made additions stay uncommitted; no push yet).
+
+## 2026-10-29 — Home, Mock catalogue + session detail follow design
+
+- Milestone: Home brought to design (Up next header, 82% snap rail, rich result-summary card, NCLC + CEFR values, Inter everywhere, safe-area top); Mock tab rebuilt as the design catalogue (app bar, exam context row, working Newest/Oldest sort, year rails of month cards); new `mock/[id]` session detail (dark hero, readiness panel, skill cards, exam-structure card, sticky CTA); skill order fixed to Listening, Reading, Speaking, Writing.
+- Product change: `(tabs)/index.tsx`, `(tabs)/mock.tsx`, `mock/[id].tsx`, `content/mocks.ts`, `constants/theme.ts` (SKILL_DARK, SKILL_DEEP, SKILL_ORDER), `app/_layout.tsx` (route registration), `(tabs)/history.tsx` (fade + bottom clearance for the floating bar), `components/TabScreenFade.tsx`.
+- Verification: `tsc --noEmit` clean; `expo export --platform web` compiles all routes including `mock/[id]`; device rendering confirmed only by owner screenshots.
+- Deferred (revisit after the app is done): watermark numeral fidelity on the detail hero (explicit right anchor now; month-number based, no database needed).
+- Redirect: owner direction 2026-10-29 — splash TEMP bypass, package files, `test/[skill]`, scope doc stay uncommitted; no push. Next: UI of the 4 skills per design.
