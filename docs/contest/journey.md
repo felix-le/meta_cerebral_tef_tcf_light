@@ -205,3 +205,10 @@
 - Context: owner ordered the cut back to section B per the contest scope (section A hidden, not deleted), then the a-b-c closing list; meanwhile a repeating red error toast appeared on-device.
 - Product change: `content/exam.ts` keeps full section A+B data behind `INCLUDE_SECTION_A = false` (flip to restore); visible Writing/Speaking flows run section B only with singular copy, task-switch code dormant but intact. `storage/history.ts` never rejects (in-memory fallback) after `AsyncStorageError: Native module is null` toasts traced to async-storage 3.1.1 vs SDK 58's 2.2.0 — package pinned to 2.2.0. `app/result.tsx` drops the dead listening/reading branch (no caller) and the false "scored from your transcript" note. Root README fixed per the scope note (4-skill TEF Canada mock; English UI, French exam).
 - Verification: `tsc --noEmit` clean; `expo export --platform web` ok; device checks by owner.
+
+## 2026-10-29 — TestReview session screen + Mock-Detail alignment (owner review)
+
+- Context: post-Speaking submit screen was pre-design scaffold; owner asked for TestReview per TestReview.dc.html, then for Mock-Detail layout parity.
+- Product change: `app/result.tsx` rebuilt as the session TestReview (dark hero, real donut arc, CORRECT/MISSED/AI-TASKS stats, sticky skill tabs, sync per-question review with filters, async pending cards with real text/durations, history CTA); `test/[skill].tsx` saves picks/text/durations to history for it. Aligned to `mock/[id].tsx`: blob opacity, heroBody, SVG donut, blur-on-scroll back chrome, single #F8F3F7 sheet. No watermark (no real session number), no fake scores/explanations/AI summary, no wall card (no per-question analysis content yet).
+- Known debt (owner deferred): 3-stat spacing in the hero panel needs a pass; revisit when tokens allow.
+- Verification: `tsc --noEmit` clean; `expo export --platform web` ok; device checks by owner.

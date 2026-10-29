@@ -501,6 +501,7 @@ export default function Test() {
         section: 'B',
         level: stub.overall.level as Cefr,
         half: stub.overall.half,
+        durations: [...sdur],
       });
     } catch {}
   };
@@ -532,6 +533,13 @@ export default function Test() {
     stopAudio();
     setStage('complete');
     try {
+      const ids = new Set(FLAT.map((item) => item.q.id));
+      const picks: Record<string, number> = {};
+      Object.keys(picked).forEach((k) => {
+        if (ids.has(k)) {
+          picks[k] = picked[k];
+        }
+      });
       await saveResult({
         id: String(Date.now()),
         date: new Date().toISOString().slice(0, 10),
@@ -539,6 +547,7 @@ export default function Test() {
         section: 'B',
         correct,
         total: FLAT.length,
+        picks,
       });
     } catch {}
   };
@@ -563,6 +572,13 @@ export default function Test() {
     const correct = READING_QUESTIONS.filter((q) => picked[q.id] === q.answer).length;
     setRstage('break');
     try {
+      const ids = new Set(READING_QUESTIONS.map((q) => q.id));
+      const picks: Record<string, number> = {};
+      Object.keys(picked).forEach((k) => {
+        if (ids.has(k)) {
+          picks[k] = picked[k];
+        }
+      });
       await saveResult({
         id: String(Date.now()),
         date: new Date().toISOString().slice(0, 10),
@@ -570,6 +586,7 @@ export default function Test() {
         section: 'B',
         correct,
         total: READING_QUESTIONS.length,
+        picks,
       });
     } catch {}
   };
@@ -596,6 +613,7 @@ export default function Test() {
         section: 'B',
         level: stub.overall.level as Cefr,
         half: stub.overall.half,
+        text: drafts[0] ?? '',
       });
     } catch {}
   };
