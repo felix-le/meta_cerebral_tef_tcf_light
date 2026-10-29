@@ -397,7 +397,13 @@ export const READING_CHART: ReadingChart = {
   answer: 2,
 };
 
+// Contest scope cut (owner decision): stage 0 builds section B only.
+// Section A stays in the file, hidden behind INCLUDE_SECTION_A — flip the
+// flag to bring it back, no rewrite needed.
+export const INCLUDE_SECTION_A = false;
+
 export interface WritingTask {
+  section: 'A' | 'B';
   kicker: string;
   title: string;
   consigne: string;
@@ -408,11 +414,11 @@ export interface WritingTask {
   placeholder: string;
 }
 
-// Writing demo: both TEF tasks (A: fait divers 80 words, B: courrier des
-// lecteurs 200 words). Content mirrors WritingTest.dc.html; drafts start
-// empty on the phone so the candidate actually writes.
-export const WRITING_TASKS: WritingTask[] = [
+// Full Writing demo content (both TEF tasks). Mirrors WritingTest.dc.html;
+// drafts start empty on the phone so the candidate actually writes.
+export const WRITING_TASKS_ALL: WritingTask[] = [
   {
+    section: 'A',
     kicker: 'Tâche 1 · section A',
     title: 'Terminer un fait divers',
     consigne:
@@ -424,6 +430,7 @@ export const WRITING_TASKS: WritingTask[] = [
     placeholder: "Continuez l'article…",
   },
   {
+    section: 'B',
     kicker: 'Tâche 2 · section B',
     title: 'Exprimer et défendre un point de vue',
     consigne:
@@ -436,12 +443,24 @@ export const WRITING_TASKS: WritingTask[] = [
   },
 ];
 
-export const WRITING_RULES = [
+export const WRITING_TASKS: WritingTask[] = INCLUDE_SECTION_A
+  ? WRITING_TASKS_ALL
+  : WRITING_TASKS_ALL.filter((t) => t.section === 'B');
+
+export const WRITING_RULES_ALL = [
   'Deux textes, 10 minutes en tout pour cette démo. Vous répartissez le temps comme vous voulez : rien n’est imposé par texte.',
   'Tâche A : terminer un fait divers, 80 mots minimum. Tâche B : défendre un point de vue, 200 mots minimum.',
   "Un clavier d'accents est disponible à l'écran. Le champ est en texte brut : l'orthographe et la grammaire sont évaluées, la mise en page non.",
   'Les deux textes sont envoyés ensemble. À la fin du temps imparti, ils partent tels quels.',
 ];
+
+export const WRITING_RULES = INCLUDE_SECTION_A
+  ? WRITING_RULES_ALL
+  : [
+      'Un seul texte : défendre un point de vue, 200 mots minimum. 10 minutes pour cette démo (35 minutes à l’examen).',
+      "Un clavier d'accents est disponible à l'écran. Le champ est en texte brut : l'orthographe et la grammaire sont évaluées, la mise en page non.",
+      'Le texte est envoyé une seule fois. À la fin du temps imparti, il part tel quel.',
+    ];
 
 export const WRITING_NOTE =
   'Le compteur de mots et l’alerte de minimum sont propres à l’application. L’examen annonce un minimum mais rien ne confirme qu’il compte les mots ou bloque un texte trop court.';
@@ -481,6 +500,7 @@ export interface SpeakingTurn {
 }
 
 export interface SpeakingTask {
+  section: 'A' | 'B';
   kicker: string;
   title: string;
   consigne: string;
@@ -494,10 +514,12 @@ export interface SpeakingTask {
   turns: SpeakingTurn[];
 }
 
-// Speaking demo (TEF Canada, 2 sections). Examiner cues mirror
-// SpeakingTest.dc.html; durations below are measured live, never seeded.
-export const SPEAKING_TASKS: SpeakingTask[] = [
+// Full Speaking demo content (both TEF sections). Examiner cues mirror
+// SpeakingTest.dc.html; durations are measured live, never seeded. Section
+// A is hidden behind INCLUDE_SECTION_A (same flag as Writing).
+export const SPEAKING_TASKS_ALL: SpeakingTask[] = [
   {
+    section: 'A',
     kicker: 'Tâche 1 · section A',
     title: 'Obtenir des informations',
     consigne:
@@ -519,6 +541,7 @@ export const SPEAKING_TASKS: SpeakingTask[] = [
     ],
   },
   {
+    section: 'B',
     kicker: 'Tâche 2 · section B',
     title: 'Présenter et convaincre',
     consigne:
@@ -541,12 +564,25 @@ export const SPEAKING_TASKS: SpeakingTask[] = [
   },
 ];
 
-export const SPEAKING_RULES = [
+export const SPEAKING_TASKS: SpeakingTask[] = INCLUDE_SECTION_A
+  ? SPEAKING_TASKS_ALL
+  : SPEAKING_TASKS_ALL.filter((t) => t.section === 'B');
+
+export const SPEAKING_RULES_ALL = [
   'Deux sections, 15 minutes en tout. La section A dure 5 minutes, la section B 10 minutes.',
   "Chaque section commence par une minute de découverte du sujet. La prise de notes n'est pas autorisée.",
   "Un examinateur vous fait face et joue le rôle de votre interlocuteur. Vous l'entendez : rien n'est écrit, ni ici ni le jour de l'examen.",
   "Tout est enregistré une seule fois. Il n'y a pas de seconde prise le jour de l'examen.",
 ];
+
+export const SPEAKING_RULES = INCLUDE_SECTION_A
+  ? SPEAKING_RULES_ALL
+  : [
+      'Une seule partie, 10 minutes : présenter et convaincre.',
+      "La partie commence par une minute de découverte du sujet. La prise de notes n'est pas autorisée.",
+      "Un examinateur vous fait face et joue le rôle de votre interlocuteur. Vous l'entendez : rien n'est écrit, ni ici ni le jour de l'examen.",
+      "Tout est enregistré une seule fois. Il n'y a pas de seconde prise le jour de l'examen.",
+    ];
 
 export const SPEAKING_NOTE =
   "Le retour de l'IA ne concerne que l'entraînement. Le jour de l'examen, deux examinateurs notent l'enregistrement.";

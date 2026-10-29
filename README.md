@@ -1,13 +1,14 @@
-# TEF & TCF Canada — Speaking & Writing Practice (Light)
+# Prépa TEF TCF — Contest Mock (Stage 0)
 
-A lightweight Expo mobile app (iOS + Android) to practise the two productive skills of the
-**TEF Canada** and **TCF Canada** French exams: **Speaking** (Expression orale) and
-**Writing** (Expression écrite).
+A lightweight Expo mobile app (iOS + Android) running a shortened **TEF Canada** mock test in
+one sitting: **Listening** (Compréhension orale), **Reading** (Compréhension écrite),
+**Writing** section B (Expression écrite) and **Speaking** section B (Expression orale).
 
 Built for the **Meta Global AI Developer Hackathon** (Cerebral Valley).
 
-This is a standalone, light build focused on two skills only. It is not the full mock-exam
-platform — no accounts, no payments, no admin tooling, no other exam skills.
+This is a standalone contest build — no accounts, no payments, no admin tooling. Scoring
+content is TEF Canada only; AI scoring lands in a later stage (writing/speaking results show
+a documented stub until then).
 
 ---
 
@@ -19,13 +20,22 @@ platform — no accounts, no payments, no admin tooling, no other exam skills.
 - Record your answer on the phone.
 - AI feedback on fluency, vocabulary, grammar and structure.
 
+### Listening & Reading
+
+- Shortened working sections with real TTS audio (listening) and free navigation (reading).
+- A clear in-app note says the full 40-question versions arrive after launch.
+
 ### Writing
 
-- Practice prompts modelled on the official writing tasks.
-- Write your answer in the app.
-- AI feedback on structure, vocabulary, grammar and coherence.
+- Section B only: defend a point of view, 200 words minimum.
+- Write your answer in the app with an accent keyboard and live word count.
 
-Production UI is French.
+### Speaking
+
+- Section B only: present and convince, stub take with live examiner cues.
+- No real recording in Stage 0; no second take, like the exam.
+
+App UI is English; exam content is French.
 
 ---
 
@@ -44,7 +54,7 @@ Production UI is French.
 meta_cerebral_valley_tef_tcf/
 ├── README.md            this file
 └── apps/
-    └── mobile/          Expo app (speaking + writing practice)
+    └── mobile/          Expo app (4-skill mock)
 ```
 
 ---
