@@ -29,9 +29,12 @@ import {
   SPEAKING_B_CONSIGNE,
   SPEAKING_B_DOCUMENT,
   SPEAKING_MAX_TURNS,
-  WRITING_B_CONSIGNE,
-  WRITING_B_FLOOR,
-  WRITING_B_SUBJECT,
+  WRITING_ACCENTS,
+  WRITING_CRITERIA,
+  WRITING_DEMO_SECS,
+  WRITING_NOTE,
+  WRITING_RULES,
+  WRITING_TASKS,
 } from '@/content/exam';
 
 const SKILLS: Skill[] = ['listening', 'reading', 'writing', 'speaking'];
@@ -163,6 +166,26 @@ export default function Test() {
   const rfinishRef = useRef(() => {});
   const [exitVisible, setExitVisible] = useState(false);
   const [text, setText] = useState('');
+  // Writing strict mock: consignes -> write -> review -> write(2) ->
+  // review -> submit -> pending (the AI scores while speaking starts).
+  // Per-tâche intros are skipped in mock mode, straight into the field.
+  const [wstage, setWstage] = useState<'consignes' | 'write' | 'review' | 'submit' | 'pending'>(() =>
+    skill === 'writing' &&
+    (stageParam === 'write' || stageParam === 'review' || stageParam === 'submit' || stageParam === 'pending')
+      ? stageParam
+      : 'consignes',
+  );
+  const [wtask, setWtask] = useState(() => (skill === 'writing' && liParam === '1' ? 1 : 0));
+  const [drafts, setDrafts] = useState<string[]>(['', '']);
+  const [wtyped, setWtyped] = useState(false);
+  const [wsecs, setWsecs] = useState(WRITING_DEMO_SECS);
+  // Cursor tracked in a ref, never in state: storing it in state re-renders
+  // on every keystroke and breaks typing on iOS.
+  const wselRef = useRef({ start: 0, end: 0 });
+  const [promptOpen, setPromptOpen] = useState(false);
+  const [wauto, setWauto] = useState(false);
+  const wdoneRef = useRef(false);
+  const wfinishRef = useRef((_auto: boolean) => {});
   // Listening strict mock: consignes screen, then per question
   // signal -> consigne (first of document) -> document -> question -> pause.
   // No per-answer verdict in mock mode.
@@ -434,7 +457,7 @@ export default function Test() {
   const waveTime = phase === 'pause' ? `${fmtClock(10 - pauseLeft)} / 0:10` : fmtClock(qElapsed);
 
   const submitText = async () => {
-    const stub = s === 'speaking' ? SPEAKING_B_STUB : WRITING_B_STUB;
+    const stub = SPEAKING_B_STUB;
     await saveResult({
       id: String(Date.now()),
       date: new Date().toISOString().slice(0, 10),
@@ -448,12 +471,15 @@ export default function Test() {
 
   const dark =
     (s === 'listening' && (stage === 'consignes' || stage === 'complete')) ||
-    (s === 'reading' && (rstage === 'consignes' || rstage === 'complete'));
+    (s === 'reading' && (rstage === 'consignes' || rstage === 'complete')) ||
+    (s === 'writing' && (wstage === 'consignes' || wstage === 'pending'));
   const showTimer =
     (s === 'listening' && stage === 'question') ||
-    (s === 'reading' && (rstage === 'passage' || rstage === 'question' || rstage === 'break'));
-  const clockSecs = s === 'reading' ? rsecs : secs;
-  const topPad = dark ? insets.top + 64 : insets.top + 52 + (isChoice ? 52 : 12) + 8;
+    (s === 'reading' && (rstage === 'passage' || rstage === 'question' || rstage === 'break')) ||
+    (s === 'writing' && (wstage === 'write' || wstage === 'review' || wstage === 'submit'));
+  const clockSecs = s === 'reading' ? rsecs : s === 'writing' ? wsecs : secs;
+  const wChromeTall = s === 'writing' && wstage !== 'consignes' && wstage !== 'pending';
+  const topPad = dark ? insets.top + 64 : insets.top + 52 + (isChoice || wChromeTall ? 52 : 12) + 8;
 
   // Saved exactly once: doneRef also guards the 1s timer against repeats.
   // The result screen shows first; history save is best-effort after it,
@@ -512,12 +538,39 @@ export default function Test() {
     void finishReading();
   };
 
+  // Writing demo: both texts go together, saved once. The pending screen
+  // shows first; history save is best-effort after it, so a storage
+  // failure can never trap the user on the submit screen.
+  const finishWriting = async (auto: boolean) => {
+    if (wdoneRef.current) {
+      return;
+    }
+    wdoneRef.current = true;
+    setWauto(auto);
+    setWstage('pending');
+    try {
+      const stub = WRITING_B_STUB;
+      await saveResult({
+        id: String(Date.now()),
+        date: new Date().toISOString().slice(0, 10),
+        skill: 'writing',
+        section: 'B',
+        level: stub.overall.level as Cefr,
+        half: stub.overall.half,
+      });
+    } catch {}
+  };
+  wfinishRef.current = (auto: boolean) => {
+    void finishWriting(auto);
+  };
+
   // Handoff auto-advance: entering either end screen restarts the 15 s
   // countdown; at zero it moves to the next skill on its own.
   useEffect(() => {
     const done =
       (skill === 'listening' && stage === 'complete') ||
-      (skill === 'reading' && rstage === 'complete');
+      (skill === 'reading' && rstage === 'complete') ||
+      (skill === 'writing' && wstage === 'pending');
     if (!done) {
       return;
     }
@@ -526,7 +579,7 @@ export default function Test() {
       setHandSecs((v) => (v <= 1 ? 0 : v - 1));
     }, 1000);
     return () => clearInterval(t);
-  }, [skill, stage, rstage]);
+  }, [skill, stage, rstage, wstage]);
   useEffect(() => {
     if (handSecs !== 0) {
       return;
@@ -535,8 +588,10 @@ export default function Test() {
       router.replace({ pathname: '/test/[skill]', params: { skill: 'reading' } });
     } else if (skill === 'reading' && rstage === 'complete') {
       router.replace({ pathname: '/test/[skill]', params: { skill: 'writing' } });
+    } else if (skill === 'writing' && wstage === 'pending') {
+      router.replace({ pathname: '/test/[skill]', params: { skill: 'speaking' } });
     }
-  }, [handSecs, skill, stage, rstage]);
+  }, [handSecs, skill, stage, rstage, wstage]);
 
   // Demo budget: 5 minutes, ticking once the passage opens (never from
   // consignes). The countdown only counts; finishing lives outside the
@@ -555,6 +610,45 @@ export default function Test() {
       rfinishRef.current();
     }
   }, [skill, rsecs, rstage]);
+
+  // Demo budget: 10 minutes, ticking once the writing field opens (never
+  // from consignes). At zero both texts go as-is, like the real exam.
+  useEffect(() => {
+    if (skill !== 'writing' || (wstage !== 'write' && wstage !== 'review' && wstage !== 'submit')) {
+      return;
+    }
+    const t = setInterval(() => {
+      setWsecs((v) => (v <= 1 ? 0 : v - 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [skill, wstage]);
+  useEffect(() => {
+    if (
+      skill === 'writing' &&
+      wsecs === 0 &&
+      (wstage === 'write' || wstage === 'review' || wstage === 'submit')
+    ) {
+      wfinishRef.current(true);
+    }
+  }, [skill, wsecs, wstage]);
+
+  // Writing helpers: current task, its word count, accent insertion at the
+  // cursor (falls back to appending when no selection is known yet).
+  const wtaskData = WRITING_TASKS[wtask];
+  const wcount = countWords(drafts[wtask] ?? '');
+  const wshort = wcount < wtaskData.min;
+  const insertAccent = (ch: string) => {
+    const cur = drafts[wtask] ?? '';
+    const sel = wselRef.current;
+    // No selection known yet (accent tapped before focusing): append.
+    const untouched = cur !== '' && sel.start === 0 && sel.end === 0;
+    const from = untouched ? cur.length : Math.max(0, Math.min(sel.start, cur.length));
+    const to = untouched ? cur.length : Math.max(0, Math.min(sel.end, cur.length));
+    const next = cur.slice(0, from) + ch + cur.slice(to);
+    setDrafts((d) => d.map((v, i) => (i === wtask ? next : v)));
+    setWtyped(true);
+    wselRef.current = { start: from + ch.length, end: from + ch.length };
+  };
 
   const wordsOf = (paras: string[]) => paras.join(' ').split(/\s+/).filter(Boolean).length;
   // Document number (1-3) for the exit sheet: text questions show their own
@@ -656,7 +750,8 @@ export default function Test() {
           styles.content,
           { paddingTop: topPad, paddingBottom: 150 },
         ]}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
         {s === 'reading' && rstage === 'consignes' && (
           <>
             <View style={styles.consignesHead}>
@@ -1082,19 +1177,253 @@ export default function Test() {
           </>
         )}
 
-        {s === 'writing' && (
+        {s === 'writing' && wstage === 'consignes' && (
           <>
-            <Text style={styles.taskTitle}>{WRITING_B_CONSIGNE}</Text>
-            <View style={styles.passageCard}>
-              <Text style={styles.passage}>{WRITING_B_SUBJECT}</Text>
+            <View style={styles.consignesHead}>
+              <Text style={styles.consignesKicker}>TEF Canada · épreuve 3 sur 4</Text>
+              <Text style={styles.consignesTitle}>Expression écrite</Text>
+              <Text style={styles.consignesSub}>2 tâches · 10 minutes · temps global</Text>
+              <Text style={styles.demoNote}>
+                Démo raccourcie : 10 minutes au lieu de 60, mais les deux tâches et leurs minimums sont les
+                vrais.
+              </Text>
+            </View>
+            <View style={styles.rulesCard}>
+              <Text style={styles.rRulesKicker}>CONSIGNES</Text>
+              {WRITING_RULES.map((r, i) => (
+                <View key={i} style={styles.ruleRow}>
+                  <View style={styles.ruleNum}>
+                    <Text style={styles.ruleNumText}>{i + 1}</Text>
+                  </View>
+                  <Text style={styles.ruleText}>{r}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.consigneNote}>{WRITING_NOTE}</Text>
+          </>
+        )}
+
+        {s === 'writing' && wstage === 'write' && (
+          <>
+            {wsecs <= 60 && (
+              <View style={styles.lowBanner}>
+                <Text style={styles.lowBannerText}>
+                  Une minute restante. Le brouillon est enregistré automatiquement : à 0:00, ce qui est écrit
+                  est envoyé.
+                </Text>
+              </View>
+            )}
+            <View style={styles.wConsigneCard}>
+              <View style={styles.wConsigneHead}>
+                <Text style={styles.wConsigneKicker}>CONSIGNE · {wtaskData.kicker}</Text>
+                <Pressable
+                  onPress={() => setPromptOpen((v) => !v)}
+                  accessibilityRole="button"
+                  accessibilityLabel={promptOpen ? 'Masquer le document' : 'Afficher le document'}
+                  hitSlop={8}>
+                  <Text style={styles.wToggle}>{promptOpen ? 'Masquer' : 'Afficher'} le document</Text>
+                </Pressable>
+              </View>
+              <Text style={styles.wConsigneText}>{wtaskData.short}</Text>
+              {promptOpen && (
+                <View style={styles.wDocOpen}>
+                  <Text style={styles.wDocKicker}>{wtaskData.docLabel}</Text>
+                  <Text style={styles.wDocText}>{wtaskData.doc}</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.wordBlock}>
+              <View style={styles.wordRow}>
+                <Text style={[styles.wordCount, { color: wshort ? '#B91C1C' : '#15803D' }]}>
+                  {wcount} {wcount === 1 ? 'mot' : 'mots'}
+                </Text>
+                <Text style={styles.wordNote}>
+                  {wshort
+                    ? `· encore ${wtaskData.min - wcount} pour atteindre ${wtaskData.min}`
+                    : `· au-dessus du minimum de ${wtaskData.min}`}
+                </Text>
+                <View style={styles.saveChip}>
+                  <Text style={styles.saveLabel}>{wtyped ? 'Enregistré en continu' : 'Brouillon enregistré'}</Text>
+                </View>
+              </View>
+              <View style={styles.wordTrack}>
+                <LinearGradient
+                  colors={wshort ? ['#F0A0A0', '#DC2626'] : [Brand.gold, accent.deep]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.wordFill, { width: `${Math.min(100, (wcount / wtaskData.min) * 100)}%` }]}
+                />
+              </View>
+            </View>
+            <View style={styles.accentBox}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.accentRow}>
+                {WRITING_ACCENTS.map((ch) => (
+                  <Pressable
+                    key={ch}
+                    style={styles.accentKey}
+                    onPress={() => insertAccent(ch)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Insérer ${ch}`}>
+                    <Text style={styles.accentLabel}>{ch}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+              <Text style={styles.accentCaption}>Clavier d’accents — reste visible pendant le scroll</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={styles.editor}
               multiline
-              value={text}
-              onChangeText={setText}
-              placeholder="Écrivez votre texte ici…"
+              textAlignVertical="top"
+              value={drafts[wtask] ?? ''}
+              onChangeText={(v) => {
+                setDrafts((d) => d.map((prev, i) => (i === wtask ? v : prev)));
+                setWtyped(true);
+              }}
+              onSelectionChange={(e) => {
+                wselRef.current = e.nativeEvent.selection;
+              }}
+              placeholder={wtaskData.placeholder}
+              placeholderTextColor="#A2919F"
             />
+          </>
+        )}
+
+        {s === 'writing' && wstage === 'review' && (
+          <>
+            <View style={styles.reviewHead}>
+              <View style={styles.reviewPills}>
+                <Text style={styles.kickerPill}>{wtaskData.kicker}</Text>
+                <View style={styles.savedChip}>
+                  <View style={styles.mcheck}>
+                    <View style={[styles.mcheckBar, styles.mcheckShort]} />
+                    <View style={[styles.mcheckBar, styles.mcheckLong]} />
+                  </View>
+                  <Text style={styles.savedLabel}>Enregistré</Text>
+                </View>
+              </View>
+              <Text style={styles.wTitle}>
+                Tâche {wtask + 1} rédigée · {wcount} mots
+              </Text>
+            </View>
+            <View style={styles.reviewRows}>
+              <View style={styles.reviewRow}>
+                <Text style={styles.reviewLabel}>Longueur</Text>
+                <Text style={[styles.reviewValue, { color: wshort ? '#B91C1C' : '#111827' }]}>
+                  {wcount} mots
+                </Text>
+              </View>
+              <View style={styles.reviewRow}>
+                <Text style={styles.reviewLabel}>Minimum</Text>
+                <Text style={styles.reviewValue}>{wtaskData.min} mots</Text>
+              </View>
+              <View style={styles.reviewRowLast}>
+                <Text style={styles.reviewLabel}>Section</Text>
+                <Text style={styles.reviewValue}>{wtaskData.kicker.split(' · ')[1]}</Text>
+              </View>
+            </View>
+            <View style={styles.reviewBox}>
+              <Text style={styles.reviewKicker}>VOTRE TEXTE</Text>
+              <Text style={styles.reviewText}>{drafts[wtask] === '' ? '—' : drafts[wtask]}</Text>
+            </View>
+            <Text style={styles.reviewNote}>
+              {wshort
+                ? 'Ce texte est en dessous de la longueur demandée. Vous pouvez le rouvrir et le compléter : rien n’est verrouillé avant l’envoi des deux tâches.'
+                : 'Les deux tâches restent modifiables jusqu’à l’envoi. Ensuite les textes sont définitifs et partent tels quels vers l’IA.'}
+            </Text>
+            <Pressable
+              style={styles.editBtn}
+              onPress={() => setWstage('write')}
+              accessibilityRole="button"
+              accessibilityLabel={`Modifier à nouveau la tâche ${wtask + 1}`}>
+              <Text style={styles.editLabel}>Modifier à nouveau la tâche {wtask + 1}</Text>
+            </Pressable>
+          </>
+        )}
+
+        {s === 'writing' && wstage === 'submit' && (
+          <>
+            <View style={styles.submitHead}>
+              <Text style={styles.wTitle}>Envoyer les deux textes à la correction</Text>
+              <Text style={styles.submitSub}>
+                Une fois envoyés, les textes ne peuvent plus être modifiés. L’IA les évalue sur quatre critères
+                et rend un score pour l’épreuve.
+              </Text>
+            </View>
+            {WRITING_TASKS.map((t, i) => {
+              const n = countWords(drafts[i] ?? '');
+              const ok = n >= t.min;
+              return (
+                <View key={t.kicker} style={styles.submitRow}>
+                  <View style={styles.fileIcon}>
+                    <AppIcon name="IconOutlineRoundedAiDocument" size={18} color="#966010" />
+                  </View>
+                  <View style={styles.submitInfo}>
+                    <Text style={styles.submitName}>
+                      Tâche {i + 1} · {t.title}
+                    </Text>
+                    <Text style={styles.submitMeta}>
+                      {t.kicker.split(' · ')[1]} · {t.min} mots min.
+                    </Text>
+                  </View>
+                  <Text style={[styles.submitWords, { color: ok ? '#15803D' : '#B91C1C' }]}>
+                    {n} mots
+                  </Text>
+                </View>
+              );
+            })}
+            <View style={styles.aiBox}>
+              <View style={styles.aiBoxHead}>
+                <AppIcon name="IconSparkles" size={16} color="#8A5B10" />
+                <Text style={styles.aiBoxTitle}>La correction par l’IA prend 1 à 5 minutes</Text>
+              </View>
+              <Text style={styles.aiBoxBody}>
+                Vous pouvez fermer l’application. La tentative apparaît dans l’historique avec le statut «
+                correction IA » et une notification vous prévient dès que le score arrive.
+              </Text>
+              <View style={styles.critChips}>
+                {WRITING_CRITERIA.map((c) => (
+                  <Text key={c} style={styles.critChip}>
+                    {c}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
+
+        {s === 'writing' && wstage === 'pending' && (
+          <>
+            <View style={styles.aiWrap}>
+              <View style={styles.aiRing}>
+                <AppIcon name="IconSparkles" size={44} color={Brand.gold} />
+              </View>
+              <Text style={styles.aiLabel}>CORRECTION</Text>
+              <Text style={styles.aiTitle}>
+                {wauto ? 'Temps écoulé — les deux textes ont été envoyés' : 'Les deux textes sont chez l’IA'}
+              </Text>
+              <Text style={styles.aiSub}>
+                {wauto
+                  ? 'Le chronomètre a atteint 0:00 : les textes sont partis à l’IA tels quels. La correction prend quelques minutes.'
+                  : 'Quelques minutes. Vous n’êtes pas obligé de rester ici : la tentative apparaît dans l’historique avec le statut « correction IA ».'}
+              </Text>
+            </View>
+            <View style={styles.pendRows}>
+              <View style={styles.pendRow}>
+                <Text style={styles.pendLabel}>Envoyé</Text>
+                <Text style={styles.pendValue}>{wauto ? '2 tâches · automatiquement' : '2 tâches · manuellement'}</Text>
+              </View>
+              <View style={styles.pendRow}>
+                <Text style={styles.pendLabel}>Statut dans l’historique</Text>
+                <Text style={styles.pendValue}>Correction IA</Text>
+              </View>
+              <View style={styles.pendRowLast}>
+                <Text style={styles.pendLabel}>Attente estimée</Text>
+                <Text style={styles.pendValue}>1 à 5 minutes</Text>
+              </View>
+            </View>
           </>
         )}
 
@@ -1162,8 +1491,21 @@ export default function Test() {
               ? `${READING_QUESTIONS[READING_QUESTIONS.length - 1].group} · terminé`
               : s === 'reading' && (rstage === 'passage' || rstage === 'question')
                 ? `Question ${(rstage === 'passage' ? [0, 4, 5][rdoc] : qIndex) + 1} sur 6`
-                : `${SKILL_LABEL[s]} · Demo`}
+                : s === 'writing' && wstage === 'submit'
+                  ? 'Envoi · 2 tâches'
+                  : s === 'writing' && wstage === 'review'
+                    ? `Tâche ${wtask + 1} sur 2`
+                    : s === 'writing' && (wstage === 'write' || wstage === 'pending')
+                      ? ''
+                      : `${SKILL_LABEL[s]} · Demo`}
           </Text>
+          {s === 'writing' && wstage === 'write' && (
+            <View style={styles.wordChip}>
+              <Text style={styles.wordChipText}>
+                {wcount} / {wtaskData.min}
+              </Text>
+            </View>
+          )}
           {showTimer && s === 'reading' && (
             <View style={[styles.rTimer, clockSecs < 300 && styles.rTimerUrgent]}>
               <Text style={[styles.rTimerText, clockSecs < 300 && styles.rTimerUrgentText]}>
@@ -1226,6 +1568,20 @@ export default function Test() {
                 <Text style={styles.progressGroup}>{cur.doc.group}</Text>
               </View>
             )}
+          </View>
+        )}
+        {s === 'writing' && wstage !== 'consignes' && wstage !== 'pending' && (
+          <View style={styles.progressLabels}>
+            <Text style={styles.progressLabel}>
+              {wstage === 'submit' ? 'Deux tâches rédigées' : `Tâche ${wtask + 1} sur 2`}
+            </Text>
+            <Text style={styles.progressGroup}>
+              {wstage === 'submit'
+                ? 'Prêt à envoyer'
+                : wstage === 'review'
+                  ? 'Enregistré'
+                  : 'Expression écrite · 10 min'}
+            </Text>
           </View>
         )}
       </View>
@@ -1344,14 +1700,74 @@ export default function Test() {
           }}
         />
       )}
-      {s === 'writing' && (
+      {s === 'writing' && wstage === 'consignes' && (
         <StickyCta
-          label="Submit"
-          onPress={submitText}
-          disabled={text.trim() === ''}
-          note={`${countWords(text)} / ${WRITING_B_FLOOR} words minimum${
-            countWords(text) < WRITING_B_FLOOR ? ' — below the floor, feedback will repeat it.' : ''
-          }`}
+          tone="dark"
+          label="Commencer l'épreuve"
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => setWstage('write')}
+          note="Le chronomètre de 10 minutes (démo) couvre les deux textes — il démarre à l'écran suivant."
+        />
+      )}
+      {s === 'writing' && wstage === 'write' && (
+        <StickyCta
+          bg={wshort ? '#B4451F' : '#2E1A3B'}
+          label={wshort ? `Continuer avec ${wcount} mots` : 'Enregistrer et relire le brouillon'}
+          icon={
+            wshort ? (
+              <AppIcon name="IconArrowRight" size={17} color="#fff" />
+            ) : (
+              <CheckIcon color="#fff" />
+            )
+          }
+          onPress={() => setWstage('review')}
+          disabled={wcount === 0}
+          note={
+            wcount === 0
+              ? "Écrivez quelque chose avant d'enregistrer cette tâche."
+              : wshort
+                ? `Un texte de moins de ${wtaskData.min} mots perd des points — encore ${wtaskData.min - wcount}.`
+                : "Le brouillon est enregistré au fil de la frappe. Vous pouvez le modifier jusqu'à l'envoi."
+          }
+        />
+      )}
+      {s === 'writing' && wstage === 'review' && (
+        <StickyCta
+          bg="#2E1A3B"
+          label={wtask === 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => {
+            if (wtask === 1) {
+              setWstage('submit');
+            } else {
+              setWtask(1);
+              setPromptOpen(false);
+              setWstage('write');
+            }
+          }}
+          note={
+            wtask === 1
+              ? "Rien n'a encore été envoyé à l'IA."
+              : 'La tâche 2 est le courrier des lecteurs : 200 mots minimum.'
+          }
+        />
+      )}
+      {s === 'writing' && wstage === 'submit' && (
+        <StickyCta
+          bg="#2E1A3B"
+          label="Envoyer à la correction"
+          icon={<AppIcon name="IconOutlineRoundedAiDocument" size={17} color="#fff" />}
+          onPress={() => void finishWriting(false)}
+          note="Action irréversible — les textes sont définitifs après envoi."
+        />
+      )}
+      {s === 'writing' && wstage === 'pending' && (
+        <StickyCta
+          tone="dark"
+          label="Continuer : Expression orale"
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+          onPress={() => router.replace({ pathname: '/test/[skill]', params: { skill: 'speaking' } })}
+          note={`L'IA corrige cette épreuve pendant que vous continuez. Passage à l'oral dans ${fmtClock(handSecs)}.`}
         />
       )}
       {s === 'speaking' && <StickyCta label="Submit" onPress={submitText} />}
@@ -1522,16 +1938,32 @@ export default function Test() {
 
       <ExitSheet
         visible={exitVisible}
-        title={s === 'listening' || s === 'reading' ? "Quitter l'épreuve ?" : 'Leave this test?'}
+        title={
+          s === 'listening' || s === 'reading' || s === 'writing' ? (
+            s === 'writing' && wstage !== 'consignes' && wstage !== 'pending'
+              ? 'Quitter cette tâche ?'
+              : "Quitter l'épreuve ?"
+          ) : (
+            'Leave this test?'
+          )
+        }
         body={
           s === 'reading'
             ? 'Votre progression est enregistrée comme tentative inachevée. Le chronomètre continue pendant votre absence.'
             : s === 'listening'
               ? 'Vos réponses à cette démo seront perdues.'
-              : 'Your answers on this demo will be lost.'
+              : s === 'writing'
+                ? `La tâche ${wtask + 1} compte ${wcount} mots. Le brouillon n’est pas encore envoyé : il sera perdu si vous quittez.`
+                : 'Your answers on this demo will be lost.'
         }
-        keepLabel={s === 'listening' || s === 'reading' ? "Continuer l'épreuve" : 'Keep going'}
-        leaveLabel={s === 'reading' ? 'Enregistrer et quitter' : s === 'listening' ? 'Quitter sans enregistrer' : 'Leave'}
+        keepLabel={
+          s === 'writing' && wstage !== 'consignes' && wstage !== 'pending'
+            ? 'Rester et continuer à rédiger'
+            : s === 'listening' || s === 'reading'
+              ? "Continuer l'épreuve"
+              : 'Keep going'
+        }
+        leaveLabel={s === 'reading' ? 'Enregistrer et quitter' : s === 'listening' ? 'Quitter sans enregistrer' : s === 'writing' ? 'Quitter sans enregistrer' : 'Leave'}
         keepBg={s === 'reading' ? '#2E1A3B' : undefined}
         leaveInk={s === 'reading' ? '#B4451F' : undefined}
         rows={
@@ -1547,7 +1979,12 @@ export default function Test() {
                   { label: 'Document', value: `${rdocNum(qIndex)} sur ${READING_DOCS.length}` },
                   { label: 'Temps restant', value: fmtClock(rsecs) },
                 ]
-              : undefined
+              : s === 'writing'
+                ? [
+                    { label: 'Rédaction', value: `Tâche ${wtask + 1} · ${wcount} mots` },
+                    { label: 'Temps restant', value: fmtClock(wsecs) },
+                  ]
+                : undefined
         }
         note={s === 'listening' || s === 'reading' ? 'La reprise est gratuite.' : undefined}
         onKeep={() => setExitVisible(false)}
@@ -2000,4 +2437,211 @@ const styles = StyleSheet.create({
   transQuote: { flex: 1, fontFamily: FontFamily.sans, fontSize: 12, fontStyle: 'italic', lineHeight: 18, color: '#5E4E69' },
 
   doneTitle: { fontFamily: FontFamily.sansBold, fontSize: 26, lineHeight: 32, letterSpacing: -0.6, color: '#fff', textAlign: 'center' },
+
+  // Writing mock (WritingTest.dc.html): field, accents, word meter, review,
+  // submit recap and the dark "with the AI" pending screen.
+  consigneNote: { fontFamily: FontFamily.sans, fontSize: 12, lineHeight: 18, color: 'rgba(255,255,255,.62)' },
+  progressLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 2,
+  },
+  wordChip: {
+    height: 32,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    justifyContent: 'center',
+    backgroundColor: '#F5EEF3',
+    borderWidth: 1,
+    borderColor: '#EFE3EC',
+    flexShrink: 0,
+  },
+  wordChipText: { fontFamily: FontFamily.sansBold, fontSize: 13, color: '#2E1A3B', fontVariant: ['tabular-nums'] },
+  lowBanner: { padding: 12, borderRadius: 14, backgroundColor: '#FEF3C7', borderWidth: 1, borderColor: '#FDE68A' },
+  lowBannerText: { fontFamily: FontFamily.sansBold, fontSize: 12, lineHeight: 18, color: '#92400E' },
+  wTitle: { fontFamily: FontFamily.sansBold, fontSize: 22, lineHeight: 28, letterSpacing: -0.4, color: '#111827' },
+  wConsigneCard: { gap: 9, padding: 16, borderRadius: 20, backgroundColor: '#FBF7FA', borderWidth: 1, borderColor: '#EFE3EC' },
+  wConsigneHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  wConsigneKicker: { flex: 1, fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: '#857789' },
+  wToggle: { fontFamily: FontFamily.sansBold, fontSize: 11, color: '#966010' },
+  wConsigneText: { fontFamily: FontFamily.sans, fontSize: 14, lineHeight: 20, color: '#2E1A3B' },
+  wDocOpen: { gap: 7, paddingTop: 9, borderTopWidth: 1, borderTopColor: '#EFE3EC' },
+  wDocKicker: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: '#857789' },
+  wDocText: { fontFamily: FontFamily.sans, fontSize: 13, lineHeight: 20, color: '#4B5563' },
+  wordBlock: { gap: 9 },
+  accentBox: {
+    gap: 5,
+    padding: 10,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#E8DFE6',
+  },
+  accentCaption: { fontFamily: FontFamily.sans, fontSize: 11, color: '#A2919F' },
+  editor: {
+    minHeight: 180,
+    padding: 16,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#EFE3EC',
+    fontFamily: FontFamily.sans,
+    fontSize: 15,
+    lineHeight: 23,
+    color: '#111827',
+  },
+  accentRow: { gap: 8, paddingVertical: 4 },
+  accentKey: {
+    minWidth: 34,
+    height: 34,
+    paddingHorizontal: 8,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FBF7FA',
+    borderWidth: 1,
+    borderColor: '#EFE3EC',
+  },
+  accentLabel: { fontFamily: FontFamily.sansBold, fontSize: 14, color: '#5E4E69' },
+  wordRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  wordCount: { fontFamily: FontFamily.sansBold, fontSize: 19, lineHeight: 24, fontVariant: ['tabular-nums'] },
+  wordNote: { flex: 1, fontFamily: FontFamily.sans, fontSize: 12, color: '#5E4E69' },
+  saveChip: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    flexShrink: 0,
+  },
+  saveLabel: { fontFamily: FontFamily.sansBold, fontSize: 11, color: '#15803D' },
+  wordTrack: { height: 6, borderRadius: 100, backgroundColor: '#F3EDF2', overflow: 'hidden' },
+  wordFill: { height: '100%', borderRadius: 100 },
+  reviewHead: { gap: 10 },
+  reviewPills: { flexDirection: 'row', alignItems: 'center', gap: 7, flexWrap: 'wrap' },
+  kickerPill: {
+    fontFamily: FontFamily.sansBold,
+    fontSize: 10,
+    letterSpacing: 0.8,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    overflow: 'hidden',
+    backgroundColor: '#FDF3E3',
+    color: '#7A4E0C',
+    borderWidth: 1,
+    borderColor: '#F0DCB4',
+  },
+  savedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  mcheck: { width: 12, height: 12, alignItems: 'center', justifyContent: 'center' },
+  mcheckBar: { position: 'absolute', height: 2, borderRadius: 1, backgroundColor: '#15803D' },
+  mcheckShort: { width: 5, left: 1, top: 6, transform: [{ rotate: '45deg' }] },
+  mcheckLong: { width: 9, left: 3, top: 4, transform: [{ rotate: '-45deg' }] },
+  savedLabel: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.8, color: '#15803D' },
+  reviewRows: { paddingHorizontal: 16, borderRadius: 20, backgroundColor: '#FBF7FA', borderWidth: 1, borderColor: '#EFE3EC' },
+  reviewRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5EEF3',
+  },
+  reviewRowLast: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingVertical: 11 },
+  reviewLabel: { flex: 1, fontFamily: FontFamily.sans, fontSize: 13, color: '#5E4E69' },
+  reviewValue: { fontFamily: FontFamily.sansBold, fontSize: 13, fontVariant: ['tabular-nums'] },
+  reviewKicker: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: '#857789' },
+  reviewBox: { gap: 10, padding: 18, borderRadius: 22, backgroundColor: '#fff', borderWidth: 1, borderColor: '#E8DFE6' },
+  reviewText: { fontFamily: FontFamily.sans, fontSize: 14, lineHeight: 21, color: '#111827' },
+  reviewNote: { fontFamily: FontFamily.sans, fontSize: 13, lineHeight: 19, color: '#5E4E69' },
+  editBtn: {
+    paddingVertical: 13,
+    borderRadius: 100,
+    alignItems: 'center',
+    backgroundColor: '#FDF3E3',
+    borderWidth: 1,
+    borderColor: '#F0DCB4',
+  },
+  editLabel: { fontFamily: FontFamily.sansBold, fontSize: 14, color: '#7A4E0C' },
+  submitHead: { gap: 8 },
+  submitSub: { fontFamily: FontFamily.sans, fontSize: 14, lineHeight: 20, color: '#5E4E69' },
+  submitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+    padding: 16,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#E8DFE6',
+  },
+  fileIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FDF3E3',
+    flexShrink: 0,
+  },
+  submitInfo: { flex: 1, gap: 3 },
+  submitName: { fontFamily: FontFamily.sansBold, fontSize: 13, color: '#111827' },
+  submitMeta: { fontFamily: FontFamily.sans, fontSize: 12, color: '#5E4E69' },
+  submitWords: { fontFamily: FontFamily.sansBold, fontSize: 13, fontVariant: ['tabular-nums'], flexShrink: 0 },
+  aiBox: { gap: 9, padding: 16, borderRadius: 20, backgroundColor: '#FEFAF1', borderWidth: 1, borderColor: '#F3E6C8' },
+  aiBoxHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  aiBoxTitle: { flex: 1, fontFamily: FontFamily.sansBold, fontSize: 13, lineHeight: 17, color: '#8A5B10' },
+  aiBoxBody: { fontFamily: FontFamily.sans, fontSize: 13, lineHeight: 18, color: '#5E4E69' },
+  critChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingTop: 2 },
+  critChip: {
+    fontFamily: FontFamily.sansBold,
+    fontSize: 11,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 100,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    color: '#8A5B10',
+    borderWidth: 1,
+    borderColor: '#F3E6C8',
+  },
+  aiWrap: { alignItems: 'center', gap: 10, paddingTop: 24 },
+  aiRing: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: Brand.gold,
+    backgroundColor: 'rgba(249,189,72,.08)',
+  },
+  aiLabel: { fontFamily: FontFamily.sansBold, fontSize: 11, letterSpacing: 1.2, color: Brand.gold },
+  aiTitle: { fontFamily: FontFamily.sansBold, fontSize: 20, lineHeight: 26, color: '#fff', textAlign: 'center' },
+  aiSub: { fontFamily: FontFamily.sans, fontSize: 13, lineHeight: 19, color: 'rgba(255,255,255,.72)', textAlign: 'center' },
+  pendRows: {
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.1)',
+  },
+  pendRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,.08)' },
+  pendRowLast: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 12 },
+  pendLabel: { fontFamily: FontFamily.sans, fontSize: 13, color: 'rgba(255,255,255,.6)' },
+  pendValue: { fontFamily: FontFamily.sansBold, fontSize: 13, color: '#fff', textAlign: 'right', flexShrink: 1 },
 });
