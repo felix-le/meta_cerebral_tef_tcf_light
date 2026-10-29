@@ -150,7 +150,12 @@ export default function MockSession() {
               <Text style={styles.sectionHint}>Tap one to open</Text>
             </View>
             {SKILL_ORDER.map((skill) => (
-              <Pressable key={skill} style={styles.skillCard} onPress={() => router.push(`/test/${skill}`)}>
+              <Pressable
+                key={skill}
+                style={styles.skillCard}
+                onPress={() =>
+                  router.push({ pathname: '/test/[skill]', params: { skill, mode: 'mock' } })
+                }>
                 <View style={styles.skillRow}>
                   <LinearGradient
                     colors={[SkillAccent[skill], SKILL_DEEP[skill]]}
@@ -229,7 +234,9 @@ export default function MockSession() {
         />
         <Pressable
           style={styles.cta}
-          onPress={() => router.push(`/test/${SKILL_ORDER[0]}`)}
+          onPress={() =>
+            router.push({ pathname: '/test/[skill]', params: { skill: SKILL_ORDER[0], mode: 'mock' } })
+          }
           accessibilityRole="button"
           accessibilityLabel="Start Listening">
           <AppIcon name="IconArrowRight" size={17} color="#fff" />

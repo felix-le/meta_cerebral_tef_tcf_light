@@ -135,6 +135,64 @@ objections. Same limits as §3.2: transcript only, no pronunciation or intonatio
 - README and video say: estimation only, transcript-based for speaking, no official grid used, criterion names from
   CCI/FEI public documents.
 
+### 5.1 Writing B probe — 2026-10-29 (muse-spark-1.3, Chat Completions + json_schema)
+
+Three in-house samples on the B-only demo consigne (car-free historic centre, letter to the newspaper).
+All calls HTTP 200, all outputs schema-valid, every overall inside its assessed criteria range.
+Probe: `/tmp/stage1-writing-probe.mjs` + `/tmp/stage1-samples/*.txt` (request built by `src/ai/scorer.ts`).
+
+| Sample | Words | Expected | Got | Estimation shown | Drift |
+|---|---|---|---|---|---|
+| faible | 148 | A2 | A2/none | NCLC 4 · 181–225 / 450 | 0 |
+| moyen | 207 | B1 | B2/lower | NCLC 7 · 310–348 / 450 | +1 (tolerance edge) |
+| bon | 290 | B2 | C2/none, 0 corrections | NCLC 11–12 · 416–450 / 450 | +2, ceiling effect |
+
+Reading: ordering is monotonic (faible < moyen < bon), but the model grades generously, worst at the top end —
+the bon sample got straight C2 with zero corrections, which flatters it. For the contest demo this is acceptable
+(the screen says Estimation, and §2 shows a range, never an exact score), but do not present top-band estimates
+as precise, and re-probe with public CEFR sample texts before any wider release.
+
+Sample texts (verbatim, French):
+
+**faible** (got A2): « Madame, Monsieur, Je vous écris pour le centre-ville sans voiture. Je suis contre cette idée.
+C'est pas bien pour les gens. D'abord, les gens ont besoin de la voiture pour aller au travail. Le bus c'est long
+et c'est pas pratique. Ma mère prend la voiture tous les jours. Si le centre est fermé, elle peut pas aller au
+travail. C'est un gros problème. Ensuite, les magasins vont perdre des clients. Les gens vont aller dans les grands
+magasins en dehors de la ville. Les petits magasins du centre vont fermer. C'est triste pour la ville. Aussi, les
+personnes âgées peuvent pas marcher beaucoup. Ils ont besoin de la voiture pour aller chez le médecin. Le week-end,
+ils veulent sortir aussi. Pour finir, je pense que c'est une mauvaise idée. Il faut laisser les voitures. Il faut
+pas fermer le centre. Merci de lire ma lettre. Pierre Dubois »
+
+**moyen** (got B2/lower): « Madame, Monsieur, J'ai lu dans votre journal que la mairie veut interdire les voitures
+dans le centre historique le week-end. Je veux donner mon avis parce que j'habite dans ce quartier depuis dix ans.
+Je suis plutôt favorable à ce projet, même si je comprends les inquiétudes des commerçants. D'abord, la pollution
+est un vrai problème dans le centre. Quand il y a beaucoup de voitures, l'air est mauvais et c'est désagréable de
+se promener. Par exemple, le samedi après-midi, le bruit des voitures est très fatigant pour les habitants. Ensuite,
+un centre sans voiture serait plus sûr pour les enfants et les personnes âgées. Ils pourraient marcher tranquillement
+sans avoir peur des accidents. Dans beaucoup de villes en Europe, les centres piétons marchent très bien et les
+magasins ont même plus de clients. Pourtant, il faut que la mairie propose des solutions. Il faut plus de bus le
+week-end, et il faut des parkings pas chers à l'entrée de la ville. Sans ça, les gens qui habitent loin peuvent pas
+venir. En conclusion, je soutiens cette idée à condition qu'on prépare bien les transports. C'est bon pour la santé
+et pour la qualité de vie. Je vous prie d'agréer, Madame, Monsieur, mes salutations distinguées. Claire Moreau »
+
+**bon** (got C2): « Madame, Monsieur, La consultation lancée par la mairie sur la piétonisation du centre historique
+le week-end mérite mieux que les réactions passionnées qu'elle suscite. Habitant du quartier depuis quinze ans, je
+souhaite apporter un point de vue nuancé, résolument favorable au projet, à condition qu'il soit accompagné de mesures
+concrètes. Premièrement, l'argument sanitaire est difficile à contester. Les pics de pollution aux particules fines
+coïncident systématiquement avec les week-ends de forte affluence automobile. Or, contraindre les familles à respirer
+cet air vicié précisément au moment où elles se promènent relève de l'aberration. À Bordeaux comme à Grenoble, la
+piétonisation a entraîné une baisse mesurable du dioxyde d'azote, et les riverains plébiscitent unanimement le calme
+retrouvé. Deuxièmement, loin de pénaliser le commerce, comme le prétendent certains, l'éviction des voitures le rend
+plus attractif. Il suffit d'observer les terrasses bondées de la rue Sainte-Catherine pour comprendre qu'on consomme
+davantage là où l'on flâne. Encore faut-il que la mairie rassure les commerçants en publiant les chiffres des villes
+pionnières plutôt qu'en leur opposant des slogans. Il n'en demeure pas moins que ce projet échouera si les transports
+ne suivent pas. J'exige, comme nombre de mes voisins, que la ville augmente la fréquence des bus le week-end et
+qu'elle crée des parkings relais à tarif symbolique. Il serait paradoxal de prôner l'écologie tout en compliquant la
+vie de ceux qui n'ont d'autre choix que la voiture. En définitive, fermer le centre aux voitures le week-end constitue
+une opportunité remarquable, à condition de la traiter comme un projet d'aménagement global et non comme une simple
+interdiction. C'est à ce prix que notre ville deviendra à la fois plus respirable et plus conviviale. Je vous prie
+d'agréer, Madame, Monsieur, l'expression de ma considération distinguée. Julien Lambert »
+
 ## Sources
 - CCI Paris Île-de-France, *Exemples de sujets TEF – Expression écrite* (2024):
   https://www.lefrancaisdesaffaires.fr/wp-content/uploads/2024/10/tef-exemples-epreuve-ee.pdf
