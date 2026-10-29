@@ -67,3 +67,11 @@
 - Product change: flow is Splash (1800ms/tap) → Animation (~2.3s, tap skips) → Entry (renamed from welcome route) → Home. Real vector logos rendered to PNG (logo 236px, mark 120px); mist gradient + feathered gold/plum blobs; Entry keeps design copy, plum pill button and "Examinateur IA (demo)" label. Animation uses only built-in Animated: logo bounce 0.7→1, gold dot pop, 2 expanding rings, 5 twinkling stars, gentle float, then auto-advance with tap guard.
 - Verification: `tsc --noEmit` clean; web export compiled splash/animation/entry/home/mock/history/test/result/analysis with no errors. Device rendering (shadow lift, blob richness) confirmed only by owner screenshots, not by builder.
 - Redirect: owner direction 2026-10-28 (design file is visual authority; per-screen approval).
+
+## 2026-10-29 — Bottom nav matched to design; sliding pill deferred
+
+- Milestone: floating pill tab bar now matches `design/prepa-contest-final` on iOS and Android; tab content fade + pill crossfade added; animation screen temporarily bypassed (splash goes straight to entry).
+- Product change: `(tabs)/_layout.tsx` rewritten with custom tabBarButton (full-width items, white pill wraps icon + label, `aria-selected` focus, marginHorizontal side gaps, longhand paddings to beat the navigator's base styles); new `components/TabScreenFade.tsx` wraps the three tab screens (220ms fade + rise); splash points to `/entry` (TEMP, one-line revert in `splash.tsx`).
+- Verification: `tsc --noEmit` clean; `expo export --platform web` compiles all routes; device rendering confirmed only by owner screenshots.
+- Deferred (revisit if tokens remain after the app is done): sliding pill indicator that travels between tabs (needs measured tab positions); the current crossfade is the approved interim.
+- Redirect: owner direction 2026-10-29 (commit design-matching parts only; self-made additions stay uncommitted; no push yet).
