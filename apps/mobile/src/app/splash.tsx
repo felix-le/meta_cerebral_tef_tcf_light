@@ -22,12 +22,14 @@ function PulseDot({ delay }: { delay: number }) {
 
 export default function Splash() {
   useEffect(() => {
-    const t = setTimeout(() => router.replace('/animation'), SPLASH_MS);
+    // TEMP (2026-10-29): animation screen disabled, splash goes straight to entry.
+    // Re-enable by pointing back to '/animation' (file + route kept).
+    const t = setTimeout(() => router.replace('/entry'), SPLASH_MS);
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <Pressable style={styles.root} onPress={() => router.replace('/animation')}>
+    <Pressable style={styles.root} onPress={() => router.replace('/entry')}>
       <Image source={require('../../assets/brand/bg-gradient.png')} style={styles.bg} resizeMode="stretch" />
       <Image source={require('../../assets/brand/blob-gold.png')} style={styles.goldBlob} resizeMode="stretch" />
       <Image source={require('../../assets/brand/blob-plum.png')} style={styles.plumBlob} resizeMode="stretch" />
