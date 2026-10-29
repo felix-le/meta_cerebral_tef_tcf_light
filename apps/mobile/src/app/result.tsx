@@ -7,20 +7,8 @@ import { SPEAKING_B_STUB, WRITING_B_STUB, type FeedbackStub } from '@/content/fe
 const DISCLAIMER = 'Estimation from an AI reading of your work, not an official score.';
 
 export default function Result() {
-  const { skill, correct, total } = useLocalSearchParams<{ skill: string; correct?: string; total?: string }>();
+  const { skill } = useLocalSearchParams<{ skill: string }>();
   const label = SKILL_LABEL[skill as Skill] ?? skill;
-
-  if (skill === 'listening' || skill === 'reading') {
-    return (
-      <ScrollView style={styles.root} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{label} — Result</Text>
-        <Text style={styles.score}>
-          {correct} / {total} correct
-        </Text>
-        <Text style={styles.note}>Practice set: count of correct answers only, no estimate.</Text>
-      </ScrollView>
-    );
-  }
 
   const stub: FeedbackStub = skill === 'speaking' ? SPEAKING_B_STUB : WRITING_B_STUB;
   const estimation = estimationLabel(stub.overall.level as Cefr, stub.overall.half);
@@ -31,7 +19,7 @@ export default function Result() {
       <Text style={styles.score}>{estimation}</Text>
       <Text style={styles.note}>{DISCLAIMER}</Text>
       {skill === 'speaking' && (
-        <Text style={styles.note}>Scored from your transcript; pronunciation is not assessed.</Text>
+        <Text style={styles.note}>Pronunciation is not assessed.</Text>
       )}
       {stub.criteria.map((c) => (
         <View key={c.id} style={styles.card}>

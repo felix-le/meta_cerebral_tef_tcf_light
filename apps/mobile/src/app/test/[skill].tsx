@@ -173,7 +173,11 @@ export default function Test() {
       ? stageParam
       : 'consignes',
   );
-  const [wtask, setWtask] = useState(() => (skill === 'writing' && liParam === '1' ? 1 : 0));
+  // Task index into the visible flow (B-only while INCLUDE_SECTION_A is
+  // off); deep links clamp so hidden section A can never crash the flow.
+  const [wtask, setWtask] = useState(() =>
+    Math.min(Number(liParam) || 0, WRITING_TASKS.length - 1),
+  );
   const [drafts, setDrafts] = useState<string[]>(['', '']);
   const [wtyped, setWtyped] = useState(false);
   const [wsecs, setWsecs] = useState(WRITING_DEMO_SECS);
@@ -201,9 +205,11 @@ export default function Test() {
       ? stageParam
       : 'consignes',
   );
-  const [stask, setStask] = useState(() => (skill === 'speaking' && liParam === '1' ? 1 : 0));
+  const [stask, setStask] = useState(() =>
+    Math.min(Number(liParam) || 0, SPEAKING_TASKS.length - 1),
+  );
   const [prepLeft, setPrepLeft] = useState(
-    () => SPEAKING_TASKS[skill === 'speaking' && liParam === '1' ? 1 : 0].prep,
+    () => SPEAKING_TASKS[Math.min(Number(liParam) || 0, SPEAKING_TASKS.length - 1)].prep,
   );
   const [rec, setRec] = useState(0);
   const [sdur, setSdur] = useState<number[]>([]);
@@ -693,6 +699,8 @@ export default function Test() {
   }, [skill, sstage, stask]);
 
   // Speaking stub helpers: current task, live examiner cue, measured stop.
+  // sMulti is false while section A is scope-hidden (same pattern as writing).
+  const sMulti = SPEAKING_TASKS.length > 1;
   const staskData = SPEAKING_TASKS[stask];
   const sStopped = sstage === 'record' && rec >= staskData.max;
   const cueIdx = (() => {
@@ -718,10 +726,21 @@ export default function Test() {
     setSstage('review');
   };
   const sProgPct =
-    sstage === 'submit' ? 100 : sstage === 'review' ? (stask === 0 ? 50 : 90) : stask === 0 ? 20 : 62;
+    sstage === 'submit'
+      ? 100
+      : sstage === 'review'
+        ? sMulti && stask === 0
+          ? 50
+          : 90
+        : sMulti && stask === 0
+          ? 20
+          : 62;
 
   // Writing helpers: current task, its word count, accent insertion at the
   // cursor (falls back to appending when no selection is known yet).
+  // wMulti is false while section A is scope-hidden: shared copy switches
+  // to the singular, the task-switch branches stay dormant but intact.
+  const wMulti = WRITING_TASKS.length > 1;
   const wtaskData = WRITING_TASKS[wtask];
   const wcount = countWords(drafts[wtask] ?? '');
   const wshort = wcount < wtaskData.min;
@@ -1280,10 +1299,13 @@ export default function Test() {
             <View style={styles.consignesHead}>
               <Text style={styles.consignesKicker}>TEF Canada · épreuve 3 sur 4</Text>
               <Text style={styles.consignesTitle}>Expression écrite</Text>
-              <Text style={styles.consignesSub}>2 tâches · 10 minutes · temps global</Text>
+              <Text style={styles.consignesSub}>
+                {wMulti ? '2 tâches · 10 minutes · temps global' : 'Section B · 10 minutes · temps global'}
+              </Text>
               <Text style={styles.demoNote}>
-                Démo raccourcie : 10 minutes au lieu de 60, mais les deux tâches et leurs minimums sont les
-                vrais.
+                {wMulti
+                  ? 'Démo raccourcie : 10 minutes au lieu de 60, mais les deux tâches et leurs minimums sont les vrais.'
+                  : 'Démo : 10 minutes au lieu de 35, section B uniquement.'}
               </Text>
             </View>
             <View style={styles.rulesCard}>
@@ -1403,7 +1425,7 @@ export default function Test() {
                 </View>
               </View>
               <Text style={styles.wTitle}>
-                Tâche {wtask + 1} rédigée · {wcount} mots
+                {wMulti ? `Tâche ${wtask + 1} rédigée` : 'Section B rédigée'} · {wcount} mots
               </Text>
             </View>
             <View style={styles.reviewRows}>
@@ -1435,8 +1457,12 @@ export default function Test() {
               style={styles.editBtn}
               onPress={() => setWstage('write')}
               accessibilityRole="button"
-              accessibilityLabel={`Modifier à nouveau la tâche ${wtask + 1}`}>
-              <Text style={styles.editLabel}>Modifier à nouveau la tâche {wtask + 1}</Text>
+              accessibilityLabel={
+                wMulti ? `Modifier à nouveau la tâche ${wtask + 1}` : 'Modifier à nouveau le texte'
+              }>
+              <Text style={styles.editLabel}>
+                {wMulti ? `Modifier à nouveau la tâche ${wtask + 1}` : 'Modifier à nouveau le texte'}
+              </Text>
             </Pressable>
           </>
         )}
@@ -1444,10 +1470,13 @@ export default function Test() {
         {s === 'writing' && wstage === 'submit' && (
           <>
             <View style={styles.submitHead}>
-              <Text style={styles.wTitle}>Envoyer les deux textes à la correction</Text>
+              <Text style={styles.wTitle}>
+                {wMulti ? 'Envoyer les deux textes à la correction' : 'Envoyer le texte à la correction'}
+              </Text>
               <Text style={styles.submitSub}>
-                Une fois envoyés, les textes ne peuvent plus être modifiés. L’IA les évalue sur quatre critères
-                et rend un score pour l’épreuve.
+                {wMulti
+                  ? 'Une fois envoyés, les textes ne peuvent plus être modifiés. L’IA les évalue sur quatre critères et rend un score pour l’épreuve.'
+                  : 'Une fois envoyé, le texte ne peut plus être modifié. L’IA l’évalue sur quatre critères et rend un score pour l’épreuve.'}
               </Text>
             </View>
             {WRITING_TASKS.map((t, i) => {
@@ -1460,7 +1489,7 @@ export default function Test() {
                   </View>
                   <View style={styles.submitInfo}>
                     <Text style={styles.submitName}>
-                      Tâche {i + 1} · {t.title}
+                      {wMulti ? `Tâche ${i + 1}` : 'Section B'} · {t.title}
                     </Text>
                     <Text style={styles.submitMeta}>
                       {t.kicker.split(' · ')[1]} · {t.min} mots min.
@@ -1500,7 +1529,13 @@ export default function Test() {
               </View>
               <Text style={styles.aiLabel}>CORRECTION</Text>
               <Text style={styles.aiTitle}>
-                {wauto ? 'Temps écoulé — les deux textes ont été envoyés' : 'Les deux textes sont chez l’IA'}
+                {wauto
+                  ? wMulti
+                    ? 'Temps écoulé — les deux textes ont été envoyés'
+                    : 'Temps écoulé — le texte a été envoyé'
+                  : wMulti
+                    ? 'Les deux textes sont chez l’IA'
+                    : 'Le texte est chez l’IA'}
               </Text>
               <Text style={styles.aiSub}>
                 {wauto
@@ -1511,7 +1546,15 @@ export default function Test() {
             <View style={styles.pendRows}>
               <View style={styles.pendRow}>
                 <Text style={styles.pendLabel}>Envoyé</Text>
-                <Text style={styles.pendValue}>{wauto ? '2 tâches · automatiquement' : '2 tâches · manuellement'}</Text>
+                <Text style={styles.pendValue}>
+                  {wMulti
+                    ? wauto
+                      ? '2 tâches · automatiquement'
+                      : '2 tâches · manuellement'
+                    : wauto
+                      ? 'Envoi automatique'
+                      : 'Envoi manuel'}
+                </Text>
               </View>
               <View style={styles.pendRow}>
                 <Text style={styles.pendLabel}>Statut dans l’historique</Text>
@@ -1530,7 +1573,9 @@ export default function Test() {
             <View style={styles.consignesHead}>
               <Text style={styles.consignesKicker}>TEF Canada · épreuve 4 sur 4</Text>
               <Text style={styles.consignesTitle}>Expression orale</Text>
-              <Text style={styles.consignesSub}>2 parties · face à un examinateur</Text>
+              <Text style={styles.consignesSub}>
+                {sMulti ? '2 parties · face à un examinateur' : 'Section B · face à un examinateur'}
+              </Text>
               <Text style={styles.demoNote}>
                 Démo : préparation et prise en temps réel, sans coupure de session. La préparation peut être
                 sautée.
@@ -1684,7 +1729,8 @@ export default function Test() {
                 </View>
               </View>
               <Text style={styles.wTitle}>
-                Tâche {stask + 1} enregistrée · {fmtClock(sdur[stask] ?? rec)}
+                {sMulti ? `Tâche ${stask + 1} enregistrée` : 'Section B enregistrée'} ·{' '}
+                {fmtClock(sdur[stask] ?? rec)}
               </Text>
             </View>
             <View style={styles.reviewRows}>
@@ -1711,10 +1757,15 @@ export default function Test() {
         {s === 'speaking' && sstage === 'submit' && (
           <>
             <View style={styles.submitHead}>
-              <Text style={styles.wTitle}>Envoyer les deux enregistrements à la correction</Text>
+              <Text style={styles.wTitle}>
+                {sMulti
+                  ? 'Envoyer les deux enregistrements à la correction'
+                  : "Envoyer l'enregistrement à la correction"}
+              </Text>
               <Text style={styles.submitSub}>
-                Une fois envoyés, les enregistrements ne peuvent plus être modifiés. L’IA les évalue sur quatre
-                critères et vous transmet le résultat.
+                {sMulti
+                  ? 'Une fois envoyés, les enregistrements ne peuvent plus être modifiés. L’IA les évalue sur quatre critères et vous transmet le résultat.'
+                  : 'Une fois envoyé, l’enregistrement ne peut plus être modifié. L’IA l’évalue sur quatre critères et vous transmet le résultat.'}
               </Text>
             </View>
             {SPEAKING_TASKS.map((t, i) => (
@@ -1724,7 +1775,7 @@ export default function Test() {
                 </View>
                 <View style={styles.submitInfo}>
                   <Text style={styles.submitName}>
-                    Tâche {i + 1} · {t.title}
+                    {sMulti ? `Tâche ${i + 1}` : 'Section B'} · {t.title}
                   </Text>
                   <Text style={styles.submitMeta}>
                     {t.kicker.split(' · ')[1]} · limite {t.maxLabel}
@@ -1760,7 +1811,9 @@ export default function Test() {
                 <AppIcon name="IconSparkles" size={44} color={Brand.gold} />
               </View>
               <Text style={styles.aiLabel}>CORRECTION</Text>
-              <Text style={styles.aiTitle}>Les deux tâches sont chez l’IA</Text>
+              <Text style={styles.aiTitle}>
+                {sMulti ? 'Les deux tâches sont chez l’IA' : 'La tâche est chez l’IA'}
+              </Text>
               <Text style={styles.aiSub}>
                 Environ 5 minutes. Vous n’êtes pas obligé de rester ici : nous vous prévenons dès que le score
                 est prêt.
@@ -1769,7 +1822,7 @@ export default function Test() {
             <View style={styles.pendRows}>
               <View style={styles.pendRow}>
                 <Text style={styles.pendLabel}>Envoyé</Text>
-                <Text style={styles.pendValue}>2 tâches · manuellement</Text>
+                <Text style={styles.pendValue}>{sMulti ? '2 tâches · manuellement' : '1 tâche · manuellement'}</Text>
               </View>
               <View style={styles.pendRow}>
                 <Text style={styles.pendLabel}>Statut dans l’historique</Text>
@@ -1826,17 +1879,25 @@ export default function Test() {
               : s === 'reading' && (rstage === 'passage' || rstage === 'question')
                 ? `Question ${(rstage === 'passage' ? [0, 4, 5][rdoc] : qIndex) + 1} sur 6`
                 : s === 'writing' && wstage === 'submit'
-                  ? 'Envoi · 2 tâches'
+                  ? wMulti
+                    ? 'Envoi · 2 tâches'
+                    : 'Envoi · section B'
                   : s === 'writing' && wstage === 'review'
-                    ? `Tâche ${wtask + 1} sur 2`
+                    ? wMulti
+                      ? `Tâche ${wtask + 1} sur ${WRITING_TASKS.length}`
+                      : 'Section B'
                     : s === 'writing' && (wstage === 'write' || wstage === 'pending')
                       ? ''
                       : s === 'speaking' && sstage === 'submit'
-                        ? 'Envoi · 2 tâches'
+                        ? sMulti
+                          ? 'Envoi · 2 tâches'
+                          : 'Envoi · section B'
                         : s === 'speaking' && sstage === 'pending'
                           ? ''
                           : s === 'speaking' && sstage !== 'consignes'
-                            ? `Tâche ${stask + 1} sur 2`
+                            ? sMulti
+                              ? `Tâche ${stask + 1} sur ${SPEAKING_TASKS.length}`
+                              : 'Section B'
                             : `${SKILL_LABEL[s]} · Demo`}
           </Text>
           {s === 'speaking' && sstage === 'record' && (
@@ -1919,7 +1980,13 @@ export default function Test() {
         {s === 'writing' && wstage !== 'consignes' && wstage !== 'pending' && (
           <View style={styles.progressLabels}>
             <Text style={styles.progressLabel}>
-              {wstage === 'submit' ? 'Deux tâches rédigées' : `Tâche ${wtask + 1} sur 2`}
+              {wstage === 'submit'
+                ? wMulti
+                  ? 'Deux tâches rédigées'
+                  : 'Texte rédigé'
+                : wMulti
+                  ? `Tâche ${wtask + 1} sur ${WRITING_TASKS.length}`
+                  : 'Section B'}
             </Text>
             <Text style={styles.progressGroup}>
               {wstage === 'submit'
@@ -1940,7 +2007,13 @@ export default function Test() {
             </View>
             <View style={styles.progressRow}>
               <Text style={styles.progressLabel}>
-                {sstage === 'submit' ? 'Deux tâches enregistrées' : `Tâche ${stask + 1} sur 2`}
+                {sstage === 'submit'
+                  ? sMulti
+                    ? 'Deux tâches enregistrées'
+                    : 'Prise enregistrée'
+                  : sMulti
+                    ? `Tâche ${stask + 1} sur ${SPEAKING_TASKS.length}`
+                    : 'Section B'}
               </Text>
               <Text style={styles.progressGroup}>
                 {sstage === 'submit' ? 'Prêt à envoyer' : sstage === 'review' ? 'Enregistré' : 'Expression orale'}
@@ -2070,7 +2143,11 @@ export default function Test() {
           label="Commencer l'épreuve"
           icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
           onPress={() => setWstage('write')}
-          note="Le chronomètre de 10 minutes (démo) couvre les deux textes — il démarre à l'écran suivant."
+          note={
+            wMulti
+              ? "Le chronomètre de 10 minutes (démo) couvre les deux textes — il démarre à l'écran suivant."
+              : "Le chronomètre de 10 minutes (démo) couvre le texte — il démarre à l'écran suivant."
+          }
         />
       )}
       {s === 'writing' && wstage === 'write' && (
@@ -2098,19 +2175,19 @@ export default function Test() {
       {s === 'writing' && wstage === 'review' && (
         <StickyCta
           bg="#2E1A3B"
-          label={wtask === 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
+          label={!wMulti || wtask === WRITING_TASKS.length - 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
           icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
           onPress={() => {
-            if (wtask === 1) {
+            if (!wMulti || wtask === WRITING_TASKS.length - 1) {
               setWstage('submit');
             } else {
-              setWtask(1);
+              setWtask(wtask + 1);
               setPromptOpen(false);
               setWstage('write');
             }
           }}
           note={
-            wtask === 1
+            !wMulti || wtask === WRITING_TASKS.length - 1
               ? "Rien n'a encore été envoyé à l'IA."
               : 'La tâche 2 est le courrier des lecteurs : 200 mots minimum.'
           }
@@ -2140,7 +2217,11 @@ export default function Test() {
           label="Commencer l'épreuve"
           icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
           onPress={() => setSstage('intro')}
-          note="L'examinateur est prêt — la section A commence par une minute de découverte du document."
+          note={
+            sMulti
+              ? "L'examinateur est prêt — la section A commence par une minute de découverte du document."
+              : "L'examinateur est prêt — la partie commence par une minute de découverte du document."
+          }
         />
       )}
       {s === 'speaking' && sstage === 'intro' && (
@@ -2192,21 +2273,21 @@ export default function Test() {
       {s === 'speaking' && sstage === 'review' && (
         <StickyCta
           bg="#2E1A3B"
-          label={stask === 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
+          label={!sMulti || stask === SPEAKING_TASKS.length - 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
           icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
           onPress={() => {
-            if (stask === 1) {
+            if (!sMulti || stask === SPEAKING_TASKS.length - 1) {
               setSstage('submit');
             } else {
-              setStask(1);
+              setStask(stask + 1);
               setRec(0);
               setSstage('intro');
             }
           }}
           note={
-            stask === 1
+            !sMulti || stask === SPEAKING_TASKS.length - 1
               ? "Rien n'a encore été envoyé à l'IA."
-              : `Tâche 2 · ${SPEAKING_TASKS[1].maxLabel} — ${SPEAKING_TASKS[1].title.toLowerCase()}.`
+              : `Tâche ${stask + 2} · ${SPEAKING_TASKS[stask + 1].maxLabel} — ${SPEAKING_TASKS[stask + 1].title.toLowerCase()}.`
           }
         />
       )}
@@ -2412,11 +2493,13 @@ export default function Test() {
             : s === 'listening'
               ? 'Vos réponses à cette démo seront perdues.'
               : s === 'writing'
-                ? `La tâche ${wtask + 1} compte ${wcount} mots. Le brouillon n’est pas encore envoyé : il sera perdu si vous quittez.`
+                ? wMulti
+                  ? `La tâche ${wtask + 1} compte ${wcount} mots. Le brouillon n’est pas encore envoyé : il sera perdu si vous quittez.`
+                  : `Le texte compte ${wcount} mots. Le brouillon n’est pas encore envoyé : il sera perdu si vous quittez.`
                 : s === 'speaking' && sstage === 'record'
-                  ? `Vous êtes à ${fmtClock(rec)} de la tâche ${stask + 1}. Quitter maintenant supprime cet enregistrement : aucune prise partielle n’est conservée.`
+                  ? `Vous êtes à ${fmtClock(rec)} de ${sMulti ? `la tâche ${stask + 1}` : 'la section B'}. Quitter maintenant supprime cet enregistrement : aucune prise partielle n’est conservée.`
                   : s === 'speaking'
-                    ? `Rien n’a encore été enregistré pour la tâche ${stask + 1}. La tentative est enregistrée comme inachevée et la préparation recommence à votre retour.`
+                    ? `Rien n’a encore été enregistré pour ${sMulti ? `la tâche ${stask + 1}` : 'la section B'}. La tentative est enregistrée comme inachevée et la préparation recommence à votre retour.`
                     : 'Your answers on this demo will be lost.'
         }
         keepLabel={
@@ -2460,13 +2543,26 @@ export default function Test() {
                 ]
               : s === 'writing'
                 ? [
-                    { label: 'Rédaction', value: `Tâche ${wtask + 1} · ${wcount} mots` },
+                    {
+                      label: 'Rédaction',
+                      value: wMulti ? `Tâche ${wtask + 1} · ${wcount} mots` : `Section B · ${wcount} mots`,
+                    },
                     { label: 'Temps restant', value: fmtClock(wsecs) },
                   ]
                 : s === 'speaking' && sstage !== 'record'
                   ? [
-                      { label: 'Enregistré', value: `${sdur.length} tâche${sdur.length === 1 ? '' : 's'} sur 2` },
-                      { label: 'Tâche en cours', value: `Tâche ${stask + 1} · ${staskData.title}` },
+                      {
+                        label: 'Enregistré',
+                        value: sMulti
+                          ? `${sdur.length} tâche${sdur.length === 1 ? '' : 's'} sur ${SPEAKING_TASKS.length}`
+                          : sdur.length > 0
+                            ? '1 tâche'
+                            : 'aucune',
+                      },
+                      {
+                        label: 'Tâche en cours',
+                        value: sMulti ? `Tâche ${stask + 1} · ${staskData.title}` : `Section B · ${staskData.title}`,
+                      },
                     ]
                   : undefined
         }
