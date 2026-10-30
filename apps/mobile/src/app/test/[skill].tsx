@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Easing, Image, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import * as Speech from 'expo-speech';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +14,7 @@ import { StickyCta } from '@/components/StickyCta';
 import { countWords, type Cefr } from '@/config/scoring';
 import { saveResult } from '@/storage/history';
 import { SPEAKING_B_STUB, WRITING_B_STUB } from '@/content/feedbackStub';
+import { isAiConfigured, scoreWritingB } from '@/ai/client';
 import {
   LISTENING_DEMO,
   LISTENING_RULES,
@@ -103,14 +105,87 @@ function CheckIcon({ color }: { color: string }) {
   );
 }
 
+// Scoring ring per WritingTest.dc.html pending state: 150px orbit, a 90°
+// gold arc spinning 1.6s/turn over a faint track, 120px dark core.
+// (Design GOLD #D4860F; the arc token lives here, not in Brand.)
+const SPIN_GOLD = '#D4860F';
+const ORBIT_R = 67.5;
+const ORBIT_C = 2 * Math.PI * ORBIT_R;
+
+function ScoringRing({ done }: { done?: boolean }) {
+  const spin = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (done) {
+      return;
+    }
+    const loop = Animated.loop(
+      Animated.timing(spin, { toValue: 1, duration: 1600, easing: Easing.linear, useNativeDriver: true }),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [spin, done]);
+  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  return (
+    <View style={styles.aiOrbit}>
+      <Animated.View style={[styles.aiSpin, { transform: [{ rotate }] }]}>
+        <Svg width={150} height={150}>
+          <Circle cx={75} cy={75} r={ORBIT_R} stroke="rgba(255,255,255,.1)" strokeWidth={15} fill="none" />
+          {done ? (
+            <Circle
+              key="full"
+              cx={75}
+              cy={75}
+              r={ORBIT_R}
+              stroke="#4ADE80"
+              strokeWidth={15}
+              fill="none"
+            />
+          ) : (
+            <Circle
+              key="arc"
+              cx={75}
+              cy={75}
+              r={ORBIT_R}
+              stroke={SPIN_GOLD}
+              strokeWidth={15}
+              fill="none"
+              strokeDasharray={`${ORBIT_C / 4} ${(3 * ORBIT_C) / 4}`}
+              transform="rotate(-90 75 75)"
+            />
+          )}
+        </Svg>
+      </Animated.View>
+      <View style={styles.aiCore}>
+        {done ? (
+          <CheckIcon color="#4ADE80" />
+        ) : (
+          <AppIcon name="IconSparkles" size={30} color={SPIN_GOLD} />
+        )}
+      </View>
+    </View>
+  );
+}
+
 export default function Test() {
-  const { skill, stage: stageParam, li: liParam, phase: phaseParam, picked: pickedParam } = useLocalSearchParams<{
+  const { skill, stage: stageParam, li: liParam, phase: phaseParam, picked: pickedParam, mode: modeParam, session: sessionParam } = useLocalSearchParams<{
     skill: string;
     stage?: string;
     li?: string;
     phase?: string;
     picked?: string;
+    mode?: string;
+    session?: string;
   }>();
+  // Run mode: 'mock' chains the 4 skills into one session, anything else
+  // is a single-skill attempt. Missing session → this screen mints one id
+  // at start so every save below lands in exactly one attempt.
+  const isMock = modeParam === 'mock';
+  const sessionRef = useRef<string>(sessionParam ?? `${isMock ? 'mock' : 'single'}-${Date.now()}`);
+  const fwdParams = (s: string): { skill: string; mode: string; session: string } => ({
+    skill: s,
+    mode: isMock ? 'mock' : 'single',
+    session: sessionRef.current,
+  });
   // Dev gallery deep links (no params in the real flow: defaults below).
   // stage=consignes|question|complete, li=0..8, phase=signal|consigne|doc|ask|pause,
   // picked=all-correct|mixed|all-wrong (complete only).
@@ -496,6 +571,7 @@ export default function Test() {
       const stub = SPEAKING_B_STUB;
       await saveResult({
         id: String(Date.now()),
+        session: sessionRef.current,
         date: new Date().toISOString().slice(0, 10),
         skill: 'speaking',
         section: 'B',
@@ -542,6 +618,7 @@ export default function Test() {
       });
       await saveResult({
         id: String(Date.now()),
+        session: sessionRef.current,
         date: new Date().toISOString().slice(0, 10),
         skill: 'listening',
         section: 'B',
@@ -581,6 +658,7 @@ export default function Test() {
       });
       await saveResult({
         id: String(Date.now()),
+        session: sessionRef.current,
         date: new Date().toISOString().slice(0, 10),
         skill: 'reading',
         section: 'B',
@@ -597,6 +675,7 @@ export default function Test() {
   // Writing demo: both texts go together, saved once. The pending screen
   // shows first; history save is best-effort after it, so a storage
   // failure can never trap the user on the submit screen.
+  const [wSaved, setWSaved] = useState(false);
   const finishWriting = async (auto: boolean) => {
     if (wdoneRef.current) {
       return;
@@ -605,16 +684,42 @@ export default function Test() {
     setWauto(auto);
     setWstage('pending');
     try {
+      // Stage-1 Writing B: score for real when the key is in; otherwise
+      // keep the Stage-0 stub so the flow never depends on the network.
+      const task = WRITING_TASKS[wtask] ?? WRITING_TASKS[0];
+      const text = drafts[wtask] ?? drafts[0] ?? '';
+      if (isAiConfigured()) {
+        try {
+          const feedback = await scoreWritingB(task.consigne, text);
+          await saveResult({
+            id: String(Date.now()),
+            session: sessionRef.current,
+            date: new Date().toISOString().slice(0, 10),
+            skill: 'writing',
+            section: 'B',
+            level: feedback.overall.level as Cefr,
+            half: feedback.overall.half,
+            text,
+            feedback,
+          });
+          setWSaved(true);
+          return;
+        } catch (e) {
+          console.warn('[scorer] writing B failed, stub fallback:', e instanceof Error ? e.message : e);
+        }
+      }
       const stub = WRITING_B_STUB;
       await saveResult({
         id: String(Date.now()),
+        session: sessionRef.current,
         date: new Date().toISOString().slice(0, 10),
         skill: 'writing',
         section: 'B',
         level: stub.overall.level as Cefr,
         half: stub.overall.half,
-        text: drafts[0] ?? '',
+        text,
       });
+      setWSaved(true);
     } catch {}
   };
   wfinishRef.current = (auto: boolean) => {
@@ -622,12 +727,15 @@ export default function Test() {
   };
 
   // Handoff auto-advance: entering either end screen restarts the 15 s
-  // countdown; at zero it moves to the next skill on its own.
+  // countdown. Mock chains to the next skill with the same session;
+  // a single test opens its own TestReview instead.
   useEffect(() => {
+    // Writing single waits for the save (AI scoring can outlast the
+    // countdown); mock chains straight through while scoring lands behind.
     const done =
       (skill === 'listening' && stage === 'complete') ||
       (skill === 'reading' && rstage === 'complete') ||
-      (skill === 'writing' && wstage === 'pending');
+      (skill === 'writing' && wstage === 'pending' && (isMock || wSaved));
     if (!done) {
       return;
     }
@@ -636,17 +744,21 @@ export default function Test() {
       setHandSecs((v) => (v <= 1 ? 0 : v - 1));
     }, 1000);
     return () => clearInterval(t);
-  }, [skill, stage, rstage, wstage]);
+  }, [skill, stage, rstage, wstage, wSaved]);
   useEffect(() => {
     if (handSecs !== 0) {
       return;
     }
+    if (!isMock) {
+      router.replace({ pathname: '/result', params: { session: sessionRef.current } });
+      return;
+    }
     if (skill === 'listening' && stage === 'complete') {
-      router.replace({ pathname: '/test/[skill]', params: { skill: 'reading' } });
+      router.replace({ pathname: '/test/[skill]', params: fwdParams('reading') });
     } else if (skill === 'reading' && rstage === 'complete') {
-      router.replace({ pathname: '/test/[skill]', params: { skill: 'writing' } });
+      router.replace({ pathname: '/test/[skill]', params: fwdParams('writing') });
     } else if (skill === 'writing' && wstage === 'pending') {
-      router.replace({ pathname: '/test/[skill]', params: { skill: 'speaking' } });
+      router.replace({ pathname: '/test/[skill]', params: fwdParams('speaking') });
     }
   }, [handSecs, skill, stage, rstage, wstage]);
 
@@ -853,7 +965,9 @@ export default function Test() {
   }
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar style={dark ? 'light' : 'dark'} />
       <LinearGradient colors={['#F8F3F7', '#FFFFFF']} style={styles.bg} />
       {dark && s === 'reading' && (
@@ -886,7 +1000,8 @@ export default function Test() {
           { paddingTop: topPad, paddingBottom: 150 },
         ]}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={Keyboard.dismiss}>
         {s === 'reading' && rstage === 'consignes' && (
           <>
             <View style={styles.consignesHead}>
@@ -1084,16 +1199,22 @@ export default function Test() {
                 />
               ))}
             </View>
-            <Text style={styles.doneKicker}>TEF Canada · session in progress</Text>
+            <Text style={styles.doneKicker}>
+              {isMock ? 'TEF Canada · session in progress' : 'TEF Canada · test terminé'}
+            </Text>
             <Text style={styles.doneTitle}>Reading complete</Text>
             <Text style={styles.handBody}>
-              No breaks are allowed between tests. Written expression starts on its own — stay at your screen.
+              {isMock
+                ? 'No breaks are allowed between tests. Written expression starts on its own — stay at your screen.'
+                : 'Votre résultat est prêt — il s’ouvre tout seul.'}
             </Text>
             <View style={styles.handCard}>
               <View style={styles.handText}>
-                <Text style={styles.handKicker}>NEXT TEST</Text>
-                <Text style={styles.handName}>Writing</Text>
-                <Text style={styles.handSub}>Written expression · demo</Text>
+                <Text style={styles.handKicker}>{isMock ? 'NEXT TEST' : 'RÉSULTAT'}</Text>
+                <Text style={styles.handName}>{isMock ? 'Writing' : 'TestReview'}</Text>
+                <Text style={styles.handSub}>
+                  {isMock ? 'Written expression · demo' : 'Reading only'}
+                </Text>
               </View>
               <Text style={styles.handCount}>{fmtClock(handSecs)}</Text>
             </View>
@@ -1281,17 +1402,22 @@ export default function Test() {
                 />
               ))}
             </View>
-            <Text style={styles.doneKicker}>TEF Canada · session in progress</Text>
+            <Text style={styles.doneKicker}>
+              {isMock ? 'TEF Canada · session in progress' : 'TEF Canada · test terminé'}
+            </Text>
             <Text style={styles.doneTitle}>Listening complete</Text>
             <Text style={styles.handBody}>
-              No breaks are allowed between tests. Reading comprehension (10 minutes) starts on its own — stay
-              at your screen.
+              {isMock
+                ? 'No breaks are allowed between tests. Reading comprehension (10 minutes) starts on its own — stay at your screen.'
+                : 'Votre résultat est prêt — il s’ouvre tout seul.'}
             </Text>
             <View style={styles.handCard}>
               <View style={styles.handText}>
-                <Text style={styles.handKicker}>NEXT TEST</Text>
-                <Text style={styles.handName}>Reading</Text>
-                <Text style={styles.handSub}>10 minutes · Reading comprehension</Text>
+                <Text style={styles.handKicker}>{isMock ? 'NEXT TEST' : 'RÉSULTAT'}</Text>
+                <Text style={styles.handName}>{isMock ? 'Reading' : 'TestReview'}</Text>
+                <Text style={styles.handSub}>
+                  {isMock ? '10 minutes · Reading comprehension' : 'Listening only'}
+                </Text>
               </View>
               <Text style={styles.handCount}>{fmtClock(handSecs)}</Text>
             </View>
@@ -1410,6 +1536,15 @@ export default function Test() {
                 ))}
               </ScrollView>
               <Text style={styles.accentCaption}>Clavier d’accents — reste visible pendant le scroll</Text>
+            </View>
+            <View style={styles.kbRow}>
+              <Pressable
+                onPress={Keyboard.dismiss}
+                accessibilityRole="button"
+                accessibilityLabel="Fermer le clavier"
+                hitSlop={8}>
+                <Text style={styles.kbLabel}>Fermer le clavier ↓</Text>
+              </Pressable>
             </View>
             <TextInput
               style={styles.editor}
@@ -1542,18 +1677,18 @@ export default function Test() {
         {s === 'writing' && wstage === 'pending' && (
           <>
             <View style={styles.aiWrap}>
-              <View style={styles.aiRing}>
-                <AppIcon name="IconSparkles" size={44} color={Brand.gold} />
-              </View>
-              <Text style={styles.aiLabel}>CORRECTION</Text>
+              <ScoringRing done={wSaved} />
+              <Text style={styles.aiLabel}>{wSaved ? 'TERMINÉ' : 'CORRECTION'}</Text>
               <Text style={styles.aiTitle}>
-                {wauto
-                  ? wMulti
-                    ? 'Temps écoulé — les deux textes ont été envoyés'
-                    : 'Temps écoulé — le texte a été envoyé'
-                  : wMulti
-                    ? 'Les deux textes sont chez l’IA'
-                    : 'Le texte est chez l’IA'}
+                {wSaved
+                  ? 'Le score vient d’arriver'
+                  : wauto
+                    ? wMulti
+                      ? 'Temps écoulé — les deux textes ont été envoyés'
+                      : 'Temps écoulé — le texte a été envoyé'
+                    : wMulti
+                      ? 'Les deux textes sont chez l’IA'
+                      : 'Le texte est chez l’IA'}
               </Text>
               <Text style={styles.aiSub}>
                 {wauto
@@ -1825,9 +1960,7 @@ export default function Test() {
         {s === 'speaking' && sstage === 'pending' && (
           <>
             <View style={styles.aiWrap}>
-              <View style={styles.aiRing}>
-                <AppIcon name="IconSparkles" size={44} color={Brand.gold} />
-              </View>
+              <ScoringRing />
               <Text style={styles.aiLabel}>CORRECTION</Text>
               <Text style={styles.aiTitle}>
                 {sMulti ? 'Les deux tâches sont chez l’IA' : 'La tâche est chez l’IA'}
@@ -2223,10 +2356,19 @@ export default function Test() {
       {s === 'writing' && wstage === 'pending' && (
         <StickyCta
           tone="dark"
-          label="Continuer : Expression orale"
+          label={isMock ? 'Continuer : Expression orale' : 'Voir le résultat'}
           icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
-          onPress={() => router.replace({ pathname: '/test/[skill]', params: { skill: 'speaking' } })}
-          note={`L'IA corrige cette épreuve pendant que vous continuez. Passage à l'oral dans ${fmtClock(handSecs)}.`}
+          disabled={!isMock && !wSaved}
+          onPress={() =>
+            isMock
+              ? router.replace({ pathname: '/test/[skill]', params: fwdParams('speaking') })
+              : router.replace({ pathname: '/result', params: { session: sessionRef.current } })
+          }
+          note={
+            isMock
+              ? `L'IA corrige cette épreuve pendant que vous continuez. Passage à l'oral dans ${fmtClock(handSecs)}.`
+              : `L'IA corrige cette épreuve. Votre résultat s'ouvre dans ${fmtClock(handSecs)}.`
+          }
         />
       )}
       {s === 'speaking' && sstage === 'consignes' && (
@@ -2321,10 +2463,14 @@ export default function Test() {
       {s === 'speaking' && sstage === 'pending' && (
         <StickyCta
           tone="dark"
-          label="Voir le résultat de la session"
+          label={isMock ? 'Voir le résultat de la session' : 'Voir le résultat'}
           icon={<AppIcon name="IconOutlineRoundedAiDocument" size={17} color="#fff" />}
-          onPress={() => router.push({ pathname: '/result', params: { skill: 'speaking' } })}
-          note="Les quatre épreuves sont terminées — les scores sont publiés ensemble."
+          onPress={() => router.push({ pathname: '/result', params: { session: sessionRef.current } })}
+          note={
+            isMock
+              ? 'Les quatre épreuves sont terminées — les scores sont publiés ensemble.'
+              : 'Votre résultat est prêt.'
+          }
         />
       )}
 
@@ -2589,10 +2735,12 @@ export default function Test() {
         }
         onKeep={() => setExitVisible(false)}
         onLeave={() => {
+          Keyboard.dismiss();
           if (s === 'reading') {
             const correct = READING_QUESTIONS.filter((q) => picked[q.id] === q.answer).length;
             void saveResult({
               id: String(Date.now()),
+              session: sessionRef.current,
               date: new Date().toISOString().slice(0, 10),
               skill: 'reading',
               section: 'B',
@@ -2604,7 +2752,7 @@ export default function Test() {
           router.back();
         }}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -3080,6 +3228,8 @@ const styles = StyleSheet.create({
     borderColor: '#E8DFE6',
   },
   accentCaption: { fontFamily: FontFamily.sans, fontSize: 11, color: '#A2919F' },
+  kbRow: { alignItems: 'flex-end', paddingTop: 8 },
+  kbLabel: { fontFamily: FontFamily.sansMedium, fontSize: 13, color: '#7A4E0C' },
   editor: {
     minHeight: 180,
     padding: 16,
@@ -3220,15 +3370,21 @@ const styles = StyleSheet.create({
     borderColor: '#F3E6C8',
   },
   aiWrap: { alignItems: 'center', gap: 10, paddingTop: 24 },
-  aiRing: {
+  aiOrbit: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  aiSpin: { position: 'absolute', left: 0, top: 0 },
+  aiCore: {
     width: 120,
     height: 120,
     borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: Brand.gold,
-    backgroundColor: 'rgba(249,189,72,.08)',
+    backgroundColor: '#1E1226',
   },
   aiLabel: { fontFamily: FontFamily.sansBold, fontSize: 11, letterSpacing: 1.2, color: Brand.gold },
   aiTitle: { fontFamily: FontFamily.sansBold, fontSize: 20, lineHeight: 26, color: '#fff', textAlign: 'center' },
