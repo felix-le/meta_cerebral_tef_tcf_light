@@ -1,8 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Cefr, Half } from '@/config/scoring';
+import type { FeedbackStub } from '@/content/feedbackStub';
 
 export interface MockResult {
   id: string;
+  /** Attempt id: one mock chain shares it, one single test owns it. */
+  session?: string;
   date: string;
   skill: 'listening' | 'reading' | 'speaking' | 'writing';
   section: 'A' | 'B';
@@ -14,6 +17,8 @@ export interface MockResult {
   picks?: Record<string, number>;
   /** Submitted writing text (section B review). */
   text?: string;
+  /** Real scorer output when the AI was configured at submit time. */
+  feedback?: FeedbackStub;
   /** Measured take durations in seconds (speaking review). */
   durations?: number[];
 }
