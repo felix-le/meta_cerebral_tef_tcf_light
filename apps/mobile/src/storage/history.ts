@@ -6,6 +6,8 @@ export interface MockResult {
   id: string;
   /** Attempt id: one mock chain shares it, one single test owns it. */
   session?: string;
+  /** Selected mock session name ("November 2024") for rows saved in mock mode. */
+  mockLabel?: string;
   date: string;
   skill: 'listening' | 'reading' | 'speaking' | 'writing';
   section: 'A' | 'B';
