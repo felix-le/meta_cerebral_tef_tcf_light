@@ -101,19 +101,23 @@ export default function MockSession() {
   const [scrolled, setScrolled] = useState(false);
   const [mockSession] = useState(() => `mock-${Date.now()}`);
   const duration = `${Math.floor(session.mins / 60)}h ${session.mins % 60}m`;
-  // Saved progress: newest result per skill. Listening/Reading count as
-  // scored with a correct count; Writing/Speaking only with a real level
-  // (pending records without level stay in progress, never scored).
+  // Saved progress reads the newest mock session only — never the
+  // newest take of each skill across different sessions. Listening/Reading
+  // count as scored with a correct count; Writing/Speaking only with a real
+  // level (pending records without level stay in progress, never scored).
   const [results, setResults] = useState<MockResult[]>([]);
   useFocusEffect(
     useCallback(() => {
       listResults().then(setResults);
     }, []),
   );
+  const newestMockKey = results.find((r) => r.session?.startsWith('mock-'))?.session ?? null;
   const latestBySkill = new Map<Skill, MockResult>();
-  for (const r of results) {
-    if (!latestBySkill.has(r.skill)) {
-      latestBySkill.set(r.skill, r);
+  if (newestMockKey) {
+    for (const r of results) {
+      if (r.session === newestMockKey && !latestBySkill.has(r.skill)) {
+        latestBySkill.set(r.skill, r);
+      }
     }
   }
   const isScored = (r: MockResult | undefined): boolean =>
@@ -206,7 +210,10 @@ export default function MockSession() {
                 key={skill}
                 style={styles.skillCard}
                 onPress={() =>
-                  router.push({ pathname: '/test/[skill]', params: { skill, mode: 'mock', session: mockSession } })
+                  router.push({
+                    pathname: '/test/[skill]',
+                    params: { skill, mode: 'mock', session: mockSession, mock: `${session.month} ${session.year}` },
+                  })
                 }>
                 <View style={styles.skillRow}>
                   <LinearGradient
@@ -302,7 +309,10 @@ export default function MockSession() {
         <Pressable
           style={styles.cta}
           onPress={() =>
-            router.push({ pathname: '/test/[skill]', params: { skill: 'listening', mode: 'mock', session: mockSession } })
+            router.push({
+              pathname: '/test/[skill]',
+              params: { skill: 'listening', mode: 'mock', session: mockSession, mock: `${session.month} ${session.year}` },
+            })
           }
           accessibilityRole="button"
           accessibilityLabel="Start Listening">

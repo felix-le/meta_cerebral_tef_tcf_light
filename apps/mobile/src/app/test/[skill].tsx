@@ -257,7 +257,7 @@ const SPEAKING_WAV: RecordingOptions = {
 };
 
 export default function Test() {
-  const { skill, stage: stageParam, li: liParam, phase: phaseParam, picked: pickedParam, mode: modeParam, session: sessionParam } = useLocalSearchParams<{
+  const { skill, stage: stageParam, li: liParam, phase: phaseParam, picked: pickedParam, mode: modeParam, session: sessionParam, mock: mockParam } = useLocalSearchParams<{
     skill: string;
     stage?: string;
     li?: string;
@@ -265,16 +265,21 @@ export default function Test() {
     picked?: string;
     mode?: string;
     session?: string;
+    mock?: string;
   }>();
   // Run mode: 'mock' chains the 4 skills into one session, anything else
   // is a single-skill attempt. Missing session → this screen mints one id
   // at start so every save below lands in exactly one attempt.
   const isMock = modeParam === 'mock';
   const sessionRef = useRef<string>(sessionParam ?? `${isMock ? 'mock' : 'single'}-${Date.now()}`);
-  const fwdParams = (s: string): { skill: string; mode: string; session: string } => ({
+  // Selected mock name ("November 2024") travels with the chain so every
+  // saved row of the sitting carries it; singles never set it.
+  const mockLabel = isMock ? mockParam : undefined;
+  const fwdParams = (s: string): { skill: string; mode: string; session: string; mock?: string } => ({
     skill: s,
     mode: isMock ? 'mock' : 'single',
     session: sessionRef.current,
+    ...(mockLabel ? { mock: mockLabel } : {}),
   });
   // Dev gallery deep links (no params in the real flow: defaults below).
   // stage=consignes|question|complete, li=0..8, phase=signal|consigne|doc|ask|pause,
@@ -783,6 +788,7 @@ export default function Test() {
     const base = {
       id: String(Date.now()),
       session: sessionRef.current,
+      ...(mockLabel ? { mockLabel } : {}),
       date: new Date().toISOString().slice(0, 10),
       skill: 'speaking' as const,
       section: 'B' as const,
@@ -851,6 +857,7 @@ export default function Test() {
       await saveResult({
         id: String(Date.now()),
         session: sessionRef.current,
+        ...(mockLabel ? { mockLabel } : {}),
         date: new Date().toISOString().slice(0, 10),
         skill: 'listening',
         section: 'B',
@@ -891,6 +898,7 @@ export default function Test() {
       await saveResult({
         id: String(Date.now()),
         session: sessionRef.current,
+        ...(mockLabel ? { mockLabel } : {}),
         date: new Date().toISOString().slice(0, 10),
         skill: 'reading',
         section: 'B',
@@ -931,6 +939,7 @@ export default function Test() {
             section: 'B',
             level: feedback.overall.level as Cefr,
             half: feedback.overall.half,
+            ...(mockLabel ? { mockLabel } : {}),
             text,
             feedback,
           });
@@ -947,6 +956,7 @@ export default function Test() {
         date: new Date().toISOString().slice(0, 10),
         skill: 'writing',
         section: 'B',
+        ...(mockLabel ? { mockLabel } : {}),
         level: stub.overall.level as Cefr,
         half: stub.overall.half,
         text,
