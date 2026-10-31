@@ -1,4 +1,4 @@
-# Prépa TEF TCF — Contest Mock (Stage 0)
+# Prépa TEF TCF — Contest Mock
 
 A lightweight Expo mobile app (iOS + Android) running a shortened **TEF Canada** mock test in
 one sitting: **Listening** (Compréhension orale), **Reading** (Compréhension écrite),
