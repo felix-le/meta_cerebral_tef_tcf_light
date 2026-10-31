@@ -507,6 +507,40 @@ export default function Test() {
     setPhase('signal');
   };
 
+  // Listening TTS: always reset the audio session back to playback first
+  // (a Speaking recording leaves allowsRecording=true, which mutes Speech
+  // on iOS), then stop + speak. Errors log which step failed so a silent
+  // run tells setAudioMode apart from speak. Content, order, timing and
+  // answers are untouched — only the playback path is fixed.
+  const speakListening = async (
+    text: string,
+    beat: 'signal' | 'consigne' | 'doc' | 'ask',
+    opts: { onStart?: () => void; onDone?: () => void; onStopped?: () => void; onError?: () => void },
+  ) => {
+    try {
+      await AudioModule.setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+    } catch (e) {
+      console.warn(`[tts] listening ${beat} setAudioMode failed:`, e instanceof Error ? e.message : e);
+    }
+    Speech.stop();
+    try {
+      Speech.speak(text, {
+        language: 'fr-FR',
+        rate: 0.95,
+        onStart: opts.onStart,
+        onDone: opts.onDone,
+        onStopped: opts.onStopped,
+        onError: (error) => {
+          console.warn(`[tts] listening ${beat} speak failed:`, error instanceof Error ? error.message : error);
+          opts.onError?.();
+        },
+      });
+    } catch (e) {
+      console.warn(`[tts] listening ${beat} speak failed:`, e instanceof Error ? e.message : e);
+      opts.onError?.();
+    }
+  };
+
   // Strict mock beats: document, then spoken question, then the 10s pause.
   // Uses `skill` (not `s`): effects live before the early return. Any TTS
   // error falls through to the answer pause so options never stay locked.
@@ -541,9 +575,7 @@ export default function Test() {
           setPhase(next);
         }
       };
-      Speech.speak(line, {
-        language: 'fr-FR',
-        rate: 0.95,
+      void speakListening(line, 'signal', {
         onStart: () => setPlaying(true),
         onDone: () => {
           setPlaying(false);
@@ -563,9 +595,7 @@ export default function Test() {
     }
     if (phase === 'consigne') {
       Speech.stop();
-      Speech.speak('Écoutez le document sonore et la question.', {
-        language: 'fr-FR',
-        rate: 0.95,
+      void speakListening('Écoutez le document sonore et la question.', 'consigne', {
         onStart: () => setPlaying(true),
         onDone: () => {
           setPlaying(false);
@@ -590,9 +620,7 @@ export default function Test() {
     }
     const speakQuestion = () => {
       Speech.stop();
-      Speech.speak(item.q.spoken, {
-        language: 'fr-FR',
-        rate: 0.95,
+      void speakListening(item.q.spoken, 'ask', {
         onStart: () => setPlaying(true),
         onDone: () => {
           setPlaying(false);
@@ -607,9 +635,7 @@ export default function Test() {
     };
     if (phase === 'doc' && item.doc.transcript) {
       Speech.stop();
-      Speech.speak(item.doc.transcript, {
-        language: 'fr-FR',
-        rate: 0.95,
+      void speakListening(item.doc.transcript, 'doc', {
         onStart: () => setPlaying(true),
         onDone: () => {
           setPlaying(false);
@@ -962,9 +988,9 @@ export default function Test() {
     if (skill === 'listening' && stage === 'complete') {
       router.replace({ pathname: '/test/[skill]', params: fwdParams('reading') });
     } else if (skill === 'reading' && rstage === 'complete') {
-      router.replace({ pathname: '/test/[skill]', params: fwdParams('writing') });
-    } else if (skill === 'writing' && wstage === 'pending') {
       router.replace({ pathname: '/test/[skill]', params: fwdParams('speaking') });
+    } else if (skill === 'writing' && wstage === 'pending') {
+      router.replace({ pathname: '/result', params: { session: sessionRef.current } });
     }
   }, [handSecs, skill, stage, rstage, wstage]);
 
@@ -1769,15 +1795,15 @@ export default function Test() {
             <Text style={styles.doneTitle}>Reading complete</Text>
             <Text style={styles.handBody}>
               {isMock
-                ? 'No breaks are allowed between tests. Written expression starts on its own — stay at your screen.'
+                ? 'No breaks are allowed between tests. Spoken expression starts on its own — stay at your screen.'
                 : 'Votre résultat est prêt — il s’ouvre tout seul.'}
             </Text>
             <View style={styles.handCard}>
               <View style={styles.handText}>
                 <Text style={styles.handKicker}>{isMock ? 'NEXT TEST' : 'RÉSULTAT'}</Text>
-                <Text style={styles.handName}>{isMock ? 'Writing' : 'TestReview'}</Text>
+                <Text style={styles.handName}>{isMock ? 'Speaking' : 'TestReview'}</Text>
                 <Text style={styles.handSub}>
-                  {isMock ? 'Written expression · demo' : 'Reading only'}
+                  {isMock ? 'Spoken expression · demo' : 'Reading only'}
                 </Text>
               </View>
               <Text style={styles.handCount}>{fmtClock(handSecs)}</Text>
@@ -1790,7 +1816,12 @@ export default function Test() {
             <View style={styles.doneBtns}>
               <Pressable
                 style={styles.nextBtn}
-                onPress={() => router.replace({ pathname: '/test/[skill]', params: { skill: 'writing' } })}
+                onPress={() =>
+                  router.replace({
+                    pathname: '/test/[skill]',
+                    params: isMock ? fwdParams('speaking') : { skill: 'speaking' },
+                  })
+                }
                 accessibilityRole="button"
                 accessibilityLabel="Start now">
                 <Text style={styles.nextLabel}>Start now</Text>
@@ -1993,7 +2024,12 @@ export default function Test() {
             <View style={styles.doneBtns}>
               <Pressable
                 style={styles.nextBtn}
-                onPress={() => router.replace({ pathname: '/test/[skill]', params: { skill: 'reading' } })}
+                onPress={() =>
+                  router.replace({
+                    pathname: '/test/[skill]',
+                    params: isMock ? fwdParams('reading') : { skill: 'reading' },
+                  })
+                }
                 accessibilityRole="button"
                 accessibilityLabel="Start now">
                 <Text style={styles.nextLabel}>Start now</Text>
@@ -2005,7 +2041,7 @@ export default function Test() {
         {s === 'writing' && wstage === 'consignes' && (
           <>
             <View style={styles.consignesHead}>
-              <Text style={styles.consignesKicker}>TEF Canada · épreuve 3 sur 4</Text>
+              <Text style={styles.consignesKicker}>TEF Canada · épreuve 4 sur 4</Text>
               <Text style={styles.consignesTitle}>Expression écrite</Text>
               <Text style={styles.consignesSub}>
                 {wMulti ? '2 tâches · 10 minutes · temps global' : 'Section B · 10 minutes · temps global'}
@@ -2288,7 +2324,7 @@ export default function Test() {
         {s === 'speaking' && sstage === 'consignes' && (
           <>
             <View style={styles.consignesHead}>
-              <Text style={styles.consignesKicker}>TEF Canada · épreuve 4 sur 4</Text>
+              <Text style={styles.consignesKicker}>TEF Canada · épreuve 3 sur 4</Text>
               <Text style={styles.consignesTitle}>Expression orale</Text>
               <Text style={styles.consignesSub}>
                 {sMulti ? '2 parties · face à un examinateur' : 'Section B · face à un examinateur'}
@@ -3211,17 +3247,13 @@ export default function Test() {
       {s === 'writing' && wstage === 'pending' && (
         <StickyCta
           tone="dark"
-          label={isMock ? 'Continuer : Expression orale' : 'Voir le résultat'}
+          label={isMock ? 'Voir le résultat de la session' : 'Voir le résultat'}
           icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
           disabled={!isMock && !wSaved}
-          onPress={() =>
-            isMock
-              ? router.replace({ pathname: '/test/[skill]', params: fwdParams('speaking') })
-              : router.replace({ pathname: '/result', params: { session: sessionRef.current } })
-          }
+          onPress={() => router.replace({ pathname: '/result', params: { session: sessionRef.current } })}
           note={
             isMock
-              ? `L'IA corrige cette épreuve pendant que vous continuez. Passage à l'oral dans ${fmtClock(handSecs)}.`
+              ? `L'IA corrige cette épreuve. Le résultat commun s'ouvre dans ${fmtClock(handSecs)}.`
               : `L'IA corrige cette épreuve. Votre résultat s'ouvre dans ${fmtClock(handSecs)}.`
           }
         />
@@ -3316,13 +3348,17 @@ export default function Test() {
       {s === 'speaking' && sstage === 'pending' && (
         <StickyCta
           tone="dark"
-          label={isMock ? 'Voir le résultat de la session' : 'Voir le résultat'}
-          icon={<AppIcon name="IconOutlineRoundedAiDocument" size={17} color="#fff" />}
+          label={isMock ? 'Continuer : Expression écrite' : 'Voir le résultat'}
+          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
           disabled={!isMock && !sSaved}
-          onPress={() => router.push({ pathname: '/result', params: { session: sessionRef.current } })}
+          onPress={() =>
+            isMock
+              ? router.replace({ pathname: '/test/[skill]', params: fwdParams('writing') })
+              : router.push({ pathname: '/result', params: { session: sessionRef.current } })
+          }
           note={
             isMock
-              ? 'Les quatre épreuves sont terminées — les scores sont publiés ensemble.'
+              ? 'L’oral est enregistré — place à l’expression écrite.'
               : sSaved
                 ? 'Votre résultat est prêt.'
                 : 'Le score arrive — le bouton se débloque à la fin.'
