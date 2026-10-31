@@ -225,3 +225,208 @@ export function parseWritingBResult(content: string): FeedbackStub {
   }
   return raw as unknown as FeedbackStub;
 }
+
+/**
+ * Pure scorer module for the Speaking section B grader: same wire shape as
+ * Writing (model, reasoning, tokens, temperature, json_schema), but the
+ * input is the whole conversation with the AI partner and the output has
+ * the seven Speaking B criteria. Only the candidate's (Vous) turns are
+ * graded; the AI partner turns are context.
+ */
+
+export const SPEAKING_B_CRITERION_IDS = [
+  'presentation',
+  'argumentation',
+  'initiative',
+  'exchange',
+  'lexicon',
+  'grammar',
+  'register',
+] as const;
+
+const SPEAKING_B_SYSTEM_PROMPT = [
+  'You grade TEF Canada Speaking section B (presenting a situation to a hesitant colleague and convincing them).',
+  'Grade holistically like the official grid: one CEFR level per criterion below, then one overall level.',
+  'Criteria: presentation (facts presented, situation clear), argumentation (reasons, examples, persuasion),',
+  'initiative (takes and keeps the initiative, asks questions back), exchange (reacts to objections, interaction),',
+  'lexicon (range, precision), grammar (complex sentences, agreements), register (appropriate tone).',
+  'Grade ONLY the candidate turns (Vous). The AI partner turns (Examinateur IA) are context, never graded,',
+  'and evidence quotes come only from the candidate turns.',
+  'When the conversation has no AI partner turn, initiative and exchange cannot be observed: mark them',
+  'assessed=false with level omitted and a comment saying why.',
+  'Rules: comments in English (1-2 sentences, specific to this conversation); every quote, correction and rewrite',
+  'in French, copied from or applied to the candidate turns; corrections sorted by importance, max 15;',
+  '2-5 betterPhrasing rewrites; 1-3 strengths and 1-3 nextSteps.',
+  'The overall level must lie between the lowest and highest assessed criterion level.',
+  'half is lower/upper only for B1, B2, C1, otherwise none.',
+].join(' ');
+
+/** response_format value for the Speaking B grader. */
+export const SPEAKING_B_RESPONSE_FORMAT = {
+  type: 'json_schema',
+  json_schema: {
+    name: 'speaking_b_feedback',
+    schema: {
+      type: 'object',
+      additionalProperties: false,
+      required: [
+        'schemaVersion',
+        'skill',
+        'section',
+        'criteria',
+        'overall',
+        'corrections',
+        'betterPhrasing',
+        'strengths',
+        'nextSteps',
+      ],
+      properties: {
+        schemaVersion: { type: 'string' },
+        skill: { type: 'string', enum: ['speaking'] },
+        section: { type: 'string', enum: ['B'] },
+        criteria: {
+          type: 'array',
+          minItems: 7,
+          maxItems: 7,
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['id', 'assessed', 'comment'],
+            properties: {
+              id: { type: 'string', enum: [...SPEAKING_B_CRITERION_IDS] },
+              assessed: { type: 'boolean' },
+              level: { type: 'string', enum: [...CEFR_ORDER] },
+              comment: { type: 'string' },
+              evidence: { type: 'array', items: { type: 'string' }, maxItems: 3 },
+            },
+          },
+        },
+        overall: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['level', 'half'],
+          properties: {
+            level: { type: 'string', enum: [...CEFR_ORDER] },
+            half: { type: 'string', enum: ['lower', 'upper', 'none'] },
+          },
+        },
+        corrections: {
+          type: 'array',
+          maxItems: 15,
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['original', 'corrected', 'type', 'explanation'],
+            properties: {
+              original: { type: 'string' },
+              corrected: { type: 'string' },
+              type: {
+                type: 'string',
+                enum: ['grammar', 'vocabulary', 'spelling', 'punctuation', 'register'],
+              },
+              explanation: { type: 'string' },
+            },
+          },
+        },
+        betterPhrasing: {
+          type: 'array',
+          minItems: 2,
+          maxItems: 5,
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['original', 'suggestion', 'why'],
+            properties: {
+              original: { type: 'string' },
+              suggestion: { type: 'string' },
+              why: { type: 'string' },
+            },
+          },
+        },
+        strengths: { type: 'array', minItems: 1, maxItems: 3, items: { type: 'string' } },
+        nextSteps: { type: 'array', minItems: 1, maxItems: 3, items: { type: 'string' } },
+      },
+    },
+  },
+};
+
+export function buildSpeakingBRequest(
+  consigne: string,
+  conversation: string,
+): Record<string, unknown> {
+  return {
+    model: SCORER_MODEL,
+    temperature: 0,
+    // Same reasoning budget note as Writing: low keeps the trace small so
+    // the 8k budget is spent on the JSON itself.
+    reasoning_effort: 'low',
+    max_completion_tokens: 8192,
+    response_format: SPEAKING_B_RESPONSE_FORMAT,
+    messages: [
+      { role: 'system', content: SPEAKING_B_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content: `Consigne (French): ${consigne}\n\nConversation (French, candidate turns marked Vous, AI partner turns marked Examinateur IA):\n${conversation}`,
+      },
+    ],
+  };
+}
+
+/** Parse one completion content string into a FeedbackStub; throws on mismatch. */
+export function parseSpeakingBResult(content: string): FeedbackStub {
+  let raw: Record<string, unknown>;
+  try {
+    raw = JSON.parse(content) as Record<string, unknown>;
+  } catch {
+    throw new ScorerValidationError('Scorer returned non-JSON content.');
+  }
+  if (raw.skill !== 'speaking' || raw.section !== 'B') {
+    throw new ScorerValidationError('Scorer returned the wrong skill/section.');
+  }
+  const criteria = raw.criteria;
+  if (!Array.isArray(criteria) || criteria.length !== SPEAKING_B_CRITERION_IDS.length) {
+    throw new ScorerValidationError(
+      `Expected ${SPEAKING_B_CRITERION_IDS.length} criteria, got ${Array.isArray(criteria) ? criteria.length : 'none'}.`,
+    );
+  }
+  const seen = new Set<string>();
+  const assessedLevels: string[] = [];
+  for (const c of criteria) {
+    const row = c as { id?: unknown; assessed?: unknown; level?: unknown };
+    if (typeof row.id !== 'string' || !SPEAKING_B_CRITERION_IDS.includes(row.id as never)) {
+      throw new ScorerValidationError(`Unknown criterion id: ${String(row.id)}.`);
+    }
+    if (seen.has(row.id)) {
+      throw new ScorerValidationError(`Duplicate criterion id: ${row.id}.`);
+    }
+    seen.add(row.id);
+    if (row.assessed === true) {
+      if (typeof row.level !== 'string' || !CEFR_ORDER.includes(row.level as never)) {
+        throw new ScorerValidationError(`Bad level for ${row.id}.`);
+      }
+      assessedLevels.push(row.level);
+    }
+  }
+  const overall = raw.overall as { level?: unknown; half?: unknown } | undefined;
+  if (
+    !overall ||
+    typeof overall.level !== 'string' ||
+    !CEFR_ORDER.includes(overall.level as never) ||
+    typeof overall.half !== 'string' ||
+    !HALF_OK[overall.level]?.includes(overall.half)
+  ) {
+    throw new ScorerValidationError('Bad overall level/half.');
+  }
+  if (assessedLevels.length > 0) {
+    const rank = (l: string): number => CEFR_ORDER.indexOf(l as never);
+    const lo = Math.min(...assessedLevels.map(rank));
+    const hi = Math.max(...assessedLevels.map(rank));
+    const r = rank(overall.level);
+    if (r < lo || r > hi) {
+      throw new ScorerValidationError(
+        `Overall ${overall.level} outside assessed range.`,
+      );
+    }
+  }
+  return raw as unknown as FeedbackStub;
+}

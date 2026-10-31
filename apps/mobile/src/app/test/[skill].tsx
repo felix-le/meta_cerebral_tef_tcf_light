@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Animated, Easing, Image, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import * as Speech from 'expo-speech';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -13,8 +13,16 @@ import { ExitSheet } from '@/components/ExitSheet';
 import { StickyCta } from '@/components/StickyCta';
 import { countWords, type Cefr } from '@/config/scoring';
 import { saveResult } from '@/storage/history';
-import { SPEAKING_B_STUB, WRITING_B_STUB } from '@/content/feedbackStub';
-import { isAiConfigured, scoreWritingB } from '@/ai/client';
+import { WRITING_B_STUB } from '@/content/feedbackStub';
+import { debateReply, isAiConfigured, scoreSpeakingB, scoreWritingB, transcribeWav, type DebateTurn } from '@/ai/client';
+import {
+  AudioModule,
+  AudioQuality,
+  IOSOutputFormat,
+  RecordingPresets,
+  useAudioRecorder,
+  type RecordingOptions,
+} from 'expo-audio';
 import {
   LISTENING_DEMO,
   LISTENING_RULES,
@@ -112,6 +120,69 @@ const SPIN_GOLD = '#D4860F';
 const ORBIT_R = 67.5;
 const ORBIT_C = 2 * Math.PI * ORBIT_R;
 
+// Review CTA for Speaking: with the partner the review screen is the
+// end-of-session summary (all turns already happened on the record
+// screen), so it only submits. Stub keeps the old single-shot behaviour.
+function SpeakingReviewCta({
+  sMulti,
+  stask,
+  sPartner,
+  aiWorking,
+  hasTranscript,
+  onSubmit,
+  onNextTask,
+}: {
+  sMulti: boolean;
+  stask: number;
+  sPartner: boolean;
+  aiWorking: boolean;
+  hasTranscript: boolean;
+  onSubmit: () => void;
+  onNextTask: () => void;
+}) {
+  const isLast = !sMulti || stask === SPEAKING_TASKS.length - 1;
+  if (sPartner) {
+    return (
+      <StickyCta
+        bg="#2E1A3B"
+        label="Vérifier et envoyer"
+        icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+        disabled={aiWorking}
+        onPress={onSubmit}
+        note="Conversation prête — les textes corrigés seront enregistrés. La croix reste disponible pour quitter."
+      />
+    );
+  }
+  return (
+    <StickyCta
+      bg="#2E1A3B"
+      label={!sMulti || stask === SPEAKING_TASKS.length - 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
+      icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
+      disabled={
+        isLast && isAiConfigured() && Platform.OS === 'ios' && (aiWorking || !hasTranscript)
+      }
+      onPress={() => {
+        if (isLast) {
+          onSubmit();
+        } else {
+          onNextTask();
+        }
+      }}
+      note={
+        !isLast
+          ? `Tâche ${stask + 2} · ${SPEAKING_TASKS[stask + 1].maxLabel} — ${SPEAKING_TASKS[stask + 1].title.toLowerCase()}.`
+          : hasTranscript
+            ? 'Transcription prête — seul le texte corrigé sera enregistré.'
+            : isAiConfigured() && Platform.OS === 'ios'
+              ? aiWorking
+                ? 'Transcription en cours — le bouton se débloque à la fin. La croix reste disponible pour quitter.'
+                : 'Transcription manquante — touchez Réessayer avant d’envoyer. La croix reste disponible pour quitter.'
+              : "Rien n'a encore été envoyé à l'IA."
+      }
+    />
+  );
+}
+
 function ScoringRing({ done }: { done?: boolean }) {
   const spin = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -165,6 +236,25 @@ function ScoringRing({ done }: { done?: boolean }) {
     </View>
   );
 }
+
+// Stage-2 Speaking B recorder: WAV the transcriber accepts (mono 16-bit
+// PCM 16 kHz). iOS only — Android MediaRecorder cannot output WAV, so
+// Android keeps the stub timers (see the record effect below).
+const SPEAKING_WAV: RecordingOptions = {
+  ...RecordingPresets.HIGH_QUALITY,
+  extension: '.wav',
+  sampleRate: 16000,
+  numberOfChannels: 1,
+  ios: {
+    ...RecordingPresets.HIGH_QUALITY.ios,
+    outputFormat: IOSOutputFormat.LINEARPCM,
+    audioQuality: AudioQuality.HIGH,
+    sampleRate: 16000,
+    linearPCMBitDepth: 16,
+    linearPCMIsBigEndian: false,
+    linearPCMIsFloat: false,
+  },
+};
 
 export default function Test() {
   const { skill, stage: stageParam, li: liParam, phase: phaseParam, picked: pickedParam, mode: modeParam, session: sessionParam } = useLocalSearchParams<{
@@ -288,6 +378,65 @@ export default function Test() {
   );
   const [rec, setRec] = useState(0);
   const [sdur, setSdur] = useState<number[]>([]);
+  // Stage-2 transcript state (Speaking B). sTrans holds the edited text
+  // per task; the stub path leaves it empty and saves no transcript.
+  const wavRecorder = useAudioRecorder(SPEAKING_WAV);
+  const [sLive, setSLive] = useState(false);
+  const [sTrans, setSTrans] = useState<string[]>([]);
+  const [sTransState, setSTransState] = useState<'idle' | 'working' | 'error'>('idle');
+  const [sTransErr, setSTransErr] = useState('');
+  const sUriRef = useRef<string | null>(null);
+  // Stage-2 partner: takes frozen into sPrevTakes right after each
+  // transcribe + AI replies (B-only single task; max 3 user takes, one
+  // record screen). sTrans stays stub-only.
+  const [sPrevTakes, setSPrevTakes] = useState<string[]>([]);
+  const [sAi, setSAi] = useState<string[]>([]);
+  const [sAiState, setSAiState] = useState<'idle' | 'working' | 'error'>('idle');
+  const [sAiErr, setSAiErr] = useState('');
+  const sPartner = isAiConfigured() && Platform.OS === 'ios';
+  // Single-screen partner turn machine (record stage only, sPartner only):
+  // speaking (mic open) -> aiWorking (transcribe+debate) -> aiSpeaking
+  // (reply playing) -> speaking, via a 1 s mic-closed bridge that opens
+  // the mic by itself. turnError (transcribe/debate/prepare/speak failure,
+  // mic closed). The old
+  // record -> review -> record cycle between turns is gone; review is the
+  // end-of-session summary only.
+  const [turnPhase, setTurnPhase] = useState<'speaking' | 'aiWorking' | 'aiSpeaking' | 'turnError'>('speaking');
+  const turnPhaseRef = useRef(turnPhase);
+  turnPhaseRef.current = turnPhase;
+  // Per-turn mic-open clock: reset to 0 at every turn start (first turn
+  // included), ticks only while speaking, auto endTurn at takeMax.
+  const [segRec, setSegRec] = useState(0);
+  const segRecRef = useRef(0);
+  // Finalized segment files (one per turn) for same-screen retry; the take
+  // is sealed once the next turn's mic opens, so retry only exists before.
+  const [sSegUris, setSSegUris] = useState<string[]>([]);
+  const sSegUrisRef = useRef<string[]>([]);
+  // Partner conversation mirrors (refs stay synchronous for debate builds).
+  const sPrevTakesRef = useRef<string[]>([]);
+  const sAiRef = useRef<string[]>([]);
+  const [sFailKind, setSFailKind] = useState<'transcribe' | 'debate' | 'prepare' | 'speak' | null>(null);
+  // 1 s bridge after a heard reply: mic still closed, then the mic opens
+  // by itself (turns 1-2 only). Idempotent via the ref mirror below.
+  const [sAutoNext, setSAutoNext] = useState(false);
+  const sAutoNextRef = useRef(false);
+  const micWaitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sLiveRef = useRef(false);
+  sLiveRef.current = sLive;
+  const clearMicWait = () => {
+    if (micWaitRef.current) {
+      clearTimeout(micWaitRef.current);
+      micWaitRef.current = null;
+    }
+  };
+  // Reply playback failure: turnError/speak (mic stays closed, retry the
+  // playback or go to the summary).
+  const [sSpeakErr, setSSpeakErr] = useState<string | null>(null);
+  const [sMicRetry, setSMicRetry] = useState(0);
+  const endingRef = useRef(false);
+  const speakGenRef = useRef(0);
+  const speakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const endTurnRef = useRef(() => {});
   const sdoneRef = useRef(false);
   // Listening strict mock: consignes screen, then per question
   // signal -> consigne (first of document) -> document -> question -> pause.
@@ -319,6 +468,12 @@ export default function Test() {
   useEffect(
     () => () => {
       Speech.stop();
+      clearMicWait();
+      speakGenRef.current += 1;
+      if (speakTimerRef.current) {
+        clearTimeout(speakTimerRef.current);
+        speakTimerRef.current = null;
+      }
       if (preTimer.current) {
         clearTimeout(preTimer.current);
       }
@@ -561,25 +716,76 @@ export default function Test() {
 
   // Speaking stub end: saved once, then the session result screen (the
   // dedicated session review does not exist yet; /result stands in).
+  // True once the scored result is saved (Writing's wSaved): the
+  // correction screen flips to its done state. Pending fallback leaves it
+  // false, so correction stays in progress with its button locked.
+  const [sSaved, setSSaved] = useState(false);
   const finishSpeaking = async () => {
     if (sdoneRef.current) {
       return;
     }
     sdoneRef.current = true;
-    setSstage('pending');
     try {
-      const stub = SPEAKING_B_STUB;
-      await saveResult({
-        id: String(Date.now()),
-        session: sessionRef.current,
-        date: new Date().toISOString().slice(0, 10),
-        skill: 'speaking',
-        section: 'B',
-        level: stub.overall.level as Cefr,
-        half: stub.overall.half,
-        durations: [...sdur],
-      });
+      await Speech.stop();
     } catch {}
+    // Correction opens at once in its in-progress state; it flips to done
+    // only when the scored feedback lands (sSaved).
+    setSstage('pending');
+    // Joined conversation, one labeled line per turn. Partner takes live
+    // only in sPrevTakes (frozen right after each transcribe, edited in
+    // the end summary); stub keeps its single take in sTrans[stask].
+    const conv: string[] = [];
+    if (sPartner) {
+      sPrevTakesRef.current.forEach((text, i) => {
+        conv.push(`Vous (prise ${i + 1}) : ${text}`);
+        if (sAiRef.current[i] !== undefined) {
+          conv.push(`Examinateur IA (démo) : ${sAiRef.current[i]}`);
+        }
+      });
+    } else {
+      sPrevTakes.forEach((text, i) => {
+        conv.push(`Vous (prise ${i + 1}) : ${text}`);
+        if (sAi[i] !== undefined) {
+          conv.push(`Examinateur IA (démo) : ${sAi[i]}`);
+        }
+      });
+      if (sTrans[stask] !== undefined && sTrans[stask] !== '') {
+        conv.push(`Vous (prise ${sPrevTakes.length + 1}) : ${sTrans[stask]}`);
+      }
+    }
+    const conversation = conv.join('\n');
+    const base = {
+      id: String(Date.now()),
+      session: sessionRef.current,
+      date: new Date().toISOString().slice(0, 10),
+      skill: 'speaking' as const,
+      section: 'B' as const,
+      durations: [...sdur],
+      transcript: conv.length > 0 ? conversation : undefined,
+    };
+    // No key: pending record (transcript + durations, no level) — the stub
+    // is never saved as a real result.
+    if (!isAiConfigured()) {
+      try {
+        await saveResult(base);
+      } catch {}
+      return;
+    }
+    try {
+      const feedback = await scoreSpeakingB(staskData.consigne, conversation);
+      await saveResult({
+        ...base,
+        level: feedback.overall.level as Cefr,
+        half: feedback.overall.half,
+        feedback,
+      });
+      setSSaved(true);
+    } catch (e) {
+      console.warn('[scorer] speaking B failed, pending fallback:', e instanceof Error ? e.message : e);
+      try {
+        await saveResult(base);
+      } catch {}
+    }
   };
 
   const dark =
@@ -823,16 +1029,102 @@ export default function Test() {
       return;
     }
     const t = setInterval(() => {
-      setRec((v) => (v + 1 >= SPEAKING_TASKS[stask].max ? SPEAKING_TASKS[stask].max : v + 1));
+      setRec((v) => (v + 1 >= takeMax ? takeMax : v + 1));
     }, 1000);
     return () => clearInterval(t);
   }, [skill, sstage, stask]);
+  // Stage-2 real mic: only with a key, only iOS (WAV). Keyless never asks
+  // for the microphone and runs the stub timers above.
+  useEffect(() => {
+    if (skill !== 'speaking' || sstage !== 'record' || !isAiConfigured() || Platform.OS !== 'ios') {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const perm = await AudioModule.requestRecordingPermissionsAsync();
+        if (!perm.granted) {
+          if (!cancelled) {
+            setSTransState('error');
+            setSTransErr('Micro refusé — autorisez le micro dans Réglages puis recommencez.');
+            if (sPartner) {
+              setSFailKind('prepare');
+              setTurnPhase('turnError');
+            }
+          }
+          return;
+        }
+        await AudioModule.setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        await wavRecorder.prepareToRecordAsync();
+        if (cancelled) {
+          return;
+        }
+        wavRecorder.record();
+        setSLive(true);
+        // First-turn clock + phase (later turns go through the 1 s bridge).
+        segRecRef.current = 0;
+        setSegRec(0);
+        setSFailKind(null);
+        if (sPartner) {
+          setTurnPhase('speaking');
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setSTransState('error');
+          setSTransErr(e instanceof Error ? e.message : 'Micro indisponible.');
+          if (sPartner) {
+            setSFailKind('prepare');
+            setTurnPhase('turnError');
+          }
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [skill, sstage, sMicRetry]);
 
   // Speaking stub helpers: current task, live examiner cue, measured stop.
   // sMulti is false while section A is scope-hidden (same pattern as writing).
   const sMulti = SPEAKING_TASKS.length > 1;
   const staskData = SPEAKING_TASKS[stask];
-  const sStopped = sstage === 'record' && rec >= staskData.max;
+  // Per-turn cap with the partner: 180 s of user speech, max 3 turns
+  // (no total cap); stub keeps the task limit.
+  const takeMax = sPartner ? 180 : staskData.max;
+  const takeMaxLabel = sPartner ? '3:00' : staskData.maxLabel;
+  const sStopped = sPartner
+    ? sstage === 'record' && turnPhase === 'speaking' && segRec >= takeMax
+    : sstage === 'record' && rec >= takeMax;
+  // Partner: the per-turn clock ticks only while the mic is open; hitting
+  // the cap ends the turn like a tap (transcribe + debate as usual).
+  useEffect(() => {
+    if (!sPartner || skill !== 'speaking' || sstage !== 'record') {
+      return;
+    }
+    if (turnPhase !== 'speaking') {
+      return;
+    }
+    const t = setInterval(() => {
+      segRecRef.current += 1;
+      setSegRec(segRecRef.current);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [sPartner, skill, sstage, turnPhase]);
+  useEffect(() => {
+    if (sPartner && skill === 'speaking' && sstage === 'record' && turnPhase === 'speaking' && segRec >= takeMax) {
+      endTurnRef.current();
+    }
+  }, [sPartner, skill, sstage, turnPhase, segRec]);
+  // Stub cap: stop the file at the task limit even if the user never taps
+  // stop; the tap afterwards only transcribes what was kept.
+  useEffect(() => {
+    if (!sPartner && skill === 'speaking' && sstage === 'record' && rec >= takeMax && sLive) {
+      void wavRecorder
+        .stop()
+        .catch(() => {})
+        .finally(() => setSLive(false));
+    }
+  }, [sPartner, skill, sstage, rec, takeMax, sLive]);
   const cueIdx = (() => {
     let k = 0;
     staskData.turns.forEach((tn, i) => {
@@ -844,15 +1136,287 @@ export default function Test() {
   })();
   const cue = staskData.turns[cueIdx];
   const nextCue = staskData.turns[cueIdx + 1];
+  // Transcribe the stopped take (stub path). API errors surface with a
+  // retry — never a silent stub fallback once audio was recorded.
+  const runTranscribe = async (uri: string | null) => {
+    if (!uri) {
+      setSTransState('error');
+      setSTransErr('Aucun fichier audio — réessayez.');
+      return;
+    }
+    setSTransState('working');
+    setSTransErr('');
+    try {
+      const t = await transcribeWav(uri);
+      setSTrans((prev) => {
+        const next = [...prev];
+        next[stask] = t;
+        return next;
+      });
+      setSTransState('idle');
+    } catch (e) {
+      setSTransState('error');
+      setSTransErr(e instanceof Error ? e.message : 'Transcription impossible.');
+    }
+  };
+  // TTS for the AI examiner reply: reset the audio session back to
+  // playback (recording leaves allowsRecording=true, which mutes Speech on
+  // iOS), then speak exactly the given reply text. Two modes: automatic
+  // (after debate, with onDone/onSpeakError callbacks) and manual replay
+  // (Écouter buttons: playback only, never touches turn state).
+  const speakReply = async (
+    text: string,
+    opts?: { onDone?: () => void; onSpeakError?: (message: string) => void },
+  ) => {
+    if (!text || text.trim() === '') {
+      return;
+    }
+    try {
+      await AudioModule.setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+    } catch (e) {
+      console.warn('[tts] setAudioModeAsync failed:', e instanceof Error ? e.message : e);
+    }
+    try {
+      await Speech.stop();
+    } catch {}
+    try {
+      await Speech.speak(text, {
+        language: 'fr-FR',
+        rate: 0.95,
+        onDone: opts?.onDone,
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : String(error);
+          console.warn('[tts] speak failed:', message);
+          opts?.onSpeakError?.(message);
+        },
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.warn('[tts] speak failed:', message);
+      opts?.onSpeakError?.(message);
+    }
+  };
+  const clearSpeakTimer = () => {
+    if (speakTimerRef.current) {
+      clearTimeout(speakTimerRef.current);
+      speakTimerRef.current = null;
+    }
+  };
+  // Partner: transcribe one finalized segment, freeze the take into
+  // sPrevTakes immediately, then debate (except after the 3rd take: the
+  // session summary follows with no debate and no audio).
+  const runTranscribePartner = async (uri: string | null) => {
+    if (!uri) {
+      setSTransState('error');
+      setSTransErr('Aucun fichier audio — réessayez.');
+      setSFailKind('transcribe');
+      setTurnPhase('turnError');
+      return;
+    }
+    setSTransState('working');
+    setSTransErr('');
+    try {
+      const text = await transcribeWav(uri);
+      const takes = [...sPrevTakesRef.current, text];
+      sPrevTakesRef.current = takes;
+      setSPrevTakes(takes);
+      setSTransState('idle');
+      if (takes.length >= 3) {
+        setSstage('review');
+        return;
+      }
+      await runDebatePartner();
+    } catch (e) {
+      setSTransState('error');
+      setSTransErr(e instanceof Error ? e.message : 'Transcription impossible.');
+      setSFailKind('transcribe');
+      setTurnPhase('turnError');
+    }
+  };
+  // Partner: automatic reply playback with a generation token and a
+  // fresh safety timer. onDone starts the 1 s mic-closed bridge, then the
+  // mic opens by itself; any playback failure goes to turnError/speak with
+  // the mic closed — never auto-opens. Manual Écouter replays never call
+  // this: they use plain speakReply with no callbacks.
+  const playAutoReply = async (text: string) => {
+    const gen = speakGenRef.current + 1;
+    speakGenRef.current = gen;
+    clearSpeakTimer();
+    // Safety: only fires when neither onDone nor onError ran.
+    speakTimerRef.current = setTimeout(() => {
+      if (speakGenRef.current !== gen) {
+        return;
+      }
+      speakTimerRef.current = null;
+      setSSpeakErr('Réplique non entendue — réessayez.');
+      setSFailKind('speak');
+      setTurnPhase('turnError');
+    }, 30000);
+    await speakReply(text, {
+      onDone: () => {
+        if (speakGenRef.current !== gen) {
+          return;
+        }
+        clearSpeakTimer();
+        setSSpeakErr(null);
+        // 1 s bridge, mic still closed, then the mic opens by itself.
+        sAutoNextRef.current = true;
+        setSAutoNext(true);
+        clearMicWait();
+        micWaitRef.current = setTimeout(() => {
+          micWaitRef.current = null;
+          if (!sAutoNextRef.current) {
+            return;
+          }
+          void openMicForNextTurn();
+        }, 1000);
+      },
+      onSpeakError: (message) => {
+        if (speakGenRef.current !== gen) {
+          return;
+        }
+        clearSpeakTimer();
+        setSSpeakErr(message || 'Réplique non entendue — réessayez.');
+        setSFailKind('speak');
+        setTurnPhase('turnError');
+      },
+    });
+  };
+  // Partner: one AI turn built from the frozen sPrevTakes (never rebuilt
+  // from a live take); the reply lands at the last index, then plays.
+  const runDebatePartner = async () => {
+    const takes = sPrevTakesRef.current;
+    const replies = sAiRef.current;
+    const turns: DebateTurn[] = [];
+    takes.forEach((text, i) => {
+      turns.push({ who: 'you', text });
+      if (replies[i] !== undefined) {
+        turns.push({ who: 'ai', text: replies[i] });
+      }
+    });
+    setSAiState('working');
+    setSAiErr('');
+    try {
+      const reply = await debateReply(staskData.consigne, turns);
+      const idx = sPrevTakesRef.current.length - 1;
+      const next = [...sAiRef.current];
+      next[idx] = reply;
+      sAiRef.current = next;
+      setSAi(next);
+      setSAiState('idle');
+      setTurnPhase('aiSpeaking');
+      await playAutoReply(reply);
+    } catch (e) {
+      setSAiState('error');
+      setSAiErr(e instanceof Error ? e.message : 'Réponse IA impossible.');
+      setSFailKind('debate');
+      setTurnPhase('turnError');
+    }
+  };
+  // Partner: the round stop button is the only endTurn caller. Double-tap
+  // guarded, speaking-only, minimum 3 s of speech. Stops the segment (so
+  // the AI voice can never leak into the recording), freezes its duration,
+  // then transcribes — all on the same record screen.
+  const endTurn = () => {
+    if (!sPartner || turnPhaseRef.current !== 'speaking' || segRecRef.current < 3 || endingRef.current) {
+      return;
+    }
+    endingRef.current = true;
+    void (async () => {
+      try {
+        await wavRecorder.stop();
+      } catch (e) {
+        console.warn('[transcribe] recorder stop failed:', e instanceof Error ? e.message : e);
+      }
+      setSLive(false);
+      const uri = wavRecorder.uri;
+      const dur = segRecRef.current;
+      setSdur((d) => {
+        const next = [...d];
+        next[stask] = (next[stask] ?? 0) + dur;
+        return next;
+      });
+      if (uri) {
+        const uris = [...sSegUrisRef.current, uri];
+        sSegUrisRef.current = uris;
+        setSSegUris(uris);
+      }
+      setSFailKind(null);
+      setTurnPhase('aiWorking');
+      endingRef.current = false;
+      await runTranscribePartner(uri);
+    })();
+  };
+  endTurnRef.current = endTurn;
+  // Partner: open the mic for the next turn. Only audio mode + stop +
+  // prepare + record + clock reset — never appends any transcript.
+  // Guarded: never runs while the mic is already open.
+  const openMicForNextTurn = async () => {
+    if (turnPhaseRef.current === 'speaking' || sLiveRef.current) {
+      return;
+    }
+    sAutoNextRef.current = false;
+    setSAutoNext(false);
+    try {
+      await AudioModule.setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+    } catch (e) {
+      console.warn('[mic] setAudioModeAsync failed:', e instanceof Error ? e.message : e);
+    }
+    try {
+      await Speech.stop();
+    } catch {}
+    try {
+      await wavRecorder.prepareToRecordAsync();
+      wavRecorder.record();
+      setSLive(true);
+      segRecRef.current = 0;
+      setSegRec(0);
+      setSSpeakErr(null);
+      setSFailKind(null);
+      setSTransState('idle');
+      setSTransErr('');
+      sAutoNextRef.current = false;
+      setSAutoNext(false);
+      setTurnPhase('speaking');
+    } catch (e) {
+      setSLive(false);
+      sAutoNextRef.current = false;
+      setSAutoNext(false);
+      setSTransState('error');
+      setSTransErr(e instanceof Error ? e.message : 'Micro indisponible.');
+      setSFailKind('prepare');
+      setTurnPhase('turnError');
+    }
+  };
+  // Stub single take: stop, save duration, then review (partner uses
+  // endTurn on the same record screen instead).
   const stopTake = () => {
+    if (sPartner) {
+      return;
+    }
     if (rec < 3) {
       return;
     }
     setSdur((d) => {
       const next = [...d];
-      next[stask] = rec;
+      next[stask] = sPartner ? (next[stask] ?? 0) + rec : rec;
       return next;
     });
+    if (sLive) {
+      void (async () => {
+        try {
+          await wavRecorder.stop();
+        } catch (e) {
+          console.warn('[transcribe] recorder stop failed:', e instanceof Error ? e.message : e);
+        }
+        setSLive(false);
+        const uri = wavRecorder.uri;
+        sUriRef.current = uri;
+        setSstage('review');
+        await runTranscribe(uri);
+      })();
+      return;
+    }
     setSstage('review');
   };
   const sProgPct =
@@ -1813,62 +2377,239 @@ export default function Test() {
           <>
             <Text style={styles.spKicker}>{staskData.kicker}</Text>
             <Text style={styles.spShort}>{staskData.short}</Text>
-            <View
-              style={[
-                styles.turnCard,
-                cue.who === 'ex' ? styles.turnCardEx : styles.turnCardYou,
-              ]}>
-              <View style={styles.turnHead}>
-                <Text style={styles.turnKicker}>{cue.who === 'ex' ? 'L’EXAMINATEUR' : 'À VOUS'}</Text>
-                <Text style={styles.turnNext}>
-                  {nextCue
-                    ? `Prochaine réplique dans ${fmtClock(nextCue.at - rec)}`
-                    : 'Dernière réplique — concluez l’échange'}
+            {sPartner ? (
+              <View style={styles.reviewBox}>
+                <Text style={styles.reviewKicker}>
+                  CONVERSATION · PRISE {Math.min(sPrevTakes.length + 1, 3)} SUR 3
                 </Text>
+                {sPrevTakes.map((_, i) => (
+                  <View key={`you-${i}`}>
+                    <Text style={styles.reviewKicker}>VOUS · PRISE {i + 1}</Text>
+                    {sAi[i] !== undefined && (
+                      <Text style={styles.reviewKicker}>EXAMINATEUR IA (DÉMO) · RÉPLIQUE {i + 1}</Text>
+                    )}
+                  </View>
+                ))}
+                {(turnPhase === 'aiWorking') && (
+                  <View style={styles.transSpinRow}>
+                    <ActivityIndicator size="small" color="#7A4E0C" />
+                    <Text style={styles.reviewText}>
+                      {sTransState === 'working' ? 'L’IA écoute votre enregistrement.' : 'Une réplique arrive.'}
+                    </Text>
+                  </View>
+                )}
               </View>
-              <Text style={styles.turnText}>{cue.text}</Text>
-            </View>
+            ) : (
+              <View
+                style={[
+                  styles.turnCard,
+                  cue.who === 'ex' ? styles.turnCardEx : styles.turnCardYou,
+                ]}>
+                <View style={styles.turnHead}>
+                  <Text style={styles.turnKicker}>{cue.who === 'ex' ? 'L’EXAMINATEUR' : 'À VOUS'}</Text>
+                  <Text style={styles.turnNext}>
+                    {nextCue
+                      ? `Prochaine réplique dans ${fmtClock(nextCue.at - rec)}`
+                      : 'Dernière réplique — concluez l’échange'}
+                  </Text>
+                </View>
+                <Text style={styles.turnText}>{cue.text}</Text>
+              </View>
+            )}
+            {sPartner && turnPhase === 'turnError' && (
+              <View style={styles.reviewBox}>
+                <Text style={styles.reviewKicker}>
+                  {sFailKind === 'debate'
+                    ? 'RÉPLIQUE IMPOSSIBLE'
+                    : sFailKind === 'prepare'
+                      ? 'MICRO INDISPONIBLE'
+                      : sFailKind === 'speak'
+                        ? 'RÉPLIQUE NON ENTENDUE'
+                        : 'TRANSCRIPTION IMPOSSIBLE'}
+                </Text>
+                <Text style={styles.reviewText}>
+                  {sFailKind === 'debate' ? sAiErr : sFailKind === 'speak' ? (sSpeakErr ?? '') : sTransErr}
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    if (sFailKind === 'debate') {
+                      void runDebatePartner();
+                    } else if (sFailKind === 'prepare') {
+                      if (sPrevTakes.length === 0 && sSegUrisRef.current.length === 0) {
+                        setSMicRetry((c) => c + 1);
+                      } else {
+                        void openMicForNextTurn();
+                      }
+                    } else if (sFailKind === 'speak') {
+                      const idx = sPrevTakesRef.current.length - 1;
+                      const reply = sAiRef.current[idx];
+                      if (reply !== undefined) {
+                        setTurnPhase('aiSpeaking');
+                        void playAutoReply(reply);
+                      }
+                    } else {
+                      void runTranscribePartner(sSegUrisRef.current[sSegUrisRef.current.length - 1] ?? null);
+                    }
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Réessayer"
+                  hitSlop={8}>
+                  <Text style={styles.kbLabel}>Réessayer</Text>
+                </Pressable>
+                {sPrevTakes.length > 0 && (
+                  <Pressable
+                    onPress={() => setSstage('review')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Aller au récapitulatif"
+                    hitSlop={8}>
+                    <Text style={styles.kbLabel}>Aller au récapitulatif →</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
             <View style={styles.recCard}>
-              <Text style={styles.recClock}>{fmtClock(rec)}</Text>
-              <Text style={styles.recState}>{sStopped ? 'ARRÊT À LA LIMITE' : 'ENREGISTREMENT'}</Text>
-              <Waveform active={!sStopped} color="#8B62E0" />
+              <Text style={styles.recClock}>{fmtClock(sPartner ? segRec : rec)}</Text>
+              <Text style={styles.recState}>
+                {sPartner
+                  ? sAutoNext
+                    ? 'PRISE SUIVANTE…'
+                    : turnPhase === 'speaking'
+                      ? `MICRO OUVERT · PRISE ${Math.min(sPrevTakes.length + 1, 3)} SUR 3`
+                      : turnPhase === 'aiWorking'
+                        ? 'L’IA RÉFLÉCHIT…'
+                        : turnPhase === 'aiSpeaking'
+                          ? 'L’IA PARLE…'
+                          : 'ERREUR'
+                  : sStopped ? 'ARRÊT À LA LIMITE' : 'ENREGISTREMENT'}
+              </Text>
+              <Waveform active={sPartner ? turnPhase === 'speaking' : !sStopped} color="#8B62E0" />
               <View style={styles.wordTrack}>
                 <LinearGradient
                   colors={['#8B62E0', '#2E1A3B']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  style={[styles.wordFill, { width: `${Math.min(100, (rec / staskData.max) * 100)}%` }]}
+                  style={[styles.wordFill, { width: `${Math.min(100, ((sPartner ? segRec : rec) / takeMax) * 100)}%` }]}
                 />
               </View>
               <View style={styles.recMeta}>
                 <Text style={styles.recLeft}>
-                  {sStopped ? 'Durée maximale atteinte' : `${fmtClock(staskData.max - rec)} restant`}
+                  {sPartner
+                    ? `Prise ${Math.min(sPrevTakes.length + 1, 3)} sur 3 · ${fmtClock(takeMax - Math.min(segRec, takeMax))} restant`
+                    : sStopped ? 'Durée maximale atteinte' : `${fmtClock(takeMax - rec)} restant`}
                 </Text>
-                <Text style={styles.recLeft}>max {staskData.maxLabel}</Text>
+                <Text style={styles.recLeft}>max {takeMaxLabel}{sPartner ? ' / prise' : ''}</Text>
               </View>
             </View>
             <View style={styles.stopWrap}>
               <Pressable
-                style={[styles.stopBtn, rec < 3 && styles.stopBtnOff]}
-                onPress={stopTake}
-                disabled={rec < 3}
+                style={[styles.stopBtn, (sPartner ? !(turnPhase === 'speaking' && segRec >= 3) : rec < 3) && styles.stopBtnOff]}
+                onPress={sPartner ? endTurn : stopTake}
+                disabled={sPartner ? !(turnPhase === 'speaking' && segRec >= 3) : rec < 3}
                 accessibilityRole="button"
-                accessibilityLabel="Arrêter et enregistrer">
+                accessibilityLabel={sPartner && sPrevTakes.length >= 2 ? 'Terminer l’épreuve' : 'Terminer la prise'}>
                 <View style={styles.stopSquare} />
               </Pressable>
               <Text style={styles.recHint}>
-                {sStopped
-                  ? "L'enregistrement a été sauvegardé automatiquement à la limite. Rien n'est perdu."
-                  : 'Touchez le carré pour arrêter. L’enregistrement est sauvegardé dès l’arrêt.'}
+                {sPartner
+                  ? turnPhase === 'speaking'
+                    ? segRec < 3
+                      ? 'Parlez quelques secondes avant de pouvoir terminer la prise.'
+                      : sPrevTakes.length >= 2
+                        ? 'Touchez le carré pour terminer l’épreuve.'
+                        : `Touchez le carré pour terminer la prise ${sPrevTakes.length + 1} sur 3.`
+                    : turnPhase === 'aiWorking'
+                      ? 'Transcription et réplique en cours — patientez, micro fermé.'
+                      : turnPhase === 'aiSpeaking'
+                        ? sAutoNext
+                          ? 'La prise suivante s’ouvre toute seule — micro fermé.'
+                          : 'Écoutez la réplique — le micro rouvrira après.'
+                        : 'Une erreur est survenue — réessayez ci-dessus.'
+                  : sStopped
+                    ? "L'enregistrement a été sauvegardé automatiquement à la limite. Rien n'est perdu."
+                    : 'Touchez le carré pour arrêter. L’enregistrement est sauvegardé dès l’arrêt.'}
               </Text>
             </View>
             <Text style={styles.stubNote}>
-              Démo : aucun son n’est enregistré — le minuteur simule la prise.
+              {sLive
+                ? 'Enregistrement réel en cours — le minuteur tourne en parallèle.'
+                : 'Démo : aucun son n’est enregistré — le minuteur simule la prise.'}
             </Text>
           </>
         )}
 
-        {s === 'speaking' && sstage === 'review' && (
+        {s === 'speaking' && sstage === 'review' && sPartner && (
+          <>
+            <View style={styles.reviewHead}>
+              <View style={styles.reviewPills}>
+                <Text style={styles.sKickerPill}>{staskData.kicker}</Text>
+                <View style={styles.savedChip}>
+                  <View style={styles.mcheck}>
+                    <View style={[styles.mcheckBar, styles.mcheckShort]} />
+                    <View style={[styles.mcheckBar, styles.mcheckLong]} />
+                  </View>
+                  <Text style={styles.savedLabel}>Enregistré</Text>
+                </View>
+              </View>
+              <Text style={styles.wTitle}>
+                Section B enregistrée · {fmtClock(sdur[stask] ?? 0)}
+              </Text>
+            </View>
+            <View style={styles.reviewRows}>
+              <View style={styles.reviewRow}>
+                <Text style={styles.reviewLabel}>Prises</Text>
+                <Text style={styles.reviewValue}>{sPrevTakes.length} sur 3</Text>
+              </View>
+              <View style={styles.reviewRow}>
+                <Text style={styles.reviewLabel}>Durée de parole</Text>
+                <Text style={styles.reviewValue}>{fmtClock(sdur[stask] ?? 0)}</Text>
+              </View>
+              <View style={styles.reviewRowLast}>
+                <Text style={styles.reviewLabel}>Section</Text>
+                <Text style={styles.reviewValue}>{staskData.kicker.split(' · ')[1]}</Text>
+              </View>
+            </View>
+            <Text style={styles.reviewNote}>
+              Relisez et corrigez chaque prise avant l’envoi — ce sont ces textes qui seront enregistrés.
+            </Text>
+            {sPrevTakes.map((text, i) => (
+              <View key={`final-${i}`} style={styles.reviewBox}>
+                <Text style={styles.reviewKicker}>VOUS · PRISE {i + 1}</Text>
+                <TextInput
+                  style={styles.sTransInput}
+                  multiline
+                  textAlignVertical="top"
+                  value={text}
+                  onChangeText={(v) => {
+                    const next = [...sPrevTakesRef.current];
+                    next[i] = v;
+                    sPrevTakesRef.current = next;
+                    setSPrevTakes(next);
+                  }}
+                  placeholder="Votre transcription…"
+                  placeholderTextColor="#A2919F"
+                />
+                {sAi[i] !== undefined && (
+                  <>
+                    <Text style={styles.reviewKicker}>EXAMINATEUR IA (DÉMO)</Text>
+                    <Text style={[styles.reviewText, styles.convQuote]}>{sAi[i]}</Text>
+                    <Pressable
+                      onPress={() => {
+                        clearSpeakTimer();
+                        void speakReply(sAi[i] ?? '');
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Écouter la réplique"
+                      hitSlop={8}>
+                      <Text style={styles.kbLabel}>Écouter la réplique</Text>
+                    </Pressable>
+                  </>
+                )}
+              </View>
+            ))}
+          </>
+        )}
+
+        {s === 'speaking' && sstage === 'review' && !sPartner && (
           <>
             <View style={styles.reviewHead}>
               <View style={styles.reviewPills}>
@@ -1893,7 +2634,7 @@ export default function Test() {
               </View>
               <View style={styles.reviewRow}>
                 <Text style={styles.reviewLabel}>Maximum</Text>
-                <Text style={styles.reviewValue}>{staskData.maxLabel}</Text>
+                <Text style={styles.reviewValue}>{takeMaxLabel}</Text>
               </View>
               <View style={styles.reviewRowLast}>
                 <Text style={styles.reviewLabel}>Section</Text>
@@ -1904,6 +2645,112 @@ export default function Test() {
               Cet enregistrement est définitif. Un test blanc n’autorise qu’une prise par tâche, exactement
               comme à l’examen.
             </Text>
+            {sPartner && sPrevTakes.length > 0 && (
+              <View style={styles.reviewBox}>
+                <Text style={styles.reviewKicker}>CONVERSATION · PRISE {sPrevTakes.length + 1} SUR 3</Text>
+                {sPrevTakes.map((text, i) => (
+                  <View key={`you-${i}`}>
+                    <Text style={styles.reviewKicker}>VOUS · PRISE {i + 1}</Text>
+                    <Text style={styles.reviewText}>{text === '' ? '—' : text}</Text>
+                    {sAi[i] !== undefined && (
+                      <>
+                        <Text style={styles.reviewKicker}>EXAMINATEUR IA (DÉMO)</Text>
+                        <Text style={[styles.reviewText, styles.convQuote]}>{sAi[i]}</Text>
+                      </>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+            {isAiConfigured() && Platform.OS === 'ios' && sTransState === 'working' && (
+              <View style={styles.reviewBox}>
+                <Text style={styles.reviewKicker}>TRANSCRIPTION EN COURS…</Text>
+                <View style={styles.transSpinRow}>
+                  <ActivityIndicator size="small" color="#7A4E0C" />
+                  <Text style={styles.reviewText}>L’IA écoute votre enregistrement.</Text>
+                </View>
+              </View>
+            )}
+            {isAiConfigured() && Platform.OS === 'ios' && sTransState === 'error' && (
+              <View style={styles.reviewBox}>
+                <Text style={styles.reviewKicker}>TRANSCRIPTION IMPOSSIBLE</Text>
+                <Text style={styles.reviewText}>{sTransErr}</Text>
+                <Pressable
+                  onPress={() => void runTranscribe(sUriRef.current)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Réessayer la transcription"
+                  hitSlop={8}>
+                  <Text style={styles.kbLabel}>Réessayer</Text>
+                </Pressable>
+              </View>
+            )}
+            {isAiConfigured() &&
+              Platform.OS === 'ios' &&
+              sTransState === 'idle' &&
+              sTrans[stask] !== undefined && (
+                <>
+                  <View style={styles.reviewBox}>
+                    <Text style={[styles.reviewKicker, styles.transOk]}>✓ TRANSCRIPTION RÉUSSIE</Text>
+                    <Text style={styles.reviewNote}>
+                      Relisez et corrigez la transcription avant l’envoi — c’est ce texte qui sera enregistré.
+                    </Text>
+                  </View>
+                  <TextInput
+                    style={styles.sTransInput}
+                    multiline
+                    textAlignVertical="top"
+                    value={sTrans[stask] ?? ''}
+                    onChangeText={(v) =>
+                      setSTrans((prev) => {
+                        const next = [...prev];
+                        next[stask] = v;
+                        return next;
+                      })
+                    }
+                    placeholder="Votre transcription…"
+                    placeholderTextColor="#A2919F"
+                  />
+                  {sPartner && sAiState === 'working' && (
+                    <View style={styles.reviewBox}>
+                      <Text style={styles.reviewKicker}>EXAMINATEUR IA (DÉMO) RÉFLÉCHIT…</Text>
+                      <View style={styles.transSpinRow}>
+                        <ActivityIndicator size="small" color="#7A4E0C" />
+                        <Text style={styles.reviewText}>Une réplique arrive.</Text>
+                      </View>
+                    </View>
+                  )}
+                  {sPartner && sAiState === 'error' && (
+                    <View style={styles.reviewBox}>
+                      <Text style={styles.reviewKicker}>RÉPLIQUE IMPOSSIBLE</Text>
+                      <Text style={styles.reviewText}>{sAiErr}</Text>
+                      <Pressable
+                        onPress={() => void runDebatePartner()}
+                        accessibilityRole="button"
+                        accessibilityLabel="Réessayer la réplique"
+                        hitSlop={8}>
+                        <Text style={styles.kbLabel}>Réessayer</Text>
+                      </Pressable>
+                    </View>
+                  )}
+                  {sPartner &&
+                    sAiState === 'idle' &&
+                    sAi[sPrevTakes.length] !== undefined && (
+                      <View style={styles.reviewBox}>
+                        <Text style={styles.reviewKicker}>EXAMINATEUR IA (DÉMO)</Text>
+                        <Text style={[styles.reviewText, styles.convQuote]}>
+                          {sAi[sPrevTakes.length]}
+                        </Text>
+                        <Pressable
+                          onPress={() => void speakReply(sAi[sPrevTakes.length] ?? '')}
+                          accessibilityRole="button"
+                          accessibilityLabel="Écouter la réplique"
+                          hitSlop={8}>
+                          <Text style={styles.kbLabel}>Écouter la réplique</Text>
+                        </Pressable>
+                      </View>
+                    )}
+                </>
+              )}
           </>
         )}
 
@@ -1960,15 +2807,21 @@ export default function Test() {
         {s === 'speaking' && sstage === 'pending' && (
           <>
             <View style={styles.aiWrap}>
-              <ScoringRing />
-              <Text style={styles.aiLabel}>CORRECTION</Text>
+              <ScoringRing done={sSaved} />
+              <Text style={styles.aiLabel}>{sSaved ? 'TERMINÉ' : 'CORRECTION'}</Text>
               <Text style={styles.aiTitle}>
-                {sMulti ? 'Les deux tâches sont chez l’IA' : 'La tâche est chez l’IA'}
+                {sSaved
+                  ? 'Votre résultat est prêt'
+                  : sMulti
+                    ? 'Les deux tâches sont chez l’IA'
+                    : 'La tâche est chez l’IA'}
               </Text>
-              <Text style={styles.aiSub}>
-                Environ 5 minutes. Vous n’êtes pas obligé de rester ici : nous vous prévenons dès que le score
-                est prêt.
-              </Text>
+              {!sSaved && (
+                <Text style={styles.aiSub}>
+                  Environ 5 minutes. Vous n’êtes pas obligé de rester ici : nous vous prévenons dès que le score
+                  est prêt.
+                </Text>
+              )}
             </View>
             <View style={styles.pendRows}>
               <View style={styles.pendRow}>
@@ -1979,10 +2832,12 @@ export default function Test() {
                 <Text style={styles.pendLabel}>Statut dans l’historique</Text>
                 <Text style={styles.pendValue}>Correction IA</Text>
               </View>
-              <View style={styles.pendRowLast}>
-                <Text style={styles.pendLabel}>Attente estimée</Text>
-                <Text style={styles.pendValue}>Environ 5 minutes</Text>
-              </View>
+              {!sSaved && (
+                <View style={styles.pendRowLast}>
+                  <Text style={styles.pendLabel}>Attente estimée</Text>
+                  <Text style={styles.pendValue}>Environ 5 minutes</Text>
+                </View>
+              )}
             </View>
           </>
         )}
@@ -2408,7 +3263,7 @@ export default function Test() {
           note="L'enregistrement démarre tout seul à la fin de la préparation."
         />
       )}
-      {s === 'speaking' && sstage === 'record' && (
+      {s === 'speaking' && sstage === 'record' && !sPartner && (
         <StickyCta
           tone="dark"
           label={sStopped ? 'Enregistrer et continuer' : 'Arrêter et enregistrer'}
@@ -2423,7 +3278,7 @@ export default function Test() {
           disabled={rec < 3}
           note={
             sStopped
-              ? `Temps écoulé — l'enregistrement s'est arrêté à ${staskData.maxLabel}.`
+              ? `Temps écoulé — l'enregistrement s'est arrêté à ${takeMaxLabel}.`
               : rec < 3
                 ? 'Parlez quelques secondes avant de pouvoir arrêter.'
                 : "Touchez le carré pour arrêter. L'enregistrement est sauvegardé dès l'arrêt."
@@ -2431,24 +3286,22 @@ export default function Test() {
         />
       )}
       {s === 'speaking' && sstage === 'review' && (
-        <StickyCta
-          bg="#2E1A3B"
-          label={!sMulti || stask === SPEAKING_TASKS.length - 1 ? 'Vérifier et envoyer' : 'Passer à la tâche 2'}
-          icon={<AppIcon name="IconArrowRight" size={17} color="#fff" />}
-          onPress={() => {
-            if (!sMulti || stask === SPEAKING_TASKS.length - 1) {
-              setSstage('submit');
-            } else {
-              setStask(stask + 1);
-              setRec(0);
-              setSstage('intro');
-            }
+        <SpeakingReviewCta
+          sMulti={sMulti}
+          stask={stask}
+          sPartner={sPartner}
+          aiWorking={sAiState === 'working' || sTransState === 'working'}
+          hasTranscript={sPartner ? sPrevTakes.length > 0 : sTrans[stask] !== undefined}
+          onSubmit={() => setSstage('submit')}
+          onNextTask={() => {
+            setStask(stask + 1);
+            setRec(0);
+            setSTransState('idle');
+            setSPrevTakes([]);
+            setSAi([]);
+            setSAiState('idle');
+            setSstage('intro');
           }}
-          note={
-            !sMulti || stask === SPEAKING_TASKS.length - 1
-              ? "Rien n'a encore été envoyé à l'IA."
-              : `Tâche ${stask + 2} · ${SPEAKING_TASKS[stask + 1].maxLabel} — ${SPEAKING_TASKS[stask + 1].title.toLowerCase()}.`
-          }
         />
       )}
       {s === 'speaking' && sstage === 'submit' && (
@@ -2465,11 +3318,14 @@ export default function Test() {
           tone="dark"
           label={isMock ? 'Voir le résultat de la session' : 'Voir le résultat'}
           icon={<AppIcon name="IconOutlineRoundedAiDocument" size={17} color="#fff" />}
+          disabled={!isMock && !sSaved}
           onPress={() => router.push({ pathname: '/result', params: { session: sessionRef.current } })}
           note={
             isMock
               ? 'Les quatre épreuves sont terminées — les scores sont publiés ensemble.'
-              : 'Votre résultat est prêt.'
+              : sSaved
+                ? 'Votre résultat est prêt.'
+                : 'Le score arrive — le bouton se débloque à la fin.'
           }
         />
       )}
@@ -2736,6 +3592,10 @@ export default function Test() {
         onKeep={() => setExitVisible(false)}
         onLeave={() => {
           Keyboard.dismiss();
+          if (sLive) {
+            void wavRecorder.stop().catch(() => {});
+            setSLive(false);
+          }
           if (s === 'reading') {
             const correct = READING_QUESTIONS.filter((q) => picked[q.id] === q.answer).length;
             void saveResult({
@@ -3230,6 +4090,20 @@ const styles = StyleSheet.create({
   accentCaption: { fontFamily: FontFamily.sans, fontSize: 11, color: '#A2919F' },
   kbRow: { alignItems: 'flex-end', paddingTop: 8 },
   kbLabel: { fontFamily: FontFamily.sansMedium, fontSize: 13, color: '#7A4E0C' },
+  transSpinRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 6 },
+  transOk: { color: '#15803D' },
+  sTransInput: {
+    minHeight: 120,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#EFE3EC',
+    fontFamily: FontFamily.sans,
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#111827',
+  },
   editor: {
     minHeight: 180,
     padding: 16,
@@ -3317,6 +4191,7 @@ const styles = StyleSheet.create({
   reviewKicker: { fontFamily: FontFamily.sansBold, fontSize: 10, letterSpacing: 0.9, color: '#857789' },
   reviewBox: { gap: 10, padding: 18, borderRadius: 22, backgroundColor: '#fff', borderWidth: 1, borderColor: '#E8DFE6' },
   reviewText: { fontFamily: FontFamily.sans, fontSize: 14, lineHeight: 21, color: '#111827' },
+  convQuote: { fontStyle: 'italic', color: '#7A4E0C' },
   reviewNote: { fontFamily: FontFamily.sans, fontSize: 13, lineHeight: 19, color: '#5E4E69' },
   editBtn: {
     paddingVertical: 13,
