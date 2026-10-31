@@ -13,3 +13,4 @@ build/
 # Local
 .DS_Store
 *.log
+draft/
