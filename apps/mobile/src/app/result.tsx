@@ -703,6 +703,12 @@ export default function Result() {
                     </Text>
                   </View>
                 )}
+                {sRes?.transcript !== undefined && sRes.transcript !== '' && (
+                  <View style={styles.textCard}>
+                    <Text style={styles.textKicker}>VOTRE TRANSCRIPTION</Text>
+                    <Text style={styles.textBody}>{sRes.transcript}</Text>
+                  </View>
+                )}
                 {renderFeedback(sRes?.feedback)}
               </>,
             )}

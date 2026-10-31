@@ -17,6 +17,8 @@ export interface MockResult {
   picks?: Record<string, number>;
   /** Submitted writing text (section B review). */
   text?: string;
+  /** Edited speaking transcript submitted for section B. */
+  transcript?: string;
   /** Real scorer output when the AI was configured at submit time. */
   feedback?: FeedbackStub;
   /** Measured take durations in seconds (speaking review). */
