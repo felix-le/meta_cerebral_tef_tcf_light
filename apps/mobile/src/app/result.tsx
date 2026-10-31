@@ -22,8 +22,8 @@ const LETTERS = ['A', 'B', 'C', 'D'];
 const TABS: { key: Skill; label: string; icon: 'IconBulkHeadphone' | 'IconBulkBook' | 'IconBulkMic' | 'IconBulkWrite' }[] = [
   { key: 'listening', label: 'Listening', icon: 'IconBulkHeadphone' },
   { key: 'reading', label: 'Reading', icon: 'IconBulkBook' },
-  { key: 'writing', label: 'Writing', icon: 'IconBulkWrite' },
   { key: 'speaking', label: 'Speaking', icon: 'IconBulkMic' },
+  { key: 'writing', label: 'Writing', icon: 'IconBulkWrite' },
 ];
 const FRENCH: Record<Skill, string> = {
   listening: 'Compréhension orale',
@@ -145,6 +145,10 @@ export default function Result() {
   const scopedSkills = TABS.map((t) => t.key).filter((k) => scoped.some((r) => r.skill === k));
   const showTabs = !sessionParam || scopedSkills.length > 1;
   const viewTab = scopedSkills.includes(tab) ? tab : (scopedSkills[0] ?? 'listening');
+  // Joint mock review: one session with 2+ skills shows one tab per
+  // skill (plus the weakest block in the hero). Single mode and one-skill
+  // sessions keep their single tab.
+  const isJoint = !!sessionParam && scopedSkills.length > 1;
 
   const latest = useCallback(
     (skill: Skill) => scoped.find((r) => r.skill === skill),
@@ -177,6 +181,29 @@ export default function Result() {
   const rRes = latest('reading');
   const wRes = latest('writing');
   const sRes = latest('speaking');
+  // Usable level: weakest of Writing & Speaking only (real CEFR levels).
+  // Listening/Reading are counts and never take part — no invented NCLC.
+  // Each estimationFor runs guarded: a bad combo is pending, not a crash.
+  const weakest: { skill: string; level: string; nclc: string; min: number } | { pending: true } | null = (() => {
+    if (!sessionParam || scopedSkills.length < 2) {
+      return null;
+    }
+    const cands: { skill: string; level: string; nclc: string; min: number }[] = [];
+    for (const [skill, res] of [['writing', wRes], ['speaking', sRes]] as const) {
+      if (res?.level && res?.half) {
+        try {
+          const band = estimationFor(res.level as Cefr, res.half as Half);
+          cands.push({ skill, level: res.level, nclc: band.nclc, min: band.min });
+        } catch {
+          // Invalid combo counts as pending: excluded, never invented.
+        }
+      }
+    }
+    if (cands.length === 0) {
+      return { pending: true };
+    }
+    return cands.reduce((a, b) => (a.min <= b.min ? a : b));
+  })();
   const lTotal = lRes?.total ?? 0;
   const rTotal = rRes?.total ?? 0;
   const lCorrect = lRes?.correct ?? 0;
@@ -532,8 +559,9 @@ export default function Result() {
           setScrolled((prev) => (prev === v ? prev : v));
         }}
         // Tabs sit at index 1 only when shown; otherwise the body itself
-        // would become the sticky header and pin the whole page.
-        stickyHeaderIndices={showTabs ? [1] : []}>
+        // would become the sticky header and pin the whole page. The joint
+        // review hides its tabs, so it must not stick index 1 either.
+        stickyHeaderIndices={showTabs && !isJoint ? [1] : []}>
         <View style={styles.hero}>
           <LinearGradient
             colors={['#2A2018', '#1E1226', '#100D0A']}
@@ -562,6 +590,42 @@ export default function Result() {
             <Text style={styles.heroSub}>Taken {heroDate}</Text>
           </View>
           <View style={styles.heroPanel}>
+            <Text style={styles.heroPanelLine}>
+              {!sessionParam ? (
+                <>
+                  {lRes ? `Listening ${lCorrect}/${lTotal}` : 'Listening not done'}
+                  {' · '}
+                  {rRes ? `Reading ${rCorrect}/${rTotal}` : 'Reading not done'}
+                  {' · '}
+                  {aiCount > 0 ? 'Writing & Speaking with the AI' : 'Writing & Speaking not done'}
+                </>
+              ) : (
+                scopedSkills
+                  .map((k) =>
+                    k === 'listening'
+                      ? `Listening ${lCorrect}/${lTotal}`
+                      : k === 'reading'
+                        ? `Reading ${rCorrect}/${rTotal}`
+                        : k === 'writing'
+                          ? `Writing · ${wRes?.level ?? 'En correction'}`
+                          : 'Speaking · recorded',
+                  )
+                  .join(' · ')
+              )}
+            </Text>
+            {weakest !== null && (
+              <View>
+                <Text style={styles.heroStatLabel}>USABLE LEVEL · WRITING & SPEAKING ONLY</Text>
+                {'pending' in weakest ? (
+                  <Text style={styles.heroPanelTitle}>Pending — not scored yet</Text>
+                ) : (
+                  <Text style={styles.heroPanelTitle}>
+                    NCLC {weakest.nclc} · {weakest.level} · {weakest.skill === 'writing' ? 'Writing' : 'Speaking'}
+                  </Text>
+                )}
+                <Text style={styles.heroPanelLine}>Listening and Reading are counts only.</Text>
+              </View>
+            )}
             <View style={styles.heroTop}>
               <View style={styles.donut}>
                 <Svg width={78} height={78}>
@@ -589,29 +653,6 @@ export default function Result() {
               <View style={styles.heroText}>
                 <Text style={styles.heroPanelTitle}>
                   {!sessionParam || scopedSkills.length > 1 ? 'Mock test terminé' : 'Test terminé'}
-                </Text>
-                <Text style={styles.heroPanelLine}>
-                  {!sessionParam ? (
-                    <>
-                      {lRes ? `Listening ${lCorrect}/${lTotal}` : 'Listening not done'}
-                      {' · '}
-                      {rRes ? `Reading ${rCorrect}/${rTotal}` : 'Reading not done'}
-                      {' · '}
-                      {aiCount > 0 ? 'Writing & Speaking with the AI' : 'Writing & Speaking not done'}
-                    </>
-                  ) : (
-                    scopedSkills
-                      .map((k) =>
-                        k === 'listening'
-                          ? `Listening ${lCorrect}/${lTotal}`
-                          : k === 'reading'
-                            ? `Reading ${rCorrect}/${rTotal}`
-                            : k === 'writing'
-                              ? `Writing · ${wRes?.level ?? 'En correction'}`
-                              : 'Speaking · recorded',
-                      )
-                      .join(' · ')
-                  )}
                 </Text>
               </View>
             </View>
@@ -733,6 +774,9 @@ export default function Result() {
             possible after submission.
           </Text>
         </View>
+        {/* End spacer: the absolute bottom CTA (~150px) plus the home
+            indicator safe area would otherwise cover the last card. */}
+        <View style={{ height: insets.bottom + 32 }} />
       </ScrollView>
       <StickyCta
         label="View history"

@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
 import Svg, { Circle } from 'react-native-svg';
-import { Brand, FontFamily, SkillAccent, SKILL_DEEP, SKILL_LABEL, SKILL_ORDER, type Skill } from '@/constants/theme';
+import { Brand, FontFamily, SkillAccent, SKILL_DEEP, SKILL_LABEL, type Skill } from '@/constants/theme';
+import { listResults, type MockResult } from '@/storage/history';
+
+// Mock run order: Listening → Reading → Writing → Speaking, one shared
+// session for the whole sitting (minted once below, passed into every
+// test screen so no tap ever mints a new session mid-flow).
+const MOCK_ORDER: Skill[] = ['listening', 'reading', 'speaking', 'writing'];
 import { AppIcon } from '@/components/AppIcon';
 import { EXAM_NAME, MOCKS } from '@/content/mocks';
 import type { IconName } from '@/components/icons';
@@ -40,14 +46,27 @@ const SKILL_ITEMS: Record<Skill, string> = {
 
 const SKILL_MINS: Record<Skill, number> = { listening: 40, reading: 60, writing: 60, speaking: 15 };
 
-function Donut() {
+function Donut({ done }: { done?: number }) {
+  const n = done ?? 0;
   return (
     <View style={styles.donut}>
       <Svg width={78} height={78}>
         <Circle cx={39} cy={39} r={34} stroke="rgba(255,255,255,.14)" strokeWidth={10} fill="none" />
+        <Circle
+          cx={39}
+          cy={39}
+          r={34}
+          stroke="#F9BD48"
+          strokeWidth={10}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={2 * Math.PI * 34}
+          strokeDashoffset={2 * Math.PI * 34 * (1 - n / 4)}
+          transform="rotate(-90 39 39)"
+        />
       </Svg>
       <View style={styles.donutCenter}>
-        <Text style={styles.donutValue}>0/4</Text>
+        <Text style={styles.donutValue}>{n}/4</Text>
         <Text style={styles.donutCaption}>SCORED</Text>
       </View>
     </View>
@@ -80,7 +99,28 @@ export default function MockSession() {
   };
   const sessionNo = MONTH_NO[session.month] ?? '00';
   const [scrolled, setScrolled] = useState(false);
+  const [mockSession] = useState(() => `mock-${Date.now()}`);
   const duration = `${Math.floor(session.mins / 60)}h ${session.mins % 60}m`;
+  // Saved progress: newest result per skill. Listening/Reading count as
+  // scored with a correct count; Writing/Speaking only with a real level
+  // (pending records without level stay in progress, never scored).
+  const [results, setResults] = useState<MockResult[]>([]);
+  useFocusEffect(
+    useCallback(() => {
+      listResults().then(setResults);
+    }, []),
+  );
+  const latestBySkill = new Map<Skill, MockResult>();
+  for (const r of results) {
+    if (!latestBySkill.has(r.skill)) {
+      latestBySkill.set(r.skill, r);
+    }
+  }
+  const isScored = (r: MockResult | undefined): boolean =>
+    r !== undefined &&
+    (r.skill === 'listening' || r.skill === 'reading' ? r.correct != null : r.level != null);
+  const scoredCount = MOCK_ORDER.filter((k) => isScored(latestBySkill.get(k))).length;
+  const startedCount = MOCK_ORDER.filter((k) => latestBySkill.has(k)).length;
 
   return (
     <View style={styles.root}>
@@ -115,10 +155,22 @@ export default function MockSession() {
             </View>
             <View style={styles.panel}>
               <View style={styles.readyRow}>
-                <Donut />
+                <Donut done={scoredCount} />
                 <View style={styles.readyText}>
-                  <Text style={styles.readyTitle}>Nothing started yet</Text>
-                  <Text style={styles.readyLine}>Take the skills in any order. Everything is free.</Text>
+                  <Text style={styles.readyTitle}>
+                    {scoredCount >= 4
+                      ? 'Session terminée'
+                      : startedCount > 0
+                        ? `${scoredCount} of 4 scored`
+                        : 'Nothing started yet'}
+                  </Text>
+                  <Text style={styles.readyLine}>
+                    {scoredCount >= 4
+                      ? 'All four skills scored — open the joint review.'
+                      : startedCount > 0
+                        ? 'Finish the remaining skills. Everything is free.'
+                        : 'Take the skills in any order. Everything is free.'}
+                  </Text>
                 </View>
               </View>
               <View style={styles.divider} />
@@ -149,12 +201,12 @@ export default function MockSession() {
               <Text style={styles.sectionTitle}>Four skills, one session</Text>
               <Text style={styles.sectionHint}>Tap one to open</Text>
             </View>
-            {SKILL_ORDER.map((skill) => (
+            {MOCK_ORDER.map((skill) => (
               <Pressable
                 key={skill}
                 style={styles.skillCard}
                 onPress={() =>
-                  router.push({ pathname: '/test/[skill]', params: { skill, mode: 'mock' } })
+                  router.push({ pathname: '/test/[skill]', params: { skill, mode: 'mock', session: mockSession } })
                 }>
                 <View style={styles.skillRow}>
                   <LinearGradient
@@ -173,6 +225,21 @@ export default function MockSession() {
                 <Text style={styles.skillMeta}>
                   {SKILL_ITEMS[skill]} · {SKILL_MINS[skill]} min
                 </Text>
+                {(() => {
+                  const r = latestBySkill.get(skill);
+                  if (!r) {
+                    return null;
+                  }
+                  return (
+                    <Text style={styles.skillStatus}>
+                      {isScored(r)
+                        ? r.level
+                          ? `Terminé · ${r.level}`
+                          : `Terminé · ${r.correct}/${r.total}`
+                        : 'En correction'}
+                    </Text>
+                  );
+                })()}
               </Pressable>
             ))}
           </View>
@@ -182,7 +249,7 @@ export default function MockSession() {
               <Text style={styles.structSub}>80 questions + 4 tâches</Text>
             </View>
             <View style={styles.structBar}>
-              {SKILL_ORDER.map((skill) => (
+              {MOCK_ORDER.map((skill) => (
                 <LinearGradient
                   key={skill}
                   colors={[SkillAccent[skill], SKILL_DEEP[skill]]}
@@ -190,7 +257,7 @@ export default function MockSession() {
                 />
               ))}
             </View>
-            {SKILL_ORDER.map((skill) => (
+            {MOCK_ORDER.map((skill) => (
               <View key={skill} style={styles.structRow}>
                 <View style={[styles.structDot, { backgroundColor: SkillAccent[skill] }]} />
                 <Text style={styles.structFrench}>{SKILL_FRENCH[skill]}</Text>
@@ -235,7 +302,7 @@ export default function MockSession() {
         <Pressable
           style={styles.cta}
           onPress={() =>
-            router.push({ pathname: '/test/[skill]', params: { skill: SKILL_ORDER[0], mode: 'mock' } })
+            router.push({ pathname: '/test/[skill]', params: { skill: 'listening', mode: 'mock', session: mockSession } })
           }
           accessibilityRole="button"
           accessibilityLabel="Start Listening">
@@ -344,6 +411,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
   },
   skillMeta: { fontFamily: FontFamily.sans, fontSize: 11, lineHeight: 16, color: '#5E4E69' },
+  skillStatus: { fontFamily: FontFamily.sansMedium, fontSize: 11, lineHeight: 16, color: '#7A4E0C' },
   structCard: { gap: 14, padding: 18, borderRadius: 22, backgroundColor: '#fff', borderWidth: 1, borderColor: '#EFE3EC' },
   structHead: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
   structTitle: { flex: 1, fontFamily: FontFamily.sansBold, fontSize: 14, lineHeight: 19, color: '#111827' },
