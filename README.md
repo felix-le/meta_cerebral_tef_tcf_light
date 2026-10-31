@@ -39,6 +39,20 @@ App UI is English; exam content is French.
 
 ---
 
+## Built 100% with Meta AI
+
+Every line of this app was written with **Muse Code**, powered by **Meta
+Muse Spark** models — and the app itself is scored by those same Meta
+models (`muse-spark`) through the Meta Model API. No other AI provider is
+involved anywhere in the codebase or the grading.
+
+The **Muse** agent worked as the development assistant throughout:
+reviewing code, breaking work into staged plans, keeping each change inside
+an approved scope, tracking tasks and re-verifying (`tsc` + `expo export` +
+on-device checks) before handing every step back for human review.
+
+---
+
 ## Tech stack
 
 | Layer       | Choice                                |
