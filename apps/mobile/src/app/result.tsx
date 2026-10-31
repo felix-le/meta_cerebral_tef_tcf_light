@@ -691,27 +691,43 @@ export default function Result() {
               );
             })()}
           {viewTab === 'speaking' &&
-            renderAsync(
-              'speaking',
-              !!sRes,
-              <>
-                {sRes?.durations !== undefined && (
-                  <View style={styles.textCard}>
-                    <Text style={styles.textKicker}>PRISE UNIQUE</Text>
-                    <Text style={styles.textBody}>
-                      {`${fmtClock(sRes.durations[0] ?? 0)} · max 10:00`}
-                    </Text>
-                  </View>
-                )}
-                {sRes?.transcript !== undefined && sRes.transcript !== '' && (
-                  <View style={styles.textCard}>
-                    <Text style={styles.textKicker}>VOTRE TRANSCRIPTION</Text>
-                    <Text style={styles.textBody}>{sRes.transcript}</Text>
-                  </View>
-                )}
-                {renderFeedback(sRes?.feedback)}
-              </>,
-            )}
+            (() => {
+              let estimate: { level: string; raw: string } | null = null;
+              const fb = sRes?.feedback;
+              if (fb && sRes?.level && sRes?.half) {
+                try {
+                  const band = estimationFor(sRes.level as Cefr, sRes.half as Half);
+                  estimate = {
+                    level: `NCLC ${band.nclc} · ${fb.overall.level}`,
+                    raw: `${band.min}–${band.max} / 450 · Estimation`,
+                  };
+                } catch {
+                  estimate = null;
+                }
+              }
+              return renderAsync(
+                'speaking',
+                !!sRes,
+                <>
+                  {sRes?.durations !== undefined && (
+                    <View style={styles.textCard}>
+                      <Text style={styles.textKicker}>PRISE UNIQUE</Text>
+                      <Text style={styles.textBody}>
+                        {`${fmtClock(sRes.durations[0] ?? 0)} · max 10:00`}
+                      </Text>
+                    </View>
+                  )}
+                  {sRes?.transcript !== undefined && sRes.transcript !== '' && (
+                    <View style={styles.textCard}>
+                      <Text style={styles.textKicker}>VOTRE TRANSCRIPTION</Text>
+                      <Text style={styles.textBody}>{sRes.transcript}</Text>
+                    </View>
+                  )}
+                  {renderFeedback(sRes?.feedback)}
+                </>,
+                estimate,
+              );
+            })()}
           <Text style={styles.footNote}>
             AI feedback stays available for every scored tâche. Re-recording or rewriting a tâche is not
             possible after submission.

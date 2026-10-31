@@ -13,8 +13,8 @@ import { ExitSheet } from '@/components/ExitSheet';
 import { StickyCta } from '@/components/StickyCta';
 import { countWords, type Cefr } from '@/config/scoring';
 import { saveResult } from '@/storage/history';
-import { SPEAKING_B_STUB, WRITING_B_STUB } from '@/content/feedbackStub';
-import { debateReply, isAiConfigured, scoreWritingB, transcribeWav, type DebateTurn } from '@/ai/client';
+import { WRITING_B_STUB } from '@/content/feedbackStub';
+import { debateReply, isAiConfigured, scoreSpeakingB, scoreWritingB, transcribeWav, type DebateTurn } from '@/ai/client';
 import {
   AudioModule,
   AudioQuality,
@@ -716,6 +716,10 @@ export default function Test() {
 
   // Speaking stub end: saved once, then the session result screen (the
   // dedicated session review does not exist yet; /result stands in).
+  // True once the scored result is saved (Writing's wSaved): the
+  // correction screen flips to its done state. Pending fallback leaves it
+  // false, so correction stays in progress with its button locked.
+  const [sSaved, setSSaved] = useState(false);
   const finishSpeaking = async () => {
     if (sdoneRef.current) {
       return;
@@ -724,43 +728,64 @@ export default function Test() {
     try {
       await Speech.stop();
     } catch {}
+    // Correction opens at once in its in-progress state; it flips to done
+    // only when the scored feedback lands (sSaved).
     setSstage('pending');
-    try {
-      const stub = SPEAKING_B_STUB;
-      // Joined conversation, one labeled line per turn. Partner takes live
-      // only in sPrevTakes (frozen right after each transcribe, edited in
-      // the end summary); stub keeps its single take in sTrans[stask].
-      const conv: string[] = [];
-      if (sPartner) {
-        sPrevTakesRef.current.forEach((text, i) => {
-          conv.push(`Vous (prise ${i + 1}) : ${text}`);
-          if (sAiRef.current[i] !== undefined) {
-            conv.push(`Examinateur IA (démo) : ${sAiRef.current[i]}`);
-          }
-        });
-      } else {
-        sPrevTakes.forEach((text, i) => {
-          conv.push(`Vous (prise ${i + 1}) : ${text}`);
-          if (sAi[i] !== undefined) {
-            conv.push(`Examinateur IA (démo) : ${sAi[i]}`);
-          }
-        });
-        if (sTrans[stask] !== undefined && sTrans[stask] !== '') {
-          conv.push(`Vous (prise ${sPrevTakes.length + 1}) : ${sTrans[stask]}`);
+    // Joined conversation, one labeled line per turn. Partner takes live
+    // only in sPrevTakes (frozen right after each transcribe, edited in
+    // the end summary); stub keeps its single take in sTrans[stask].
+    const conv: string[] = [];
+    if (sPartner) {
+      sPrevTakesRef.current.forEach((text, i) => {
+        conv.push(`Vous (prise ${i + 1}) : ${text}`);
+        if (sAiRef.current[i] !== undefined) {
+          conv.push(`Examinateur IA (démo) : ${sAiRef.current[i]}`);
         }
-      }
-      await saveResult({
-        id: String(Date.now()),
-        session: sessionRef.current,
-        date: new Date().toISOString().slice(0, 10),
-        skill: 'speaking',
-        section: 'B',
-        level: stub.overall.level as Cefr,
-        half: stub.overall.half,
-        durations: [...sdur],
-        transcript: conv.length > 0 ? conv.join('\n') : undefined,
       });
-    } catch {}
+    } else {
+      sPrevTakes.forEach((text, i) => {
+        conv.push(`Vous (prise ${i + 1}) : ${text}`);
+        if (sAi[i] !== undefined) {
+          conv.push(`Examinateur IA (démo) : ${sAi[i]}`);
+        }
+      });
+      if (sTrans[stask] !== undefined && sTrans[stask] !== '') {
+        conv.push(`Vous (prise ${sPrevTakes.length + 1}) : ${sTrans[stask]}`);
+      }
+    }
+    const conversation = conv.join('\n');
+    const base = {
+      id: String(Date.now()),
+      session: sessionRef.current,
+      date: new Date().toISOString().slice(0, 10),
+      skill: 'speaking' as const,
+      section: 'B' as const,
+      durations: [...sdur],
+      transcript: conv.length > 0 ? conversation : undefined,
+    };
+    // No key: pending record (transcript + durations, no level) — the stub
+    // is never saved as a real result.
+    if (!isAiConfigured()) {
+      try {
+        await saveResult(base);
+      } catch {}
+      return;
+    }
+    try {
+      const feedback = await scoreSpeakingB(staskData.consigne, conversation);
+      await saveResult({
+        ...base,
+        level: feedback.overall.level as Cefr,
+        half: feedback.overall.half,
+        feedback,
+      });
+      setSSaved(true);
+    } catch (e) {
+      console.warn('[scorer] speaking B failed, pending fallback:', e instanceof Error ? e.message : e);
+      try {
+        await saveResult(base);
+      } catch {}
+    }
   };
 
   const dark =
@@ -2782,15 +2807,21 @@ export default function Test() {
         {s === 'speaking' && sstage === 'pending' && (
           <>
             <View style={styles.aiWrap}>
-              <ScoringRing />
-              <Text style={styles.aiLabel}>CORRECTION</Text>
+              <ScoringRing done={sSaved} />
+              <Text style={styles.aiLabel}>{sSaved ? 'TERMINÉ' : 'CORRECTION'}</Text>
               <Text style={styles.aiTitle}>
-                {sMulti ? 'Les deux tâches sont chez l’IA' : 'La tâche est chez l’IA'}
+                {sSaved
+                  ? 'Votre résultat est prêt'
+                  : sMulti
+                    ? 'Les deux tâches sont chez l’IA'
+                    : 'La tâche est chez l’IA'}
               </Text>
-              <Text style={styles.aiSub}>
-                Environ 5 minutes. Vous n’êtes pas obligé de rester ici : nous vous prévenons dès que le score
-                est prêt.
-              </Text>
+              {!sSaved && (
+                <Text style={styles.aiSub}>
+                  Environ 5 minutes. Vous n’êtes pas obligé de rester ici : nous vous prévenons dès que le score
+                  est prêt.
+                </Text>
+              )}
             </View>
             <View style={styles.pendRows}>
               <View style={styles.pendRow}>
@@ -2801,10 +2832,12 @@ export default function Test() {
                 <Text style={styles.pendLabel}>Statut dans l’historique</Text>
                 <Text style={styles.pendValue}>Correction IA</Text>
               </View>
-              <View style={styles.pendRowLast}>
-                <Text style={styles.pendLabel}>Attente estimée</Text>
-                <Text style={styles.pendValue}>Environ 5 minutes</Text>
-              </View>
+              {!sSaved && (
+                <View style={styles.pendRowLast}>
+                  <Text style={styles.pendLabel}>Attente estimée</Text>
+                  <Text style={styles.pendValue}>Environ 5 minutes</Text>
+                </View>
+              )}
             </View>
           </>
         )}
@@ -3285,11 +3318,14 @@ export default function Test() {
           tone="dark"
           label={isMock ? 'Voir le résultat de la session' : 'Voir le résultat'}
           icon={<AppIcon name="IconOutlineRoundedAiDocument" size={17} color="#fff" />}
+          disabled={!isMock && !sSaved}
           onPress={() => router.push({ pathname: '/result', params: { session: sessionRef.current } })}
           note={
             isMock
               ? 'Les quatre épreuves sont terminées — les scores sont publiés ensemble.'
-              : 'Votre résultat est prêt.'
+              : sSaved
+                ? 'Votre résultat est prêt.'
+                : 'Le score arrive — le bouton se débloque à la fin.'
           }
         />
       )}
