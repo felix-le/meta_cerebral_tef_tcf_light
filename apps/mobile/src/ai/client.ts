@@ -1,5 +1,11 @@
 import type { FeedbackStub } from '@/content/feedbackStub';
-import { buildWritingBRequest, parseWritingBResult, SCORER_MODEL } from './scorer';
+import {
+  buildSpeakingBRequest,
+  parseSpeakingBResult,
+  buildWritingBRequest,
+  parseWritingBResult,
+  SCORER_MODEL,
+} from './scorer';
 import {
   buildTranscribeRequest,
   parseTranscribeResult,
@@ -99,6 +105,59 @@ export async function scoreWritingB(consigne: string, text: string): Promise<Fee
     }
     const message = e instanceof Error ? e.message : 'Network request failed';
     console.warn(`[scorer] HTTP 0 network failure: ${message}`);
+    throw new AiRequestError(0, message);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Score one Speaking section B conversation with muse-spark-1.3. Same wire
+ * shape as Writing (low reasoning, 8k tokens, temperature 0, json_schema).
+ * Every HTTP 200 is logged with finish_reason + usage so a truncated or
+ * empty reply stays diagnosable. HTTP failures and schema mismatches both
+ * throw AiRequestError carrying the status — never fully silent.
+ */
+export async function scoreSpeakingB(consigne: string, conversation: string): Promise<FeedbackStub> {
+  if (!isAiConfigured()) {
+    throw new AiNotConfiguredError();
+  }
+  const url = `${baseUrl()}/chat/completions`;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 120000);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey()}` },
+      body: JSON.stringify(buildSpeakingBRequest(consigne, conversation)),
+    });
+    if (!res.ok) {
+      console.warn(`[scorer] ${SCORER_MODEL} HTTP ${res.status} on /chat/completions (speaking)`);
+      throw new AiRequestError(res.status, `Meta Model API ${res.status} on /chat/completions (speaking)`);
+    }
+    const data = (await res.json()) as ChatCompletion;
+    const finishReason = data.choices?.[0]?.finish_reason ?? 'unknown';
+    const usage = data.usage;
+    const usageStr = usage
+      ? `prompt/completion/total=${usage.prompt_tokens ?? 'n/a'}/${usage.completion_tokens ?? 'n/a'}/${usage.total_tokens ?? 'n/a'}`
+      : 'prompt/completion/total=n/a/n/a/n/a';
+    const reasoning = usage?.completion_tokens_details?.reasoning_tokens ?? 'n/a';
+    console.warn(`[scorer] HTTP 200 (speaking) finish_reason=${finishReason} usage ${usageStr} reasoning=${reasoning}`);
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new AiRequestError(200, 'Meta Model API returned no content (speaking)');
+    }
+    return parseSpeakingBResult(content);
+  } catch (e) {
+    if (e instanceof AiRequestError || e instanceof AiNotConfiguredError) {
+      throw e;
+    }
+    if (e instanceof Error && e.name === 'ScorerValidationError') {
+      console.warn(`[scorer] HTTP 200 (speaking) schema mismatch: ${e.message}`);
+      throw new AiRequestError(200, e.message);
+    }
+    const message = e instanceof Error ? e.message : 'Network request failed';
+    console.warn(`[scorer] HTTP 0 (speaking) network failure: ${message}`);
     throw new AiRequestError(0, message);
   } finally {
     clearTimeout(timer);
