@@ -122,6 +122,30 @@ export default function Home() {
           </ScrollView>
         </View>
 
+        <Text style={styles.sectionTitle}>Your skills</Text>
+        <View style={styles.grid}>
+          {SKILLS.map(({ skill, icon }) => {
+            const r = latestBySkill.get(skill);
+            const n = r ? nclcOf(r) : null;
+            const isWeak = weakest === skill;
+            return (
+              <Pressable key={skill} style={styles.skillCard} onPress={() => router.push(`/test/${skill}`)}>
+                <ProgressRing pct={n == null ? 0 : n / 12} color={SKILL_COLOR[skill]} icon={icon} />
+                <View style={styles.skillText}>
+                  <Text style={styles.skillName}>{skill[0].toUpperCase() + skill.slice(1)}</Text>
+                  {isWeak && n != null ? (
+                    <Text style={styles.weakPill}>{r?.level ? `NCLC ${n} · ${r.level}` : `NCLC ${n}`}</Text>
+                  ) : (
+                    <Text style={[styles.skillValue, n != null && { color: SKILL_DARK[skill] }]}>
+                      {r == null || n == null ? 'Not started' : r.level ? `NCLC ${n} · ${r.level}` : `NCLC ${n}`}
+                    </Text>
+                  )}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+
         {latest && (latest.level || latest.correct != null) ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Result summary</Text>
@@ -158,30 +182,6 @@ export default function Home() {
             <AppIcon name="IconChevronRight" size={20} color="#857789" />
           </Pressable>
         )}
-
-        <Text style={styles.sectionTitle}>Your skills</Text>
-        <View style={styles.grid}>
-          {SKILLS.map(({ skill, icon }) => {
-            const r = latestBySkill.get(skill);
-            const n = r ? nclcOf(r) : null;
-            const isWeak = weakest === skill;
-            return (
-              <Pressable key={skill} style={styles.skillCard} onPress={() => router.push(`/test/${skill}`)}>
-                <ProgressRing pct={n == null ? 0 : n / 12} color={SKILL_COLOR[skill]} icon={icon} />
-                <View style={styles.skillText}>
-                  <Text style={styles.skillName}>{skill[0].toUpperCase() + skill.slice(1)}</Text>
-                  {isWeak && n != null ? (
-                    <Text style={styles.weakPill}>{r?.level ? `NCLC ${n} · ${r.level}` : `NCLC ${n}`}</Text>
-                  ) : (
-                    <Text style={[styles.skillValue, n != null && { color: SKILL_DARK[skill] }]}>
-                      {r == null || n == null ? 'Not started' : r.level ? `NCLC ${n} · ${r.level}` : `NCLC ${n}`}
-                    </Text>
-                  )}
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
       </ScrollView>
     </View>
     </TabScreenFade>
