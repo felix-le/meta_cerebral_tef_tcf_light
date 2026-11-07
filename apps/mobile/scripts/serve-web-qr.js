@@ -33,15 +33,21 @@ function getLanAddress() {
     throw new Error("Could not find a LAN IPv4 address.");
 }
 
+function isLanAddress(address) {
+    return (
+        address.startsWith("10.") ||
+        address.startsWith("192.168.") ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(address)
+    );
+}
+
 const firstPort = Number(process.env.WEB_PORT ?? 8787);
 if (!Number.isInteger(firstPort) || firstPort < 1 || firstPort > 65535) {
     throw new Error("WEB_PORT must be a valid TCP port.");
 }
 
-const host = process.env.WEB_HOST ?? getLanAddress();
-if (host === "localhost" || host === "127.0.0.1") {
-    throw new Error("WEB_HOST must be the computer's LAN IP, not localhost.");
-}
+const configuredHost = process.env.WEB_HOST;
+const host = configuredHost && isLanAddress(configuredHost) ? configuredHost : getLanAddress();
 const root = join(process.cwd(), "dist");
 const mimeTypes = {
     ".css": "text/css",
