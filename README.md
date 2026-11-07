@@ -161,4 +161,3 @@ Hackathon build — work in progress.
 
 Not affiliated with CCI Paris Île-de-France or France Éducation International.
 "TEF" and "TCF" are trademarks of their respective owners.
-```
