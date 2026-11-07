@@ -1,5 +1,8 @@
-const { spawn } = require("node:child_process");
+const { createReadStream, existsSync, statSync } = require("node:fs");
+const { createServer } = require("node:http");
 const { networkInterfaces } = require("node:os");
+const { extname, join, normalize } = require("node:path");
+const { spawn } = require("node:child_process");
 
 function getLanAddress() {
     const interfaces = networkInterfaces();
@@ -35,7 +38,8 @@ const webUrl = `http://${host}:${port}`;
 
 console.log(`\nWeb URL: ${webUrl}\n`);
 
-const qr = spawn("npx", ["--yes", "qrcode", "--small", webUrl], {
+const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+const qr = spawn(npxCommand, ["--yes", "qrcode", "--small", webUrl], {
     stdio: "inherit",
 });
 
@@ -44,26 +48,51 @@ qr.on("error", (error) => {
     process.exitCode = 1;
 });
 
-const server = spawn("python", ["-m", "http.server", String(port), "--directory", "dist", "--bind", "0.0.0.0"], {
-    stdio: "inherit",
+const root = join(process.cwd(), "dist");
+const mimeTypes = {
+    ".css": "text/css",
+    ".html": "text/html",
+    ".js": "text/javascript",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".ttf": "font/ttf",
+    ".webp": "image/webp",
+};
+const server = createServer((request, response) => {
+    const requestPath = decodeURIComponent(request.url?.split("?")[0] ?? "/");
+    const relativePath = normalize(requestPath).replace(/^(\.\.[/\\])+/, "");
+    let filePath = join(root, relativePath);
+
+    if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
+        filePath = join(root, "index.html");
+    }
+
+    if (!existsSync(filePath)) {
+        response.writeHead(404);
+        response.end("Not found");
+        return;
+    }
+
+    response.writeHead(200, {
+        "Content-Type": mimeTypes[extname(filePath)] ?? "application/octet-stream",
+    });
+    createReadStream(filePath).pipe(response);
 });
+
+function stop() {
+    server.close();
+    qr.kill();
+}
 
 server.on("error", (error) => {
     console.error(`Could not start the web server: ${error.message}`);
     process.exitCode = 1;
 });
 
-server.on("close", (code) => {
-    if (code !== 0) {
-        console.error(`Web server stopped. Port ${port} may already be in use.`);
-        process.exitCode = code ?? 1;
-    }
+server.listen(port, "0.0.0.0", () => {
+    console.log(`Serving web app at ${webUrl}`);
 });
-
-function stop() {
-    server.kill();
-    qr.kill();
-}
 
 process.on("SIGINT", stop);
 process.on("SIGTERM", stop);

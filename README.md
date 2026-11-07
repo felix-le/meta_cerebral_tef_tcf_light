@@ -115,6 +115,8 @@ npm run web:static:qr
 This single command builds the web version, starts the server, and immediately
 displays the QR code in the terminal. Scan it with a phone on the same Wi-Fi.
 The QR contains the computer's Wi-Fi/Ethernet IP, not `localhost`.
+The server uses Node.js, so it works on macOS, Windows, and Linux without
+installing Python.
 Press `Ctrl+C` to stop the server.
 
 For a team, run this command on **one computer only**. All five phones scan
