@@ -93,14 +93,28 @@ Prerequisites: Node LTS only (no Xcode / Android Studio needed).
 ```bash
 cd apps/mobile
 npm install
-npx expo start --web
+npm run web:qr
 ```
 
-Share the LAN URL shown in the terminal (for example `http://192.168.x.x:8081`) or its QR code. Anyone on the same Wi-Fi opens that link on their phone, laptop, or iPad and the demo runs in the browser.
+This single command starts the web server over the local network, hides Expo
+Go's QR code, and displays one QR code containing the `Web:` URL. Scan it with
+the phone camera to open the site in the phone browser. LAN mode is faster
+because it does not route traffic through a tunnel.
 
 - On phones the app fills the screen; on laptop/iPad it shows as a centered 480px phone-width column.
-- If the venue Wi-Fi blocks device-to-device connections, run `npx expo start --web --tunnel` instead — it serves the demo over a public tunnel URL.
+- If the phone and computer are not on the same Wi-Fi, use `npm run web:qr:tunnel` instead.
 - Speaking asks the browser for microphone permission before recording.
+
+To generate a static web build instead of running the development server:
+
+```bash
+cd apps/mobile
+npm run web:static:qr
+```
+
+This single command builds the web version, starts the server, and immediately
+displays the QR code in the terminal. Scan it with a phone on the same Wi-Fi.
+Press `Ctrl+C` to stop the server.
 
 ---
 
@@ -114,3 +128,4 @@ Hackathon build — work in progress.
 
 Not affiliated with CCI Paris Île-de-France or France Éducation International.
 "TEF" and "TCF" are trademarks of their respective owners.
+```
