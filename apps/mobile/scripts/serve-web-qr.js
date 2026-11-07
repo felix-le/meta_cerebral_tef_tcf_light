@@ -25,8 +25,13 @@ function getLanAddress() {
     throw new Error("Could not find a LAN IPv4 address.");
 }
 
-const host = getLanAddress();
-const webUrl = `http://${host}:8080`;
+const port = Number(process.env.WEB_PORT ?? 8080);
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("WEB_PORT must be a valid TCP port.");
+}
+
+const host = process.env.WEB_HOST ?? getLanAddress();
+const webUrl = `http://${host}:${port}`;
 
 console.log(`\nWeb URL: ${webUrl}\n`);
 
@@ -39,13 +44,20 @@ qr.on("error", (error) => {
     process.exitCode = 1;
 });
 
-const server = spawn("python", ["-m", "http.server", "8080", "--directory", "dist", "--bind", "0.0.0.0"], {
+const server = spawn("python", ["-m", "http.server", String(port), "--directory", "dist", "--bind", "0.0.0.0"], {
     stdio: "inherit",
 });
 
 server.on("error", (error) => {
     console.error(`Could not start the web server: ${error.message}`);
     process.exitCode = 1;
+});
+
+server.on("close", (code) => {
+    if (code !== 0) {
+        console.error(`Web server stopped. Port ${port} may already be in use.`);
+        process.exitCode = code ?? 1;
+    }
 });
 
 function stop() {

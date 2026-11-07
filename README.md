@@ -117,6 +117,12 @@ displays the QR code in the terminal. Scan it with a phone on the same Wi-Fi.
 The QR contains the computer's Wi-Fi/Ethernet IP, not `localhost`.
 Press `Ctrl+C` to stop the server.
 
+For a team, run this command on **one computer only**. All five phones scan
+the same QR code; the server supports multiple users at the same time. Do not
+run it separately on each computer. If phones cannot connect, disable Wi-Fi
+client isolation and allow Python through the host computer's firewall. A
+different port will not fix a blocked network.
+
 ---
 
 ## Status
