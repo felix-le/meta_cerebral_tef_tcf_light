@@ -11,7 +11,12 @@ function getLanAddress() {
 
     for (const [name, addresses] of Object.entries(interfaces)) {
         for (const address of addresses ?? []) {
-            if (address.family === "IPv4" && !address.internal) {
+            const family = address.family === "IPv4" || address.family === 4;
+            const isPrivate =
+                address.address.startsWith("10.") ||
+                address.address.startsWith("192.168.") ||
+                /^172\.(1[6-9]|2\d|3[01])\./.test(address.address);
+            if (family && !address.internal && isPrivate) {
                 candidates.push({
                     address: address.address,
                     preferred: preferredNames.test(name),
@@ -28,12 +33,15 @@ function getLanAddress() {
     throw new Error("Could not find a LAN IPv4 address.");
 }
 
-const port = Number(process.env.WEB_PORT ?? 8080);
+const port = Number(process.env.WEB_PORT ?? 8787);
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error("WEB_PORT must be a valid TCP port.");
 }
 
 const host = process.env.WEB_HOST ?? getLanAddress();
+if (host === "localhost" || host === "127.0.0.1") {
+    throw new Error("WEB_HOST must be the computer's LAN IP, not localhost.");
+}
 const webUrl = `http://${host}:${port}`;
 
 console.log(`\nWeb URL: ${webUrl}\n`);

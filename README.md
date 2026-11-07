@@ -119,6 +119,11 @@ The server uses Node.js, so it works on macOS, Windows, and Linux without
 installing Python.
 Press `Ctrl+C` to stop the server.
 
+The static QR server uses port `8787`, so the QR looks like
+`http://192.168.x.x:8787`. It never uses `localhost`; if `localhost` appears,
+the other computer is running an old copy of the repository. Pull the latest
+code and run `npm install` again.
+
 For a team, run this command on **one computer only**. All five phones scan
 the same QR code; the server supports multiple users at the same time. Do not
 run it separately on each computer. If phones cannot connect, disable Wi-Fi
