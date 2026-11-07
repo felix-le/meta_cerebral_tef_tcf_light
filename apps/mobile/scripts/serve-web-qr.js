@@ -33,8 +33,8 @@ function getLanAddress() {
     throw new Error("Could not find a LAN IPv4 address.");
 }
 
-const port = Number(process.env.WEB_PORT ?? 8787);
-if (!Number.isInteger(port) || port < 1 || port > 65535) {
+const firstPort = Number(process.env.WEB_PORT ?? 8787);
+if (!Number.isInteger(firstPort) || firstPort < 1 || firstPort > 65535) {
     throw new Error("WEB_PORT must be a valid TCP port.");
 }
 
@@ -42,20 +42,6 @@ const host = process.env.WEB_HOST ?? getLanAddress();
 if (host === "localhost" || host === "127.0.0.1") {
     throw new Error("WEB_HOST must be the computer's LAN IP, not localhost.");
 }
-const webUrl = `http://${host}:${port}`;
-
-console.log(`\nWeb URL: ${webUrl}\n`);
-
-const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
-const qr = spawn(npxCommand, ["--yes", "qrcode", "--small", webUrl], {
-    stdio: "inherit",
-});
-
-qr.on("error", (error) => {
-    console.error(`Could not generate the web QR code: ${error.message}`);
-    process.exitCode = 1;
-});
-
 const root = join(process.cwd(), "dist");
 const mimeTypes = {
     ".css": "text/css",
@@ -88,19 +74,53 @@ const server = createServer((request, response) => {
     createReadStream(filePath).pipe(response);
 });
 
-function stop() {
-    server.close();
-    qr.kill();
+function startServer(port) {
+    return new Promise((resolve, reject) => {
+        const handleError = (error) => {
+            server.removeListener("listening", handleListening);
+            if (error.code === "EADDRINUSE" && port < 65535) {
+                resolve(startServer(port + 1));
+            } else {
+                reject(error);
+            }
+        };
+        const handleListening = () => {
+            server.removeListener("error", handleError);
+            resolve(port);
+        };
+
+        server.once("error", handleError);
+        server.once("listening", handleListening);
+        server.listen(port, "0.0.0.0");
+    });
 }
 
-server.on("error", (error) => {
-    console.error(`Could not start the web server: ${error.message}`);
-    process.exitCode = 1;
-});
+let qr;
+function stop() {
+    server.close();
+    qr?.kill();
+}
 
-server.listen(port, "0.0.0.0", () => {
-    console.log(`Serving web app at ${webUrl}`);
-});
+startServer(firstPort)
+    .then((port) => {
+        const webUrl = `http://${host}:${port}`;
+        console.log(`\nWeb URL: ${webUrl}`);
+        console.log(`Serving web app at ${webUrl}\n`);
+
+        const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+        qr = spawn(npxCommand, ["--yes", "qrcode", "--small", webUrl], {
+            stdio: "inherit",
+        });
+
+        qr.on("error", (error) => {
+            console.error(`Could not generate the web QR code: ${error.message}`);
+            process.exitCode = 1;
+        });
+    })
+    .catch((error) => {
+        console.error(`Could not start the web server: ${error.message}`);
+        process.exitCode = 1;
+    });
 
 process.on("SIGINT", stop);
 process.on("SIGTERM", stop);
