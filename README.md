@@ -87,28 +87,9 @@ npx expo start
 
 ## Run the web version
 
-No Expo Go, no login, nothing to install — anyone opens it in a browser.
-Prerequisites: Node LTS only (no Xcode / Android Studio needed).
-
 ```bash
 cd apps/mobile
 npm install
-npm run web:qr
-```
-
-This single command starts the web server over the local network, hides Expo
-Go's QR code, and displays one QR code containing the `Web:` URL. Scan it with
-the phone camera to open the site in the phone browser. LAN mode is faster
-because it does not route traffic through a tunnel.
-
-- On phones the app fills the screen; on laptop/iPad it shows as a centered 480px phone-width column.
-- If the phone and computer are not on the same Wi-Fi, use `npm run web:qr:tunnel` instead.
-- Speaking asks the browser for microphone permission before recording.
-
-To generate a static web build instead of running the development server:
-
-```bash
-cd apps/mobile
 npm run web:static:qr
 ```
 
@@ -161,3 +142,12 @@ Hackathon build — work in progress.
 
 Not affiliated with CCI Paris Île-de-France or France Éducation International.
 "TEF" and "TCF" are trademarks of their respective owners.
+
+No Expo Go, no login, nothing to install — anyone opens it in a browser.
+Prerequisites: Node LTS only (no Xcode / Android Studio needed).
+
+```bash
+cd apps/mobile
+npm install
+npm run web:qr
+```
