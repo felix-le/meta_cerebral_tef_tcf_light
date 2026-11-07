@@ -122,8 +122,26 @@ Press `Ctrl+C` to stop the server.
 For a team, run this command on **one computer only**. All five phones scan
 the same QR code; the server supports multiple users at the same time. Do not
 run it separately on each computer. If phones cannot connect, disable Wi-Fi
-client isolation and allow Python through the host computer's firewall. A
+client isolation and allow Node.js through the host computer's firewall. A
 different port will not fix a blocked network.
+
+If the QR works from one Mac but not another, compare the network first:
+
+1. Connect the phone to the **same Wi-Fi network** as the Mac running the
+   command. Turn off cellular data and any VPN on the phone.
+2. On the Mac, open the printed `Web URL` in its own browser. Then open that
+   same URL on the phone. If the Mac works but the phone does not, macOS
+   **System Settings > Network > Firewall** is blocking incoming Node
+   connections, or the Wi-Fi has client isolation enabled.
+3. If the phone and Mac cannot share a Wi-Fi network, use the web tunnel
+   command instead:
+
+   ```bash
+   npm run web:qr:tunnel
+   ```
+
+   This creates a web QR that works across different networks, but it can be
+   slower than the local-LAN QR.
 
 ---
 
