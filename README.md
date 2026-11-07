@@ -85,6 +85,25 @@ npx expo start
 
 ---
 
+## Run the web version
+
+No Expo Go, no login, nothing to install — anyone opens it in a browser.
+Prerequisites: Node LTS only (no Xcode / Android Studio needed).
+
+```bash
+cd apps/mobile
+npm install
+npx expo start --web
+```
+
+Share the LAN URL shown in the terminal (for example `http://192.168.x.x:8081`) or its QR code. Anyone on the same Wi-Fi opens that link on their phone, laptop, or iPad and the demo runs in the browser.
+
+- On phones the app fills the screen; on laptop/iPad it shows as a centered 480px phone-width column.
+- If the venue Wi-Fi blocks device-to-device connections, run `npx expo start --web --tunnel` instead — it serves the demo over a public tunnel URL.
+- Speaking asks the browser for microphone permission before recording.
+
+---
+
 ## Status
 
 Hackathon build — work in progress.
