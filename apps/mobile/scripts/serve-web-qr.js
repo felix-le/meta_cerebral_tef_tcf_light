@@ -3,13 +3,23 @@ const { networkInterfaces } = require("node:os");
 
 function getLanAddress() {
     const interfaces = networkInterfaces();
+    const preferredNames = /^(en0|en1|wi-?fi|ethernet|wlan|eth)/i;
+    const candidates = [];
 
-    for (const addresses of Object.values(interfaces)) {
+    for (const [name, addresses] of Object.entries(interfaces)) {
         for (const address of addresses ?? []) {
             if (address.family === "IPv4" && !address.internal) {
-                return address.address;
+                candidates.push({
+                    address: address.address,
+                    preferred: preferredNames.test(name),
+                });
             }
         }
+    }
+
+    const candidate = candidates.find(({ preferred }) => preferred) ?? candidates[0];
+    if (candidate) {
+        return candidate.address;
     }
 
     throw new Error("Could not find a LAN IPv4 address.");
