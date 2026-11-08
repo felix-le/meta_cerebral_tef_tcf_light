@@ -48,7 +48,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "web:static:qr": "npx expo export --platform web && node ./scripts/serve-web-qr.js",
+    "web:static:qr": "npx expo export --platform web && node ./scripts/prepare-vercel.js && node ./scripts/serve-web-qr.js",
     "lint": "expo lint"
   },
   "private": true

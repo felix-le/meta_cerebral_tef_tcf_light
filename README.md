@@ -87,6 +87,22 @@ npx expo start
 
 ## Run the web version
 
+### Deployed site
+
+The production web app is hosted on Vercel and does not depend on this
+computer being turned on:
+
+**Site:** https://dist-orpin-six-42.vercel.app
+
+**QR code for slides:** [apps/mobile/web-qr.png](apps/mobile/web-qr.png)
+
+The QR code above points to the production site. It can be scanned from any
+network and supports multiple users at the same time. User history is stored
+locally in each browser/device, so users have separate sessions. The computer
+only needs to be running when deploying a new version.
+
+### Run locally
+
 ```bash
 cd apps/mobile
 npm install
@@ -106,9 +122,9 @@ the QR URL. It never uses `localhost`; if `localhost` appears, the other
 computer is running an old copy of the repository. Pull the latest code and
 run `npm install` again.
 
-For a team, run this command on **one computer only**. All five phones scan
-the same QR code; the server supports multiple users at the same time. Do not
-run it separately on each computer. If phones cannot connect, disable Wi-Fi
+For a local team demo, run this command on **one computer only**. All phones
+scan the same QR code; the server supports multiple users at the same time.
+Do not run it separately on each computer. If phones cannot connect, disable Wi-Fi
 client isolation and allow Node.js through the host computer's firewall. A
 different port will not fix a blocked network.
 
