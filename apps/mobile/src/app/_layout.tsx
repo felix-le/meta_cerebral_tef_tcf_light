@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
@@ -25,15 +26,31 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="splash" />
-      <Stack.Screen name="animation" />
-      <Stack.Screen name="entry" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="mock/[id]" />
-      <Stack.Screen name="test/[skill]" />
-      <Stack.Screen name="result" />
-      <Stack.Screen name="analysis" />
-    </Stack>
+    <View style={styles.webShell}>
+      <View style={styles.webColumn}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="splash" />
+          <Stack.Screen name="animation" />
+          <Stack.Screen name="entry" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="mock/[id]" />
+          <Stack.Screen name="test/[skill]" />
+          <Stack.Screen name="result" />
+          <Stack.Screen name="analysis" />
+        </Stack>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  webShell: {
+    flex: 1,
+    ...(Platform.OS === 'web' ? { alignItems: 'center', backgroundColor: '#111' } : {}),
+  },
+  webColumn: {
+    flex: 1,
+    width: '100%',
+    ...(Platform.OS === 'web' ? { maxWidth: 480 } : {}),
+  },
+});

@@ -57,7 +57,7 @@ export default function Home() {
   const latest = results[0] ?? null;
   const insets = useSafeAreaInsets();
   // Design rail cards are 82% of the content width with snap.
-  const CARD_W = Math.round((Dimensions.get('window').width - 40) * 0.82);
+  const CARD_W = Math.round((Math.min(Dimensions.get('window').width, 480) - 40) * 0.82);
   const band = latest?.level ? estimationFor(latest.level as Cefr, (latest.half ?? 'none') as Half) : null;
 
   return (
